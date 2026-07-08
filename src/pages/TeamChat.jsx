@@ -1,3 +1,4 @@
+// TeamChat Component - Real-time chat with Firebase
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, MessageCircle, X, Camera, Bell, BellOff } from 'lucide-react';
 import { db } from '../utils/firebase';
