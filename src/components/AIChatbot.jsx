@@ -41,7 +41,6 @@ const knowledgeBase = [
 ];
 
 const AIChatbot = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { text: 'สวัสดีครับ! ผมคือ Engineering Bot ผู้ช่วยวิศวกรส่วนตัวของคุณ มีคำถามเรื่องแอร์ โซลาร์เซลล์ หรือระบบไฟฟ้า พิมพ์ถามผมได้เลยครับ! 🤖', sender: 'bot' }
   ]);
@@ -55,12 +54,10 @@ const AIChatbot = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isTyping, isOpen]);
+  }, [messages, isTyping]);
 
   const generateResponse = (userText) => {
     const text = userText.toLowerCase();
-    
-    // Simple Keyword Matching logic
     let bestMatch = null;
     let maxMatches = 0;
 
@@ -78,8 +75,6 @@ const AIChatbot = () => {
     }
 
     if (bestMatch) return bestMatch;
-    
-    // Fallback response
     return 'ขออภัยครับ ตอนนี้ผมมีความรู้เฉพาะเรื่องแอร์ โซลาร์เซลล์ และไฟฟ้าเบื้องต้นเท่านั้น ลองถามคำถามเกี่ยวกับการ "แอร์ไม่เย็น", "สายไฟ", หรือ "โซลาร์เซลล์" ดูสิครับ!';
   };
 
@@ -87,18 +82,16 @@ const AIChatbot = () => {
     e.preventDefault();
     if (!inputText.trim()) return;
 
-    // Add user message
     const userMsg = inputText.trim();
     setMessages(prev => [...prev, { text: userMsg, sender: 'user' }]);
     setInputText('');
     setIsTyping(true);
 
-    // Simulate thinking delay
     setTimeout(() => {
       const botResponse = generateResponse(userMsg);
       setMessages(prev => [...prev, { text: botResponse, sender: 'bot' }]);
       setIsTyping(false);
-    }, 1000 + Math.random() * 1000); // 1-2 seconds delay
+    }, 1000 + Math.random() * 1000);
   };
 
   const clearChat = () => {
@@ -108,102 +101,81 @@ const AIChatbot = () => {
   };
 
   return (
-    <>
-      {/* Floating Button */}
-      {!isOpen && (
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="chatbot-btn animate-fade-in"
-        >
-          <Bot size={32} />
+    <div style={{ display: 'flex', flexDirection: 'column', height: '500px', background: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #00F0FF 0%, #0080FF 100%)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Bot size={24} />
+          <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Engineering AI (Beta)</h3>
+        </div>
+        <button onClick={clearChat} title="ลบประวัติแชท" style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', display: 'flex' }}>
+          <Trash2 size={18} />
         </button>
-      )}
+      </div>
 
-      {/* Chat Window */}
-      {isOpen && (
-        <div className="chatbot-window animate-fade-in">
-          {/* Header */}
-          <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #00F0FF 0%, #0080FF 100%)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Bot size={24} />
-              <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Engineering AI (Beta)</h3>
-            </div>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <button onClick={clearChat} title="ลบประวัติแชท" style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', display: 'flex' }}>
-                <Trash2 size={18} />
-              </button>
-              <button onClick={() => setIsOpen(false)} title="ซ่อนแชท" style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', display: 'flex' }}>
-                <ChevronDown size={20} />
-              </button>
-            </div>
-          </div>
-
-          {/* Messages Area */}
-          <div style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-primary)' }}>
-            {messages.map((msg, idx) => (
-              <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
-                {msg.sender === 'bot' && (
-                  <div style={{ minWidth: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-ac)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black' }}>
-                    <Bot size={18} />
-                  </div>
-                )}
-                
-                <div style={{ 
-                  background: msg.sender === 'user' ? 'var(--accent-ac)' : 'var(--bg-tertiary)', 
-                  color: msg.sender === 'user' ? 'black' : 'var(--text-primary)',
-                  padding: '0.75rem 1rem', 
-                  borderRadius: msg.sender === 'user' ? '16px 16px 0 16px' : '16px 16px 16px 0',
-                  fontSize: '0.95rem',
-                  lineHeight: '1.5'
-                }}>
-                  {msg.text}
-                </div>
-
-                {msg.sender === 'user' && (
-                  <div style={{ minWidth: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                    <User size={18} />
-                  </div>
-                )}
-              </div>
-            ))}
-            
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-start' }}>
-                <div style={{ minWidth: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-ac)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black' }}>
-                  <Bot size={18} />
-                </div>
-                <div style={{ background: 'var(--bg-tertiary)', padding: '0.75rem 1rem', borderRadius: '16px 16px 16px 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
-                  <span className="dot-typing" style={{ animationDelay: '0s' }}>.</span>
-                  <span className="dot-typing" style={{ animationDelay: '0.2s' }}>.</span>
-                  <span className="dot-typing" style={{ animationDelay: '0.4s' }}>.</span>
-                </div>
+      {/* Messages Area */}
+      <div style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-primary)' }}>
+        {messages.map((msg, idx) => (
+          <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+            {msg.sender === 'bot' && (
+              <div style={{ minWidth: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-ac)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black' }}>
+                <Bot size={18} />
               </div>
             )}
             
-            <div ref={messagesEndRef} />
+            <div style={{ 
+              background: msg.sender === 'user' ? 'var(--accent-ac)' : 'var(--bg-tertiary)', 
+              color: msg.sender === 'user' ? 'black' : 'var(--text-primary)',
+              padding: '0.75rem 1rem', 
+              borderRadius: msg.sender === 'user' ? '16px 16px 0 16px' : '16px 16px 16px 0',
+              fontSize: '0.95rem',
+              lineHeight: '1.5'
+            }}>
+              {msg.text}
+            </div>
+
+            {msg.sender === 'user' && (
+              <div style={{ minWidth: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+                <User size={18} />
+              </div>
+            )}
           </div>
+        ))}
+        
+        {/* Typing Indicator */}
+        {isTyping && (
+          <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-start' }}>
+            <div style={{ minWidth: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-ac)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black' }}>
+              <Bot size={18} />
+            </div>
+            <div style={{ background: 'var(--bg-tertiary)', padding: '0.75rem 1rem', borderRadius: '16px 16px 16px 0', display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+              <span className="dot-typing" style={{ animationDelay: '0s' }}>.</span>
+              <span className="dot-typing" style={{ animationDelay: '0.2s' }}>.</span>
+              <span className="dot-typing" style={{ animationDelay: '0.4s' }}>.</span>
+            </div>
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
 
-          {/* Input Area */}
-          <form onSubmit={handleSend} style={{ padding: '1rem', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '0.5rem' }}>
-            <input 
-              type="text" 
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="พิมพ์คำถามของคุณ..." 
-              style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '24px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', outline: 'none' }}
-            />
-            <button 
-              type="submit" 
-              disabled={!inputText.trim() || isTyping}
-              style={{ width: '40px', height: '40px', borderRadius: '50%', background: inputText.trim() && !isTyping ? 'var(--accent-ac)' : 'var(--bg-tertiary)', color: inputText.trim() && !isTyping ? 'black' : 'var(--text-tertiary)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: inputText.trim() && !isTyping ? 'pointer' : 'default', transition: 'background 0.3s' }}
-            >
-              <Send size={18} style={{ transform: 'translate(-1px, 1px)' }} />
-            </button>
-          </form>
-
-        </div>
-      )}
+      {/* Input Area */}
+      <form onSubmit={handleSend} style={{ padding: '1rem', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '0.5rem' }}>
+        <input 
+          type="text" 
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder="พิมพ์คำถามของคุณ..." 
+          style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '24px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', outline: 'none' }}
+        />
+        <button 
+          type="submit" 
+          disabled={!inputText.trim() || isTyping}
+          style={{ width: '40px', height: '40px', borderRadius: '50%', background: inputText.trim() && !isTyping ? 'var(--accent-ac)' : 'var(--bg-tertiary)', color: inputText.trim() && !isTyping ? 'black' : 'var(--text-tertiary)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: inputText.trim() && !isTyping ? 'pointer' : 'default', transition: 'background 0.3s' }}
+        >
+          <Send size={18} style={{ transform: 'translate(-1px, 1px)' }} />
+        </button>
+      </form>
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes blink {
@@ -220,7 +192,7 @@ const AIChatbot = () => {
           font-size: 1.2rem;
         }
       `}} />
-    </>
+    </div>
   );
 };
 

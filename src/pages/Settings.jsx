@@ -3,6 +3,8 @@ import { Settings as SettingsIcon, Database, Sun, Moon, Info, HardDrive, Message
 import useStore from '../store/useStore';
 import toast from 'react-hot-toast';
 import { requestNotificationPermission } from '../utils/notifications';
+import AIChatbot from '../components/AIChatbot';
+import { Bot } from 'lucide-react';
 
 const Settings = () => {
   const theme = useStore(state => state.theme);
@@ -126,6 +128,26 @@ const Settings = () => {
         >
           <MessageSquarePlus size={20} />
           เสนอแนะ/แจ้งปัญหา
+        </button>
+        <button 
+          onClick={() => setActiveTab('ai')}
+          style={{ 
+            background: 'transparent', 
+            border: 'none', 
+            padding: '1rem 0', 
+            color: activeTab === 'ai' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'ai' ? '2px solid var(--accent-primary)' : '2px solid transparent',
+            fontWeight: activeTab === 'ai' ? '600' : '400',
+            cursor: 'pointer',
+            fontSize: '1.1rem',
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <Bot size={20} />
+          ผู้ช่วย AI
         </button>
       </div>
 
@@ -303,6 +325,16 @@ const Settings = () => {
                 ส่งข้อมูล
               </button>
             </form>
+          </div>
+        )}
+
+        {activeTab === 'ai' && (
+          <div className="animate-fade-in">
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>
+              <Bot size={24} />
+              Engineering AI Assistant
+            </h2>
+            <AIChatbot />
           </div>
         )}
 

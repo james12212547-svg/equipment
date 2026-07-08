@@ -17,7 +17,6 @@ import CableSizing from './pages/CableSizing';
 import TroubleshootingSim from './pages/TroubleshootingSim';
 import Glossary from './pages/Glossary';
 import ModelViewer from './pages/ModelViewer';
-import AIChatbot from './components/AIChatbot';
 import Login from './pages/Login';
 import WorkLog from './pages/WorkLog';
 import PfcCalculator from './pages/PfcCalculator';
@@ -103,7 +102,6 @@ function App() {
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
-        <AIChatbot />
       </div>
     </Router>
   );
