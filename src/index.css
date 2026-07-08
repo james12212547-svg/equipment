@@ -161,9 +161,18 @@ h1, h2, h3, h4, h5, h6 {
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--glass-border);
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   padding: 1rem;
   z-index: 100;
+  overflow-x: auto;
+  gap: 1.5rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.nav-bar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 .nav-item {
@@ -175,6 +184,8 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.75rem;
   transition: all 0.2s ease;
   gap: 0.25rem;
+  flex-shrink: 0;
+  min-width: 50px;
 }
 
 .nav-item.active {
@@ -461,10 +472,10 @@ h1, h2, h3, h4, h5, h6 {
 /* AI Chatbot Responsive Styles */
 .chatbot-btn {
   position: fixed;
-  bottom: 110px; /* high enough to clear mobile nav + safe area */
-  right: 1.5rem;
-  width: 60px;
-  height: 60px;
+  bottom: 150px; /* higher to clear mobile chat input */
+  right: 1.25rem;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: linear-gradient(135deg, #00F0FF 0%, #0080FF 100%);
   color: white;
@@ -484,8 +495,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .chatbot-window {
   position: fixed;
-  bottom: 110px;
-  right: 1.5rem;
+  bottom: 150px;
+  right: 1.25rem;
   width: 350px;
   max-width: calc(100vw - 3rem);
   height: 500px;
