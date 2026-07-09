@@ -6,7 +6,7 @@ export const equipmentData = [
     nameEng: 'Split Type Air Conditioner',
     abbreviation: 'SPLIT',
     symbol: '',
-    image: 'Gemini_Generated_Image_3dpoly3dpoly3dpo',
+    image: '/images/Gemini_Generated_Image_3dpoly3dpoly3dpo.png',
     function: 'ระบบปรับอากาศขนาดย่อมที่ส่วนประกอบของเครื่องปรับอากาศจะแยกเป็น 2 ส่วนหลักคือ ส่วนของคอยล์ทำความเย็น (ในพื้นที่ปรับอากาศ) และคอยล์ร้อน (นอกอาคาร)',
     principle: 'ระหว่างชุดคอยล์ร้อนคอยล์เย็นจะมีท่อสารทำความเย็นทำหน้าที่ถ่ายเทความร้อนออกจากห้องปรับอากาศ',
     specs: [
@@ -24,7 +24,7 @@ export const equipmentData = [
     nameEng: 'Reciprocating Compressor',
     abbreviation: 'COMP-REC',
     symbol: '',
-    image: 'pistolcompressor',
+    image: '/images/pistolcompressor.jpg',
     function: 'ดูดและอัดสารทำความเย็นในสถานะที่เป็นแก๊ส เพื่อเพิ่มความดันและอุณหภูมิแล้วส่งไปยังคอนเดนเซอร์',
     principle: 'ในแต่ละกระบอกสูบประกอบด้วยชุดของลิ้นทางดูดและลิ้นทางอัดติดกับวาล์วเพลต (Valve plate) ขณะที่ลูกสูบหนึ่งเคลื่อนที่ลงในจังหวะดูด ลูกสูบหนึ่งจะเคลื่อนที่ขึ้นในจังหวะอัด',
     specs: [],
@@ -37,7 +37,7 @@ export const equipmentData = [
     nameEng: 'Rotary Compressor',
     abbreviation: 'COMP-ROT',
     symbol: '',
-    image: 'คอมเพรสเซอร์แบบโรตารี่Rotary',
+    image: '/images/คอมเพรสเซอร์แบบโรตารี่Rotary.jpg',
     function: 'ดูดและอัดสารทำความเย็นในสถานะแก๊ส สำหรับระบบเครื่องทำความเย็นขนาดเล็ก',
     principle: 'อาศัยการกวาดตัวตามแกนโรเตอร์ (Rotor) ทำงานได้อย่างมีประสิทธิภาพสูง กินไฟน้อย',
     specs: [
@@ -52,7 +52,7 @@ export const equipmentData = [
     nameEng: 'Scroll Compressor',
     abbreviation: 'COMP-SCR',
     symbol: '',
-    image: 'คอมเพรสเซอร์แบบสโครลหรือแบบก้นหอย(Scroll)',
+    image: '/images/คอมเพรสเซอร์แบบสโครลหรือแบบก้นหอย(Scroll).png',
     function: 'เป็นคอมเพรสเซอร์ขนาดเล็กถึงกลาง ที่เอาข้อดีของคอมเพรสเซอร์แบบลูกสูบและแบบโรตารี่มารวมกันทำให้มีประสิทธิภาพที่เพิ่มมากขึ้น',
     principle: 'จะเป็นแผ่นวงกลมสองวงมีครีบหมุนแบบก้นหอยสองแผ่นประกบคู่กัน แผ่นก้นหอยตัวบนจะถูกยึดติดกับที่ ตัวล่างจะถูกเหวี่ยงเป็นวงโคจรโดยเพลาของมอเตอร์',
     specs: [
