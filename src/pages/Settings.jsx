@@ -5,11 +5,15 @@ import toast from 'react-hot-toast';
 import { requestNotificationPermission } from '../utils/notifications';
 import AIChatbot from '../components/AIChatbot';
 import { Bot } from 'lucide-react';
+import { db } from '../utils/firebase';
+import { ref, push, serverTimestamp } from 'firebase/database';
 
 const Settings = () => {
   const theme = useStore(state => state.theme);
   const toggleTheme = useStore(state => state.toggleTheme);
+  const user = useStore(state => state.user);
   const [storageInfo, setStorageInfo] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Tab state
   const [activeTab, setActiveTab] = useState('general'); // 'general' or 'feedback'
@@ -69,15 +73,27 @@ const Settings = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleFeedbackSubmit = (e) => {
+  const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!feedback.trim()) return;
     
-    // Simulate sending feedback
-    setTimeout(() => {
+    setIsSubmitting(true);
+    try {
+      const feedbackRef = ref(db, 'feedbacks');
+      await push(feedbackRef, {
+        type: type,
+        message: feedback.trim(),
+        user: user?.name || 'Anonymous',
+        timestamp: serverTimestamp()
+      });
       toast.success('ขอบคุณสำหรับข้อเสนอแนะ! เราจะนำไปพัฒนาต่อครับ');
       setFeedback('');
-    }, 500);
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast.error('ไม่สามารถส่งข้อเสนอแนะได้ กรุณาลองใหม่');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -321,8 +337,8 @@ const Settings = () => {
                 />
               </div>
 
-              <button type="submit" style={{ width: '100%', padding: '1rem', background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', gap: '0.5rem', transition: 'opacity 0.2s', fontSize: '1.1rem' }} onMouseOver={e => e.target.style.opacity = 0.9} onMouseOut={e => e.target.style.opacity = 1}>
-                ส่งข้อมูล
+              <button type="submit" disabled={isSubmitting} style={{ width: '100%', padding: '1rem', background: isSubmitting ? 'var(--bg-tertiary)' : 'var(--accent-primary)', color: isSubmitting ? 'var(--text-tertiary)' : 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: isSubmitting ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', gap: '0.5rem', transition: 'opacity 0.2s', fontSize: '1.1rem' }} onMouseOver={e => !isSubmitting && (e.target.style.opacity = 0.9)} onMouseOut={e => !isSubmitting && (e.target.style.opacity = 1)}>
+                {isSubmitting ? 'กำลังส่งข้อมูล...' : 'ส่งข้อมูล'}
               </button>
             </form>
           </div>
