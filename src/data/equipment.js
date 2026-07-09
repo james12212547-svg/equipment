@@ -572,7 +572,7 @@ export const categories = [
     name: 'ระบบปรับอากาศ',
     nameEng: 'Air Conditioning',
     description: 'ข้อมูลทั้งหมดเกี่ยวกับระบบปรับอากาศประเภทต่างๆ คอมเพรสเซอร์ วาล์ว และส่วนประกอบที่เกี่ยวข้องตามไฟล์อ้างอิง',
-    image: '/images/category-ac.jpg'
+    image: '/images/Gemini_Generated_Image_3dpoly3dpoly3dpo.png'
   },
   {
     id: 'solar',
