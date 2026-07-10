@@ -351,7 +351,7 @@ export const equipmentData = [
     nameEng: 'Lithium-ion Battery (LiFePO4)',
     abbreviation: 'BESS',
     symbol: '',
-    image: '/images/solar/แบตเตอรี่กักเก็บพลังงาน.jpg',
+    image: '/images/solar/Lithium-ion Battery(LiFePO4).jpg',
     function: 'กักเก็บพลังงานไฟฟ้าส่วนเกินที่ผลิตได้ในตอนกลางวัน เพื่อใช้ในเวลากลางคืนหรือตอนไฟดับ',
     principle: 'นิยมใช้เซลล์ ลิเธียมไอออนฟอสเฟต (LiFePO4) ซึ่งมีความปลอดภัยสูง ทนความร้อน ไม่ระเบิดง่าย และมีระบบ BMS (Battery Management System) ควบคุมการชาร์จภายใน',
     specs: [
@@ -367,7 +367,7 @@ export const equipmentData = [
     nameEng: 'Metal Sheet Roof Mounting',
     abbreviation: 'MOUNT-MT',
     symbol: '',
-    image: '/images/solar/โครงยึดแผงหลังคาเมทัลชีท.jpg',
+    image: '/images/solar/MetalSheetRoofMounting.png',
     function: 'อุปกรณ์ยึดแผงโซลาร์เข้ากับหลังคาเหล็กเมทัลชีท',
     principle: 'มี 2 วิธีหลัก: 1) ใช้ตัวจับล็อกลอนหนีบสันลอน (Klip-Lok) แบบไม่เจาะหลังคาเลย 2) ยิงสกรูปลายสว่านเข้าแปเหล็ก (L-Feet) พร้อมแหวน EPDM กันน้ำ',
     specs: [
@@ -383,7 +383,7 @@ export const equipmentData = [
     nameEng: 'CPAC Tile Roof Mounting',
     abbreviation: 'MOUNT-CP',
     symbol: '',
-    image: '/images/solar/โครงยึดแผงหลังคากระเบื้อง CPAC.jpg',
+    image: '/images/solar/CPAC_Tile_Roof_Mounting.jpg',
     function: 'อุปกรณ์ยึดแผงสำหรับบ้านหลังคากระเบื้องคอนกรีต (โมเนีย)',
     principle: 'ใช้วิธียกกระเบื้องขึ้น แล้วติดตั้ง "ตะขอเกี่ยว" (Tile Hook) ยึดกับจันทันไม้หรือเหล็ก จากนั้นวางกระเบื้องกลับโดยเจียรร่องเล็กน้อยให้ตะขอลอดโผล่ขึ้นมา',
     specs: [
@@ -476,7 +476,7 @@ export const equipmentData = [
     nameEng: 'Solar Wiring & Protection',
     abbreviation: 'WIRING',
     symbol: '',
-    image: '/images/solar/การเดินสายไฟและอุปกรณ์ป้องกัน.jpg',
+    image: '/images/solar/SolarWiring&Protection.jpg',
     function: 'การนำส่งกระแสไฟฟ้าจากแผงผ่านอุปกรณ์ไปยังจุดใช้งานด้วยความปลอดภัย',
     principle: 'ฝั่ง DC (แผง->อินเวอร์เตอร์): ใช้สาย PV (PV1-F) ทนแดด UV ขั้วต่อ MC4 ฝั่ง AC: ใช้สาย THW / NYY ทองแดง. คำนวณแรงดันตกคร่อมรวมไม่ควรเกิน 5%',
     specs: [
@@ -505,7 +505,7 @@ export const equipmentData = [
     nameEng: 'Surge Protective Device (SPD) Type 1',
     abbreviation: 'SPD-T1',
     symbol: '',
-    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชาก Type 1.jpg',
+    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชากType1.jpg',
     function: 'ปราการด่านหน้าป้องกันฟ้าผ่า สกัดกั้นพลังงานมหาศาลจากภายนอก ณ จุดทางเข้าบริการ (Service Entrance)',
     principle: 'ออกแบบมาเพื่อรับรูปคลื่น 10/350 µs (จำลองฟ้าผ่าโดยตรง) ซึ่งมีพลังงานมากกว่าคลื่น 8/20 µs ถึง 20 เท่า',
     specs: [
@@ -522,7 +522,7 @@ export const equipmentData = [
     nameEng: 'Surge Protective Device (SPD) Type 2',
     abbreviation: 'SPD-T2',
     symbol: '',
-    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชาก Type 2.jpg',
+    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชากType2.jpg',
     function: 'ระบบป้องกันหลัก (Workhorse) ของระบบ จัดการแรงดันเกินชั่วครู่ภายในระบบ (Internal Switching Transients)',
     principle: 'จัดการแรงดันกระชากจากการทำงานของมอเตอร์, HVAC, ลิฟต์ หรือ VFD (เกิดบ่อยกว่าฟ้าผ่ามาก) ทดสอบด้วยรูปคลื่น 8/20 µs',
     specs: [
@@ -539,7 +539,7 @@ export const equipmentData = [
     nameEng: 'Surge Protective Device (SPD) Type 3',
     abbreviation: 'SPD-T3',
     symbol: '',
-    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชาก Type 3.jpg',
+    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชากType3.jpg',
     function: 'การปกป้องขั้นสุดท้าย (Point-of-use Layer) ลดแรงดันตกค้างส่วนสุดท้ายให้ปลอดภัยต่อแผงวงจร',
     principle: 'ทำ "Voltage Clamping" ขลิบแรงดันในระดับละเอียด (Fine-tuning) ติดตั้งใกล้กับอุปกรณ์ที่ละเอียดอ่อน เช่น เซิร์ฟเวอร์, อุปกรณ์ไอที ทดสอบด้วย Combination Wave',
     specs: [
