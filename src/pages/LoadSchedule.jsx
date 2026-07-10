@@ -169,7 +169,7 @@ const LoadSchedule = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>สรุปกระแสโหลด (Phase Summary)</h3>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <button onClick={autoBalance} style={{ background: 'var(--accent-solar)', color: '#000', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button onClick={autoBalance} style={{ background: 'var(--accent-secondary)', color: 'white', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Activity size={16} /> Auto-Balance
               </button>
               <div style={{ background: summary.unbalance > 15 ? '#F44336' : '#4CAF50', color: 'white', padding: '0.5rem 1rem', borderRadius: '99px', fontSize: '0.85rem', fontWeight: 'bold' }}>
@@ -179,20 +179,26 @@ const LoadSchedule = () => {
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255,0,0,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,0,0,0.3)', position: 'relative', overflow: 'hidden' }}>
-              <h4 style={{ margin: '0 0 0.5rem', color: '#ff6b6b' }}>Phase L1 (R)</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, position: 'relative', zIndex: 1 }}>{summary.L1} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, height: '4px', background: '#ff6b6b', width: `${summary.maxPhase > 0 ? (summary.L1 / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease' }} />
+            <div style={{ background: 'rgba(255,0,0,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,0,0,0.2)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: 'rgba(255, 107, 107, 0.15)', width: `${summary.maxPhase > 0 ? (parseFloat(summary.L1) / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease', zIndex: 0 }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h4 style={{ margin: '0 0 0.5rem', color: '#ff6b6b' }}>Phase L1 (R)</h4>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{summary.L1} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
+              </div>
             </div>
-            <div style={{ background: 'rgba(255,255,0,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,0,0.3)', position: 'relative', overflow: 'hidden' }}>
-              <h4 style={{ margin: '0 0 0.5rem', color: '#feca57' }}>Phase L2 (S)</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, position: 'relative', zIndex: 1 }}>{summary.L2} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, height: '4px', background: '#feca57', width: `${summary.maxPhase > 0 ? (summary.L2 / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease' }} />
+            <div style={{ background: 'rgba(255,255,0,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,0,0.2)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: 'rgba(254, 202, 87, 0.15)', width: `${summary.maxPhase > 0 ? (parseFloat(summary.L2) / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease', zIndex: 0 }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h4 style={{ margin: '0 0 0.5rem', color: '#feca57' }}>Phase L2 (S)</h4>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{summary.L2} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
+              </div>
             </div>
-            <div style={{ background: 'rgba(0,191,255,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(0,191,255,0.3)', position: 'relative', overflow: 'hidden' }}>
-              <h4 style={{ margin: '0 0 0.5rem', color: '#48dbfb' }}>Phase L3 (T)</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, position: 'relative', zIndex: 1 }}>{summary.L3} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, height: '4px', background: '#48dbfb', width: `${summary.maxPhase > 0 ? (summary.L3 / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease' }} />
+            <div style={{ background: 'rgba(0,191,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(0,191,255,0.2)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: 'rgba(72, 219, 251, 0.15)', width: `${summary.maxPhase > 0 ? (parseFloat(summary.L3) / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease', zIndex: 0 }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h4 style={{ margin: '0 0 0.5rem', color: '#48dbfb' }}>Phase L3 (T)</h4>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{summary.L3} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
+              </div>
             </div>
           </div>
 
@@ -202,7 +208,7 @@ const LoadSchedule = () => {
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>คำนวณจากเฟสสูงสุด ({summary.maxPhase > 0 ? summary.maxPhase.toFixed(1) : 0}A) × เผื่อโหลด 25%</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem 1.5rem', borderRadius: '8px' }}>
-              <Zap size={24} color="var(--accent-solar)" />
+              <Zap size={24} color="var(--accent-secondary)" />
               <span style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{mainBreaker} <span style={{ fontSize: '1rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>AT</span></span>
             </div>
           </div>
