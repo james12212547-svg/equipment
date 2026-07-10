@@ -21,7 +21,10 @@ export const calculateCableSizing = (ampere) => {
   else if (amp <= 65) { cableSize = "25"; breakerSize = 63; }
   else if (amp <= 81) { cableSize = "35"; breakerSize = 80; }
   else if (amp <= 99) { cableSize = "50"; breakerSize = 100; }
-  else { cableSize = "ปรึกษาวิศวกรออกแบบ"; breakerSize = "Over 100"; }
+  else if (amp <= 125) { cableSize = "70"; breakerSize = 125; }
+  else if (amp <= 145) { cableSize = "95"; breakerSize = 160; }
+  else if (amp <= 170) { cableSize = "120"; breakerSize = 200; }
+  else { cableSize = "ปรึกษาวิศวกร"; breakerSize = "Over 200"; }
 
   return {
     load: amp,

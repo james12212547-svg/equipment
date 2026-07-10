@@ -1,20 +1,31 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Activity, Save, RotateCcw, Download, Zap } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Activity, Save, RotateCcw, Download, Zap, Settings, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { BREAKER_SIZES } from '../constants/engineeringConstants';
+import { BREAKER_SIZES, APPLIANCE_PRESETS } from '../constants/engineeringConstants';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { calculateCableSizing } from '../utils/engineering/cableSizing';
 
 const LoadSchedule = () => {
   const navigate = useNavigate();
   const [loads, setLoads] = useLocalStorage('loadSchedule', []);
   
   const [formData, setFormData] = useState({ name: '', current: '', phase: 'L1' });
-  const [summary, setSummary] = useState({ L1: 0, L2: 0, L3: 0, unbalance: 0, maxPhase: 0 });
+  const [demandFactor, setDemandFactor] = useLocalStorage('demandFactor', 100);
+  const [summary, setSummary] = useState({ L1: 0, L2: 0, L3: 0, unbalance: 0, maxPhase: 0, totalDesignCurrent: 0 });
   const [mainBreaker, setMainBreaker] = useState(0);
+  const [mainFeeder, setMainFeeder] = useState('');
 
   useEffect(() => {
-    calculateSummary(loads);
-  }, [loads]);
+  useEffect(() => {
+    calculateSummary(loads, demandFactor);
+  }, [loads, demandFactor]);
+
+  const handlePresetChange = (e) => {
+    const selected = APPLIANCE_PRESETS.find(p => p.name === e.target.value);
+    if (selected) {
+      setFormData({ ...formData, name: selected.name, current: selected.current });
+    }
+  };
 
   const addLoad = (e) => {
     e.preventDefault();
@@ -84,7 +95,7 @@ const LoadSchedule = () => {
     setTimeout(() => alert('ดำเนินการจัดสมดุล (Auto-Balance) เรียบร้อยแล้ว!'), 100);
   };
 
-  const calculateSummary = (currentLoads) => {
+  const calculateSummary = (currentLoads, df = 100) => {
     let L1 = 0, L2 = 0, L3 = 0;
     
     currentLoads.forEach(load => {
@@ -101,6 +112,7 @@ const LoadSchedule = () => {
     const avg = (L1 + L2 + L3) / 3;
     let unbalance = 0;
     const maxPhase = Math.max(L1, L2, L3);
+    const totalDesignCurrent = maxPhase * (df / 100);
     
     if (avg > 0) {
       const maxDev = Math.max(Math.abs(L1 - avg), Math.abs(L2 - avg), Math.abs(L3 - avg));
@@ -112,13 +124,18 @@ const LoadSchedule = () => {
       L2: L2.toFixed(1),
       L3: L3.toFixed(1),
       unbalance: unbalance.toFixed(1),
-      maxPhase
+      maxPhase,
+      totalDesignCurrent
     });
 
-    // Calculate Main Breaker (Max Phase * 1.25)
-    const requiredBreaker = maxPhase * 1.25;
+    // Calculate Main Breaker (Total Design Current * 1.25)
+    const requiredBreaker = totalDesignCurrent * 1.25;
     const recommended = BREAKER_SIZES.find(size => size >= requiredBreaker) || BREAKER_SIZES[BREAKER_SIZES.length - 1];
     setMainBreaker(recommended);
+    
+    // Calculate Main Feeder
+    const cableInfo = calculateCableSizing(recommended);
+    setMainFeeder(cableInfo ? cableInfo.cableSize : 'ปรึกษาวิศวกร');
   };
 
   const exportLoadScheduleToCSV = () => {
@@ -160,7 +177,13 @@ const LoadSchedule = () => {
         {/* Phase Summary Dashboard */}
         <div className="equipment-card" style={{ padding: '2rem', border: summary.unbalance > 15 ? '2px solid #F44336' : '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>สรุปกระแสโหลด (Phase Summary)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>สรุปกระแสโหลด (Phase Summary)</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.75rem', borderRadius: '8px' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Demand Factor (DF) %:</span>
+                <input type="number" min="10" max="100" value={demandFactor} onChange={(e) => setDemandFactor(Number(e.target.value))} style={{ width: '60px', padding: '0.25rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', textAlign: 'center' }} />
+              </div>
+            </div>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <button onClick={autoBalance} style={{ background: 'var(--accent-secondary)', color: 'white', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Activity size={16} /> Auto-Balance
@@ -195,23 +218,44 @@ const LoadSchedule = () => {
             </div>
           </div>
 
-          <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <h4 style={{ margin: '0 0 0.25rem', color: 'var(--text-secondary)' }}>ขนาด Main Breaker ที่แนะนำ (3-Phase)</h4>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>คำนวณจากเฟสสูงสุด ({summary.maxPhase > 0 ? summary.maxPhase.toFixed(1) : 0}A) × เผื่อโหลด 25%</p>
+          <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 0.25rem', color: 'var(--text-secondary)' }}>ขนาด Main Breaker ที่แนะนำ (3-Phase)</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>โหลดสูงสุด ({summary.maxPhase > 0 ? summary.maxPhase.toFixed(1) : 0}A) × DF {demandFactor}% × เผื่อ 25%</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem 1.5rem', borderRadius: '8px' }}>
+                <Zap size={24} color="var(--accent-secondary)" />
+                <span style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{mainBreaker} <span style={{ fontSize: '1rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>AT</span></span>
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem 1.5rem', borderRadius: '8px' }}>
-              <Zap size={24} color="var(--accent-secondary)" />
-              <span style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{mainBreaker} <span style={{ fontSize: '1rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>AT</span></span>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1.5rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 0.25rem', color: 'var(--text-secondary)' }}>ขนาดสายไฟเมนเข้าอาคาร (ต่อเฟส)</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>อ้างอิงสาย THW เดินในท่อ (สำหรับเบรกเกอร์ {mainBreaker}A)</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem 1.5rem', borderRadius: '8px' }}>
+                <span style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--accent-primary)' }}>{mainFeeder} <span style={{ fontSize: '1rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>sq.mm</span></span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Add Load Form */}
         <form onSubmit={addLoad} className="equipment-card" style={{ padding: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
+          <div style={{ flex: '1 1 200px' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>เครื่องใช้ไฟฟ้า (Template)</label>
+            <select onChange={handlePresetChange} defaultValue="" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+              <option value="" disabled>-- เลือกเครื่องใช้ไฟฟ้า --</option>
+              {APPLIANCE_PRESETS.map((preset, idx) => (
+                <option key={idx} value={preset.name}>{preset.name} (~{preset.current}A)</option>
+              ))}
+            </select>
+          </div>
           <div style={{ flex: '2 1 200px' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>ชื่อโหลด / รายการ</label>
-            <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required placeholder="เช่น แอร์ชั้น 1, แสงสว่าง" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>ชื่อโหลด (กำหนดเอง)</label>
+            <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required placeholder="เช่น แอร์ชั้น 1" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
           </div>
           <div style={{ flex: '1 1 100px' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>กระแสโหลด (A)</label>
