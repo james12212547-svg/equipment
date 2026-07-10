@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calculator, Thermometer, Zap, ShieldAlert, ListChecks } from 'lucide-react';
+import { Calculator, Thermometer, Zap, ShieldAlert, ListChecks, Lightbulb } from 'lucide-react';
 
 const CalculatorsHub = () => {
   return (
@@ -79,6 +79,17 @@ const CalculatorsHub = () => {
           <div className="category-card-content" style={{ textAlign: 'center' }}>
             <h3 className="text-gradient-solar" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>จัดตารางโหลด</h3>
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>Load Schedule & Phase Balancing สำหรับไฟ 3 เฟส</p>
+          </div>
+        </Link>
+        <Link to="/learning/lighting" className="category-card" style={{ padding: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+              <Lightbulb size={48} />
+            </div>
+          </div>
+          <div className="category-card-content" style={{ textAlign: 'center' }}>
+            <h3 className="text-gradient-solar" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>คำนวณแสงสว่าง</h3>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>คำนวณจำนวนหลอดไฟเพื่อความสว่างที่พอดี</p>
           </div>
         </Link>
       </div>
