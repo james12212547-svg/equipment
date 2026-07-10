@@ -16,7 +16,6 @@ const LoadSchedule = () => {
   const [mainFeeder, setMainFeeder] = useState('');
 
   useEffect(() => {
-  useEffect(() => {
     calculateSummary(loads, demandFactor);
   }, [loads, demandFactor]);
 
