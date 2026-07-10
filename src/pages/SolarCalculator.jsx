@@ -403,7 +403,7 @@ const SolarCalculator = () => {
                 * อ้างอิง Peak Sun Hours (PSH)
                 <InfoTooltip text={'PSH = ชั่วโมงที่แดดเต็มที่ต่อวัน\nใช้คำนวณว่าแผงโซลาร์ขนาด 1 kW\nจะผลิตไฟฟ้าได้กี่ kWh ต่อวัน\n(1 kW × PSH = kWh/วัน)'} />
                 {' '}: <strong style={{ color: 'var(--accent-solar)' }}>{result?.psh ?? selectedPSH} ชม./วัน</strong>
-                {' '}| แผง 550W | ราคาอาจเปลี่ยนแปลงตามหน้างาน
+                {' '}| ประสิทธิภาพระบบ (PR) 0.8 | แผง 550W | ราคาอาจเปลี่ยนแปลงตามหน้างาน
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 อินเวอร์เตอร์

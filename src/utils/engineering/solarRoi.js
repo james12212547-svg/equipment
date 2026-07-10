@@ -15,13 +15,14 @@ export const calculateSolarRoi = (calcMode, inputValue, inflationRate = 3, psh =
   let recommendedKW = 0;
   let actualSavingsPerMonth = 0;
   const PSH = psh; // Peak Sun Hours — now province-specific
+  const PR = 0.8; // Performance Ratio (System Efficiency)
   const panelWattage = 550; // Standard 550W panel
   const costPerKW = 25000; // Estimated cost per kW in Baht
 
   if (calcMode === 'bill') {
     // Mode: Calculate from Monthly Bill
-    // 1 kW solar generates PSH units/day => PSH*30 units/month
-    const savingsPerKWPerMonth = PSH * 30 * 5; // 5 Baht/unit avg
+    // 1 kW solar generates PSH * PR units/day => PSH * PR * 30 units/month
+    const savingsPerKWPerMonth = PSH * PR * 30 * 5; // 5 Baht/unit avg
     const targetSavings = value * 0.7; // Aim to cover 70% of bill
     recommendedKW = targetSavings / savingsPerKWPerMonth;
     
@@ -35,12 +36,12 @@ export const calculateSolarRoi = (calcMode, inputValue, inflationRate = 3, psh =
 
   } else {
     // Mode: Calculate from Daily Load (kWh/day)
-    // If user needs X kWh/day, system size = X / PSH
-    recommendedKW = value / PSH;
+    // If user needs X kWh/day, system size = X / (PSH * PR)
+    recommendedKW = value / (PSH * PR);
     recommendedKW = Number(recommendedKW.toFixed(2));
     
     // Savings = kWh * 5 Baht * 30 days
-    actualSavingsPerMonth = (recommendedKW * PSH) * 5 * 30;
+    actualSavingsPerMonth = (recommendedKW * PSH * PR) * 5 * 30;
   }
 
   // Common calculations based on recommendedKW
