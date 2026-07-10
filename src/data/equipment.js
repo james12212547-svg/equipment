@@ -267,7 +267,7 @@ export const equipmentData = [
     nameEng: 'Fixed Speed AC',
     abbreviation: 'FIXED',
     symbol: '',
-    image: '/images/แอร์ระบบธรรมดา.jpg',
+    image: 'แอร์ระบบfixedspeed.jpg',
     function: 'ระบบที่คอมเพรสเซอร์ทำงานความเร็วรอบคงที่เสมอ (100% capacity)',
     principle: 'การทำงานแบบ "ตัด-ต่อ" (On/Off) เมื่ออุณหภูมิลดถึงจุดที่ตั้งไว้ คอมเพรสเซอร์จะ "ตัด" ทันที และเมื่อร้อนขึ้นจะ "กระชากไฟสตาร์ทใหม่" 100% วนลูปไปเรื่อยๆ',
     specs: [
@@ -283,7 +283,7 @@ export const equipmentData = [
     nameEng: 'Inverter AC',
     abbreviation: 'INVERTER',
     symbol: '',
-    image: '/images/แอร์ระบบInverter.jpg',
+    image: 'แอร์ระบบInverter.jpg',
     function: 'ระบบที่แปรผันความเร็วรอบคอมเพรสเซอร์เพื่อประหยัดพลังงาน',
     principle: 'ใช้แผงวงจรอินเวอร์เตอร์ (VFD) แปลง AC เป็น DC และแปลงกลับเป็น AC เพื่อปรับความถี่มอเตอร์ เมื่อใกล้ถึงอุณหภูมิจะ "ลดรอบ" แทนการตัด ทำให้เลี้ยงรอบเบาๆ ไปเรื่อยๆ ชดเชยความร้อน',
     specs: [
