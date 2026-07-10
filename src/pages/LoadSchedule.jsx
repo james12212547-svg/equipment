@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Activity, Save, RotateCcw, Download } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Activity, Save, RotateCcw, Download, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+const breakerSizes = [16, 20, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 320, 400, 500, 630];
 
 const LoadSchedule = () => {
   const navigate = useNavigate();
-  // We'll use localStorage to save the schedule list so it persists across sessions
   const [loads, setLoads] = useState(() => {
     const saved = localStorage.getItem('loadSchedule');
     return saved ? JSON.parse(saved) : [];
   });
   
   const [formData, setFormData] = useState({ name: '', current: '', phase: 'L1' });
-  const [summary, setSummary] = useState({ L1: 0, L2: 0, L3: 0, unbalance: 0 });
+  const [summary, setSummary] = useState({ L1: 0, L2: 0, L3: 0, unbalance: 0, maxPhase: 0 });
+  const [mainBreaker, setMainBreaker] = useState(0);
 
   useEffect(() => {
     localStorage.setItem('loadSchedule', JSON.stringify(loads));
-    calculateSummary();
+    calculateSummary(loads);
   }, [loads]);
 
   const addLoad = (e) => {
@@ -30,7 +32,7 @@ const LoadSchedule = () => {
     };
     
     setLoads([...loads, newLoad]);
-    setFormData({ name: '', current: '', phase: 'L1' }); // Reset form
+    setFormData({ name: '', current: '', phase: 'L1' });
   };
 
   const removeLoad = (id) => {
@@ -43,15 +45,54 @@ const LoadSchedule = () => {
     }
   };
 
-  const calculateSummary = () => {
+  const autoBalance = () => {
+    if (loads.length === 0) return;
+    
+    // 1. Separate 3P loads (which can't be moved) and 1P loads
+    const loads3P = loads.filter(l => l.phase === '3P');
+    const loads1P = loads.filter(l => l.phase !== '3P');
+    
+    // 2. Sort 1P loads by current descending (Greedy approach)
+    loads1P.sort((a, b) => b.current - a.current);
+    
+    // 3. Initialize phase sums with 3P contributions
+    let sumL1 = 0, sumL2 = 0, sumL3 = 0;
+    loads3P.forEach(l => {
+      const split = l.current / 3;
+      sumL1 += split;
+      sumL2 += split;
+      sumL3 += split;
+    });
+    
+    // 4. Distribute 1P loads to the phase with the minimum sum
+    const balanced1P = loads1P.map(load => {
+      const minSum = Math.min(sumL1, sumL2, sumL3);
+      let newPhase = 'L1';
+      if (minSum === sumL1) {
+        newPhase = 'L1';
+        sumL1 += load.current;
+      } else if (minSum === sumL2) {
+        newPhase = 'L2';
+        sumL2 += load.current;
+      } else {
+        newPhase = 'L3';
+        sumL3 += load.current;
+      }
+      return { ...load, phase: newPhase };
+    });
+    
+    // 5. Update state
+    setLoads([...loads3P, ...balanced1P]);
+  };
+
+  const calculateSummary = (currentLoads) => {
     let L1 = 0, L2 = 0, L3 = 0;
     
-    loads.forEach(load => {
+    currentLoads.forEach(load => {
       if (load.phase === 'L1') L1 += load.current;
       else if (load.phase === 'L2') L2 += load.current;
       else if (load.phase === 'L3') L3 += load.current;
       else if (load.phase === '3P') {
-        // Assume balanced 3-phase load, split current equally
         L1 += load.current / 3;
         L2 += load.current / 3;
         L3 += load.current / 3;
@@ -60,6 +101,7 @@ const LoadSchedule = () => {
 
     const avg = (L1 + L2 + L3) / 3;
     let unbalance = 0;
+    const maxPhase = Math.max(L1, L2, L3);
     
     if (avg > 0) {
       const maxDev = Math.max(Math.abs(L1 - avg), Math.abs(L2 - avg), Math.abs(L3 - avg));
@@ -70,8 +112,20 @@ const LoadSchedule = () => {
       L1: L1.toFixed(1),
       L2: L2.toFixed(1),
       L3: L3.toFixed(1),
-      unbalance: unbalance.toFixed(1)
+      unbalance: unbalance.toFixed(1),
+      maxPhase
     });
+
+    // Calculate Main Breaker (Max Phase * 1.25)
+    const requiredBreaker = maxPhase * 1.25;
+    let recommended = breakerSizes[breakerSizes.length - 1];
+    for (let size of breakerSizes) {
+      if (size >= requiredBreaker) {
+        recommended = size;
+        break;
+      }
+    }
+    setMainBreaker(recommended);
   };
 
   const exportLoadScheduleToCSV = () => {
@@ -80,19 +134,14 @@ const LoadSchedule = () => {
       return;
     }
     
-    // 1. สร้าง Header
     let csvContent = "ชื่อโหลด,กระแส (A),เฟส(Phase)\n";
-    
-    // 2. วนลูปข้อมูลในตาราง
     loads.forEach(load => {
       csvContent += `"${load.name}","${load.current}","${load.phase}"\n`;
     });
 
-    // 3. สร้าง Blob สำหรับโหลดไฟล์ (ใส่ BOM \uFEFF เพื่อให้ Excel อ่านภาษาไทยได้ถูกต้อง)
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     
-    // 4. สร้างแท็ก <a> จำลองเพื่อกดดาวน์โหลด
     const link = document.createElement("a");
     link.setAttribute("href", url);
     link.setAttribute("download", `load_schedule_${new Date().getTime()}.csv`);
@@ -102,7 +151,7 @@ const LoadSchedule = () => {
   };
 
   return (
-    <div className="animate-fade-in" style={{ paddingBottom: '2rem' }}>
+    <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
           <ArrowLeft size={24} />
@@ -117,25 +166,44 @@ const LoadSchedule = () => {
         
         {/* Phase Summary Dashboard */}
         <div className="equipment-card" style={{ padding: '2rem', border: summary.unbalance > 15 ? '2px solid #F44336' : '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>สรุปกระแสโหลด (Phase Summary)</h3>
-            <div style={{ background: summary.unbalance > 15 ? '#F44336' : '#4CAF50', color: 'white', padding: '0.5rem 1rem', borderRadius: '99px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-              Unbalance: {summary.unbalance}% {summary.unbalance > 15 ? '(ควรปรับแก้)' : '(ดีมาก)'}
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <button onClick={autoBalance} style={{ background: 'var(--accent-solar)', color: '#000', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Activity size={16} /> Auto-Balance
+              </button>
+              <div style={{ background: summary.unbalance > 15 ? '#F44336' : '#4CAF50', color: 'white', padding: '0.5rem 1rem', borderRadius: '99px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                Unbalance: {summary.unbalance}% {summary.unbalance > 15 ? '(ควรปรับแก้)' : '(ดีมาก)'}
+              </div>
             </div>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'center' }}>
-            <div style={{ background: 'rgba(255,0,0,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,0,0,0.3)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(255,0,0,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,0,0,0.3)', position: 'relative', overflow: 'hidden' }}>
               <h4 style={{ margin: '0 0 0.5rem', color: '#ff6b6b' }}>Phase L1 (R)</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{summary.L1} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, position: 'relative', zIndex: 1 }}>{summary.L1} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
+              <div style={{ position: 'absolute', bottom: 0, left: 0, height: '4px', background: '#ff6b6b', width: `${summary.maxPhase > 0 ? (summary.L1 / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease' }} />
             </div>
-            <div style={{ background: 'rgba(255,255,0,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,0,0.3)' }}>
+            <div style={{ background: 'rgba(255,255,0,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,0,0.3)', position: 'relative', overflow: 'hidden' }}>
               <h4 style={{ margin: '0 0 0.5rem', color: '#feca57' }}>Phase L2 (S)</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{summary.L2} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, position: 'relative', zIndex: 1 }}>{summary.L2} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
+              <div style={{ position: 'absolute', bottom: 0, left: 0, height: '4px', background: '#feca57', width: `${summary.maxPhase > 0 ? (summary.L2 / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease' }} />
             </div>
-            <div style={{ background: 'rgba(0,191,255,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(0,191,255,0.3)' }}>
+            <div style={{ background: 'rgba(0,191,255,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(0,191,255,0.3)', position: 'relative', overflow: 'hidden' }}>
               <h4 style={{ margin: '0 0 0.5rem', color: '#48dbfb' }}>Phase L3 (T)</h4>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{summary.L3} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, position: 'relative', zIndex: 1 }}>{summary.L3} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>A</span></p>
+              <div style={{ position: 'absolute', bottom: 0, left: 0, height: '4px', background: '#48dbfb', width: `${summary.maxPhase > 0 ? (summary.L3 / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease' }} />
+            </div>
+          </div>
+
+          <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h4 style={{ margin: '0 0 0.25rem', color: 'var(--text-secondary)' }}>ขนาด Main Breaker ที่แนะนำ (3-Phase)</h4>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>คำนวณจากเฟสสูงสุด ({summary.maxPhase > 0 ? summary.maxPhase.toFixed(1) : 0}A) × เผื่อโหลด 25%</p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem 1.5rem', borderRadius: '8px' }}>
+              <Zap size={24} color="var(--accent-solar)" />
+              <span style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{mainBreaker} <span style={{ fontSize: '1rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>AT</span></span>
             </div>
           </div>
         </div>
