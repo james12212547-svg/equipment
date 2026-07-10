@@ -176,11 +176,12 @@ const LabLogger = () => {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>ผลลัพธ์ (Result)</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>ผลลัพธ์ (ระบุค่าและหน่วย)</label>
                   <input 
-                    type="number" 
-                    value={exp.result} 
-                    onChange={e => handleUpdate(exp.id, 'result', parseFloat(e.target.value) || 0)}
+                    type="text" 
+                    value={exp.result || ''} 
+                    onChange={e => handleUpdate(exp.id, 'result', e.target.value)}
+                    placeholder="เช่น 8 L/min"
                     style={{ width: '100%', padding: '0.5rem', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)', borderRadius: '4px' }}
                   />
                 </div>
