@@ -83,6 +83,9 @@ const LoadSchedule = () => {
     
     // 5. Update state
     setLoads([...loads3P, ...balanced1P]);
+    
+    // Let the user know it ran, especially if the optimal state is the same as before
+    setTimeout(() => alert('ดำเนินการจัดสมดุล (Auto-Balance) เรียบร้อยแล้ว!'), 100);
   };
 
   const calculateSummary = (currentLoads) => {
