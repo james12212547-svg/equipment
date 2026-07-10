@@ -351,7 +351,7 @@ export const equipmentData = [
     nameEng: 'Lithium-ion Battery (LiFePO4)',
     abbreviation: 'BESS',
     symbol: '',
-    image: '/images/solar/Lithium-ion Battery(LiFePO4).jpg',
+    image: '/images/solar/Lithium-ion Battery(LiFePO4).webp',
     function: 'กักเก็บพลังงานไฟฟ้าส่วนเกินที่ผลิตได้ในตอนกลางวัน เพื่อใช้ในเวลากลางคืนหรือตอนไฟดับ',
     principle: 'นิยมใช้เซลล์ ลิเธียมไอออนฟอสเฟต (LiFePO4) ซึ่งมีความปลอดภัยสูง ทนความร้อน ไม่ระเบิดง่าย และมีระบบ BMS (Battery Management System) ควบคุมการชาร์จภายใน',
     specs: [
@@ -444,7 +444,7 @@ export const equipmentData = [
     nameEng: 'Off-Grid System',
     abbreviation: 'OFF-GRID',
     symbol: '',
-    image: '/images/solar/ระบบออฟกริด.jpg',
+    image: '/images/solar/ระบบออฟกริด.jpeg',
     function: 'ระบบผลิตไฟฟ้าอิสระ ตัดขาดจากการไฟฟ้า 100% เหมาะกับ "พื้นที่ห่างไกล, บนดอย, เกาะ"',
     principle: 'ผลิตไฟได้ต้องนำไปเก็บในแบตเตอรี่ทั้งหมด แล้วดึงจากแบตเตอรี่มาใช้ในบ้านตลอด 24 ชั่วโมง',
     specs: [
@@ -476,7 +476,7 @@ export const equipmentData = [
     nameEng: 'Solar Wiring & Protection',
     abbreviation: 'WIRING',
     symbol: '',
-    image: '/images/solar/SolarWiring&Protection.jpg',
+    image: '/images/solar/SolarWiring&Protection.webp',
     function: 'การนำส่งกระแสไฟฟ้าจากแผงผ่านอุปกรณ์ไปยังจุดใช้งานด้วยความปลอดภัย',
     principle: 'ฝั่ง DC (แผง->อินเวอร์เตอร์): ใช้สาย PV (PV1-F) ทนแดด UV ขั้วต่อ MC4 ฝั่ง AC: ใช้สาย THW / NYY ทองแดง. คำนวณแรงดันตกคร่อมรวมไม่ควรเกิน 5%',
     specs: [
@@ -505,7 +505,7 @@ export const equipmentData = [
     nameEng: 'Surge Protective Device (SPD) Type 1',
     abbreviation: 'SPD-T1',
     symbol: '',
-    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชากType1.jpg',
+    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชากType1.webp',
     function: 'ปราการด่านหน้าป้องกันฟ้าผ่า สกัดกั้นพลังงานมหาศาลจากภายนอก ณ จุดทางเข้าบริการ (Service Entrance)',
     principle: 'ออกแบบมาเพื่อรับรูปคลื่น 10/350 µs (จำลองฟ้าผ่าโดยตรง) ซึ่งมีพลังงานมากกว่าคลื่น 8/20 µs ถึง 20 เท่า',
     specs: [
@@ -522,7 +522,7 @@ export const equipmentData = [
     nameEng: 'Surge Protective Device (SPD) Type 2',
     abbreviation: 'SPD-T2',
     symbol: '',
-    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชากType2.jpg',
+    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชากType2.webp',
     function: 'ระบบป้องกันหลัก (Workhorse) ของระบบ จัดการแรงดันเกินชั่วครู่ภายในระบบ (Internal Switching Transients)',
     principle: 'จัดการแรงดันกระชากจากการทำงานของมอเตอร์, HVAC, ลิฟต์ หรือ VFD (เกิดบ่อยกว่าฟ้าผ่ามาก) ทดสอบด้วยรูปคลื่น 8/20 µs',
     specs: [
@@ -539,7 +539,7 @@ export const equipmentData = [
     nameEng: 'Surge Protective Device (SPD) Type 3',
     abbreviation: 'SPD-T3',
     symbol: '',
-    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชากType3.jpg',
+    image: '/images/solar/อุปกรณ์ป้องกันไฟกระชากType3.webp',
     function: 'การปกป้องขั้นสุดท้าย (Point-of-use Layer) ลดแรงดันตกค้างส่วนสุดท้ายให้ปลอดภัยต่อแผงวงจร',
     principle: 'ทำ "Voltage Clamping" ขลิบแรงดันในระดับละเอียด (Fine-tuning) ติดตั้งใกล้กับอุปกรณ์ที่ละเอียดอ่อน เช่น เซิร์ฟเวอร์, อุปกรณ์ไอที ทดสอบด้วย Combination Wave',
     specs: [
@@ -555,7 +555,7 @@ export const equipmentData = [
     nameEng: 'Layered Protection Strategy',
     abbreviation: 'COORD',
     symbol: '',
-    image: '/images/solar/ยุทธศาสตร์การป้องกันแบบลำดับชั้น.jpg',
+    image: '/images/solar/ยุทธศาสตร์การป้องกันแบบลำดับชั้น.webp',
     function: 'การประสานงานทางพลังงานระหว่างชั้น (Energy Coordination) เพื่อให้ระบบสกัดกั้นแรงดันเกินได้อย่างสมบูรณ์',
     principle: 'Stage 1: Type 1 ระบายฟ้าผ่า -> Stage 2: Type 2 จัดการไฟกระชากสวิตชิ่ง -> Stage 3: Type 3 ลดแรงดันส่วนสุดท้ายให้วงจร',
     specs: [
