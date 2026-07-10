@@ -73,11 +73,12 @@ const BtuCalculator = () => {
             <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
               <p style={{ margin: '0 0 0.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>ℹ️ เกณฑ์ค่าตัวคูณภาระความร้อน (Cooling Load Factor) โดยประมาณ:</p>
               <ul style={{ margin: 0, paddingLeft: '1.5rem', color: 'var(--text-secondary)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <li>ห้องนอน (ไม่โดนแดด): 700 - 800</li>
-                <li>ห้องนอน (โดนแดด): 800 - 900</li>
-                <li>ห้องทำงาน/นั่งเล่น (ไม่โดนแดด): 800 - 900</li>
-                <li>ห้องทำงาน/นั่งเล่น (โดนแดด): 900 - 1000+</li>
-                <li style={{ gridColumn: '1 / -1' }}>ห้องครัว/ห้องอาหาร: 900 - 1000+ (เนื่องจากมีความร้อนสูง)</li>
+                <li>ห้องนอนปกติ: 700</li>
+                <li>ห้องนอน (โดนแดด): 800</li>
+                <li>ห้องทำงาน/ห้องนั่งเล่น/ห้องรับแขก ปกติ: 800</li>
+                <li>ห้องทำงาน/ห้องนั่งเล่น/ห้องรับแขก (โดนแดด): 900</li>
+                <li>ห้องครัว/ห้องอาหาร ปกติ: 900</li>
+                <li>ห้องครัว/ห้องอาหาร (โดนแดด): 1000</li>
               </ul>
             </div>
             
