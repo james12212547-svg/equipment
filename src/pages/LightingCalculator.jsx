@@ -191,14 +191,14 @@ const LightingCalculator = () => {
 
         {/* Results */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="equipment-card" style={{ padding: '2rem', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(254, 202, 87, 0.05) 100%)', border: '1px solid var(--accent-solar)' }}>
+          <div className="equipment-card" style={{ padding: '2rem', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(254, 202, 87, 0.05) 100%)', border: '1px solid var(--accent-secondary)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ background: 'var(--accent-solar)', color: 'black', padding: '1rem', borderRadius: '50%' }}>
+              <div style={{ background: 'var(--accent-secondary)', color: 'white', padding: '1rem', borderRadius: '50%' }}>
                 <Lightbulb size={32} />
               </div>
               <div>
                 <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>จำนวนหลอดไฟที่แนะนำ</h3>
-                <p style={{ margin: 0, color: 'var(--accent-solar)', fontWeight: 'bold' }}>Lumen Method Calculation</p>
+                <p style={{ margin: 0, color: 'var(--accent-secondary)', fontWeight: 'bold' }}>Lumen Method Calculation</p>
               </div>
             </div>
             
@@ -256,9 +256,9 @@ const LightingCalculator = () => {
                 <div key={i} style={{ 
                   width: '16px', 
                   height: '16px', 
-                  background: 'var(--accent-solar)', 
+                  background: 'var(--accent-secondary)', 
                   borderRadius: '50%',
-                  boxShadow: '0 0 15px var(--accent-solar)',
+                  boxShadow: '0 0 15px var(--accent-secondary)',
                   animation: 'pulse 2s infinite'
                 }} />
               ))}
