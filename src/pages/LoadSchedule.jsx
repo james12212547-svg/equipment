@@ -1,22 +1,18 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Trash2, Activity, Save, RotateCcw, Download, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-const breakerSizes = [16, 20, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 320, 400, 500, 630];
+import { BREAKER_SIZES } from '../constants/engineeringConstants';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const LoadSchedule = () => {
   const navigate = useNavigate();
-  const [loads, setLoads] = useState(() => {
-    const saved = localStorage.getItem('loadSchedule');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [loads, setLoads] = useLocalStorage('loadSchedule', []);
   
   const [formData, setFormData] = useState({ name: '', current: '', phase: 'L1' });
   const [summary, setSummary] = useState({ L1: 0, L2: 0, L3: 0, unbalance: 0, maxPhase: 0 });
   const [mainBreaker, setMainBreaker] = useState(0);
 
   useEffect(() => {
-    localStorage.setItem('loadSchedule', JSON.stringify(loads));
     calculateSummary(loads);
   }, [loads]);
 
@@ -121,13 +117,7 @@ const LoadSchedule = () => {
 
     // Calculate Main Breaker (Max Phase * 1.25)
     const requiredBreaker = maxPhase * 1.25;
-    let recommended = breakerSizes[breakerSizes.length - 1];
-    for (let size of breakerSizes) {
-      if (size >= requiredBreaker) {
-        recommended = size;
-        break;
-      }
-    }
+    const recommended = BREAKER_SIZES.find(size => size >= requiredBreaker) || BREAKER_SIZES[BREAKER_SIZES.length - 1];
     setMainBreaker(recommended);
   };
 

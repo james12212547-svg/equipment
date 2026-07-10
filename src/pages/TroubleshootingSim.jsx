@@ -316,11 +316,6 @@ const TroubleshootingSim = () => {
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [currentStep, setCurrentStep] = useState(null);
 
-  const resetAll = () => {
-    setSelectedCategory(null);
-    setSelectedScenario(null);
-    setCurrentStep(null);
-  };
 
   const startScenario = (scenario) => {
     setSelectedScenario(scenario);

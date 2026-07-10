@@ -81,7 +81,7 @@ function ReloadPrompt() {
         }
       );
     }
-  }, [needRefresh, updateServiceWorker]);
+  }, [needRefresh, updateServiceWorker, close]);
 
   return null;
 }

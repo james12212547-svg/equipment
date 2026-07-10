@@ -120,7 +120,7 @@ const TeamChat = () => {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [senderSet, sender]);
+  }, [senderSet, sender, notifMuted]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });

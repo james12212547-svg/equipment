@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, DollarSign, ClipboardList, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import useStore from '../store/useStore';
 import { getWorkLogsDB, getAllQuotationsDB } from '../utils/db';
@@ -9,7 +9,7 @@ const COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444'];
 const MONTH_NAMES_TH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 
 const RevenueDashboard = () => {
-  const schedules = useStore(state => state.schedules) || [];
+  const schedules = useStore(state => state.schedules);
   const [workLogs, setWorkLogs] = useState([]);
   const [quotations, setQuotations] = useState([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -39,7 +39,8 @@ const RevenueDashboard = () => {
     });
 
     // Schedules with cost
-    schedules.forEach(s => {
+    const schedulesList = schedules || [];
+    schedulesList.forEach(s => {
       if (!s.cost || !s.date) return;
       const d = new Date(s.date);
       if (isNaN(d) || d.getFullYear() !== selectedYear) return;
@@ -75,9 +76,10 @@ const RevenueDashboard = () => {
 
   // Recent transactions (all sources combined)
   const recentTransactions = useMemo(() => {
+    const schedulesList = schedules || [];
     const all = [
       ...workLogs.filter(l => l.cost).map(l => ({ date: l.date, label: l.issue || 'งานซ่อม', amount: Number(l.cost), source: 'จดงาน', customer: l.customer })),
-      ...schedules.filter(s => s.cost).map(s => ({ date: s.date, label: s.equipmentType, amount: Number(s.cost), source: 'คิวงาน', customer: s.customerName })),
+      ...schedulesList.filter(s => s.cost).map(s => ({ date: s.date, label: s.equipmentType, amount: Number(s.cost), source: 'คิวงาน', customer: s.customerName })),
       ...quotations.filter(q => q.status === 'paid').map(q => ({ date: q.createdAt?.split('T')[0], label: q.number, amount: Number(q.total), source: 'ใบเสนอราคา', customer: q.customerName })),
     ];
     return all.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 15);
