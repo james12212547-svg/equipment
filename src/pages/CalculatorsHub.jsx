@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calculator, Thermometer, Zap, ShieldAlert, ListChecks, Lightbulb, Cylinder } from 'lucide-react';
+import { Calculator, Thermometer, Zap, ShieldAlert, ListChecks, Lightbulb, Cylinder, Cpu } from 'lucide-react';
 
 const CalculatorsHub = () => {
   return (
@@ -24,7 +24,7 @@ const CalculatorsHub = () => {
 
         <Link to="/learning/calculator" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
               <Calculator size={48} />
             </div>
           </div>
@@ -36,7 +36,7 @@ const CalculatorsHub = () => {
 
         <Link to="/learning/cable" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
               <Zap size={48} />
             </div>
           </div>
@@ -48,7 +48,7 @@ const CalculatorsHub = () => {
 
         <Link to="/learning/pfc" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
               <Zap size={48} />
             </div>
           </div>
@@ -60,7 +60,7 @@ const CalculatorsHub = () => {
 
         <Link to="/learning/voltage-drop" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
               <ShieldAlert size={48} />
             </div>
           </div>
@@ -72,7 +72,7 @@ const CalculatorsHub = () => {
 
         <Link to="/learning/load-schedule" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
               <ListChecks size={48} />
             </div>
           </div>
@@ -83,7 +83,7 @@ const CalculatorsHub = () => {
         </Link>
         <Link to="/learning/lighting" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
               <Lightbulb size={48} />
             </div>
           </div>
@@ -94,13 +94,24 @@ const CalculatorsHub = () => {
         </Link>
         <Link to="/learning/conduit" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
               <Cylinder size={48} />
             </div>
           </div>
           <div className="category-card-content" style={{ textAlign: 'center' }}>
             <h3 className="text-gradient-solar" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>คำนวณท่อร้อยสาย</h3>
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>หาขนาดท่อ PVC/EMT ให้พอดีกับจำนวนสายไฟ (Max 40%)</p>
+          </div>
+        </Link>
+        <Link to="/learning/motor" className="category-card" style={{ padding: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
+              <Cpu size={48} />
+            </div>
+          </div>
+          <div className="category-card-content" style={{ textAlign: 'center' }}>
+            <h3 className="text-gradient-solar" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>คำนวณอุปกรณ์มอเตอร์</h3>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>สเปค Breaker, Contactor, OLR, และสายไฟ (DOL / Star-Delta)</p>
           </div>
         </Link>
       </div>
