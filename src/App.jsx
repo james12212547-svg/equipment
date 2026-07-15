@@ -23,6 +23,7 @@ import PfcCalculator from './pages/PfcCalculator';
 import VoltageDrop from './pages/VoltageDrop';
 import LoadSchedule from './pages/LoadSchedule';
 import LightingCalculator from './pages/LightingCalculator';
+import ConduitSizing from './pages/ConduitSizing';
 import LabLogger from './pages/LabLogger';
 import Favorites from './pages/Favorites';
 import Settings from './pages/Settings';
@@ -90,6 +91,7 @@ function App() {
             <Route path="/learning/voltage-drop" element={<VoltageDrop />} />
             <Route path="/learning/load-schedule" element={<LoadSchedule />} />
             <Route path="/learning/lighting" element={<LightingCalculator />} />
+            <Route path="/learning/conduit" element={<ConduitSizing />} />
             <Route path="/learning/3d" element={<ModelViewer />} />
             <Route path="/learning/lab-logger" element={<LabLogger />} />
             <Route path="/work-log" element={<WorkLog />} />

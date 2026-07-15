@@ -15,3 +15,35 @@ export const APPLIANCE_PRESETS = [
   { name: 'วงจรแสงสว่าง (1 วงจร)', current: 5.0, type: 'Lighting' },
   { name: 'EV Charger 7kW (1-Phase)', current: 32.0, type: 'EV' },
 ];
+
+export const CONDUIT_SPECS = {
+  EMT: [
+    { size: '1/2"', mm: 15, area: 196, maxFill: 78 },
+    { size: '3/4"', mm: 20, area: 343, maxFill: 137 },
+    { size: '1"', mm: 25, area: 556, maxFill: 222 },
+    { size: '1-1/4"', mm: 32, area: 962, maxFill: 385 },
+    { size: '1-1/2"', mm: 40, area: 1314, maxFill: 525 },
+    { size: '2"', mm: 50, area: 2165, maxFill: 866 },
+  ],
+  PVC: [
+    { size: '3/8" (15mm)', mm: 15, area: 154, maxFill: 61 },
+    { size: '1/2" (18mm)', mm: 18, area: 254, maxFill: 101 },
+    { size: '3/4" (20mm)', mm: 20, area: 380, maxFill: 152 },
+    { size: '1" (25mm)', mm: 25, area: 615, maxFill: 246 },
+    { size: '1-1/4" (35mm)', mm: 35, area: 962, maxFill: 385 },
+    { size: '1-1/2" (40mm)', mm: 40, area: 1452, maxFill: 580 },
+    { size: '2" (55mm)', mm: 55, area: 2290, maxFill: 916 },
+  ]
+};
+
+export const WIRE_AREAS = {
+  THW: {
+    1.5: 8.5, 2.5: 11, 4: 15, 6: 22, 10: 34, 16: 48, 25: 75, 35: 95, 50: 130, 70: 175
+  },
+  NYY: {
+    1.5: 23, 2.5: 27, 4: 33, 6: 39, 10: 50, 16: 64, 25: 95, 35: 113, 50: 143, 70: 180
+  },
+  VAF: {
+    1.5: 25, 2.5: 33, 4: 45, 6: 58, 10: 82 // VAF is flat, area is approximate. (Not recommended for conduit, but added for completeness)
+  }
+};
