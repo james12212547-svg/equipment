@@ -26,6 +26,8 @@ import LightingCalculator from './pages/LightingCalculator';
 import ConduitSizing from './pages/ConduitSizing';
 import MotorCalculator from './pages/MotorCalculator';
 import AirConCalculator from './pages/AirConCalculator';
+import ProjectDashboard from './pages/ProjectDashboard';
+import ProjectWorkspace from './pages/ProjectWorkspace';
 import LabLogger from './pages/LabLogger';
 import Favorites from './pages/Favorites';
 import Settings from './pages/Settings';
@@ -97,6 +99,8 @@ function App() {
             <Route path="/learning/motor" element={<MotorCalculator />} />
             <Route path="/learning/3d" element={<ModelViewer />} />
             <Route path="/learning/lab-logger" element={<LabLogger />} />
+            <Route path="/projects" element={<ProjectDashboard />} />
+            <Route path="/project/:id/*" element={<ProjectWorkspace />} />
             <Route path="/work-log" element={<WorkLog />} />
             <Route path="/schedule" element={<MaintenanceSchedule />} />
             <Route path="/customer-history" element={<CustomerHistory />} />

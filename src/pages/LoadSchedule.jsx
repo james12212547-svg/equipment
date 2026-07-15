@@ -6,12 +6,15 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { calculateCableSizing } from '../utils/engineering/cableSizing';
 import SingleLineDiagram from '../components/SingleLineDiagram';
 
-const LoadSchedule = () => {
+const LoadSchedule = ({ projectId, isReadOnly = false }) => {
   const navigate = useNavigate();
-  const [loads, setLoads] = useLocalStorage('loadSchedule', []);
+  const storageKey = projectId ? `loadSchedule_${projectId}` : 'loadSchedule';
+  const demandKey = projectId ? `demandFactor_${projectId}` : 'demandFactor';
+  
+  const [loads, setLoads] = useLocalStorage(storageKey, []);
   
   const [formData, setFormData] = useState({ name: '', current: '', phase: 'L1' });
-  const [demandFactor, setDemandFactor] = useLocalStorage('demandFactor', 100);
+  const [demandFactor, setDemandFactor] = useLocalStorage(demandKey, 100);
   const [summary, setSummary] = useState({ L1: 0, L2: 0, L3: 0, unbalance: 0, maxPhase: 0, totalDesignCurrent: 0 });
   const [mainBreaker, setMainBreaker] = useState(0);
   const [mainFeeder, setMainFeeder] = useState('');
@@ -161,35 +164,37 @@ const LoadSchedule = () => {
   };
 
   return (
-    <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
-          <ArrowLeft size={24} />
-        </button>
-        <div>
-          <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>จัดตารางโหลด (Load Schedule)</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Phase Balancing & MDB Load Summary</p>
+    <div className={`animate-fade-in ${isReadOnly ? 'print-only' : ''}`} style={{ paddingBottom: isReadOnly ? '0' : '3rem' }}>
+      {!isReadOnly && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+          <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
+            <ArrowLeft size={24} />
+          </button>
+          <div>
+            <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>จัดตารางโหลด (Load Schedule)</h1>
+            <p style={{ color: 'var(--text-secondary)' }}>Phase Balancing & MDB Load Summary</p>
+          </div>
+          <button 
+            className="no-print"
+            onClick={() => window.print()} 
+            style={{ 
+              marginLeft: 'auto', 
+              background: 'var(--accent-secondary)', 
+              color: 'white', 
+              border: 'none', 
+              padding: '0.75rem 1.5rem', 
+              borderRadius: '8px', 
+              fontWeight: 'bold', 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <Printer size={20} /> พิมพ์เป็น PDF
+          </button>
         </div>
-        <button 
-          className="no-print"
-          onClick={() => window.print()} 
-          style={{ 
-            marginLeft: 'auto', 
-            background: 'var(--accent-secondary)', 
-            color: 'white', 
-            border: 'none', 
-            padding: '0.75rem 1.5rem', 
-            borderRadius: '8px', 
-            fontWeight: 'bold', 
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-        >
-          <Printer size={20} /> พิมพ์เป็น PDF
-        </button>
-      </div>
+      )}
 
       <div className="print-only" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', display: 'none' }}>
         <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>เอกสารแสดงรายการคำนวณโหลด (Load Schedule)</h2>
@@ -344,10 +349,12 @@ const LoadSchedule = () => {
                         {load.phase}
                       </span>
                     </td>
-                    <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
-                      <button onClick={() => removeLoad(load.id)} style={{ background: 'transparent', border: 'none', color: '#F44336', cursor: 'pointer' }}>
-                        <Trash2 size={18} />
-                      </button>
+                    <td className="no-print" style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
+                      {!isReadOnly && (
+                        <button onClick={() => removeLoad(load.id)} style={{ background: 'transparent', border: 'none', color: '#F44336', cursor: 'pointer' }}>
+                          <Trash2 size={18} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

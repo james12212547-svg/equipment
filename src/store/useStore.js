@@ -83,11 +83,23 @@ const useStore = create(
       deleteSchedule: (id) => set((state) => ({
         schedules: state.schedules.filter(s => s.id !== id)
       })),
+
+      // --- Projects State ---
+      projects: [],
+      addProject: (project) => set((state) => ({
+        projects: [...state.projects, { ...project, id: Date.now().toString(), createdAt: new Date().toISOString() }]
+      })),
+      updateProject: (id, updatedProject) => set((state) => ({
+        projects: state.projects.map(p => p.id === id ? { ...p, ...updatedProject } : p)
+      })),
+      deleteProject: (id) => set((state) => ({
+        projects: state.projects.filter(p => p.id !== id)
+      })),
     }),
     {
       name: 'equipment-store-persist', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ theme: state.theme, favorites: state.favorites, schedules: state.schedules }), // Only persist these fields
+      partialize: (state) => ({ theme: state.theme, favorites: state.favorites, schedules: state.schedules, projects: state.projects }), // Only persist these fields
       onRehydrateStorage: () => (state) => {
         if (state) {
           document.documentElement.setAttribute('data-theme', state.theme);
