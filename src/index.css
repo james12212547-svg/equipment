@@ -560,6 +560,16 @@ option {
 
 /* Print Stylesheet for PDF Export */
 @media print {
+  :root, :root[data-theme='dark'] {
+    --bg-primary: #ffffff !important;
+    --bg-secondary: #f8fafc !important;
+    --bg-tertiary: #f1f5f9 !important;
+    --text-primary: #000000 !important;
+    --text-secondary: #333333 !important;
+    --text-tertiary: #666666 !important;
+    --border-color: #cccccc !important;
+  }
+
   @page {
     margin: 15mm;
   }
