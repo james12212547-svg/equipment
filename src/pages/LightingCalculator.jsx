@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ArrowLeft, Lightbulb, Grid3x3, AlertTriangle, Settings } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Grid3x3, AlertTriangle, Settings, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ROOM_TYPES = [
@@ -78,11 +78,35 @@ const LightingCalculator = () => {
           <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>โปรแกรมคำนวณแสงสว่าง</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Lighting & Lux Calculator</p>
         </div>
+        <button 
+          className="no-print"
+          onClick={() => window.print()} 
+          style={{ 
+            marginLeft: 'auto', 
+            background: 'var(--accent-secondary)', 
+            color: 'white', 
+            border: 'none', 
+            padding: '0.75rem 1.5rem', 
+            borderRadius: '8px', 
+            fontWeight: 'bold', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <Printer size={20} /> พิมพ์เป็น PDF
+        </button>
+      </div>
+
+      <div className="print-only" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', display: 'none' }}>
+        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>เอกสารแสดงรายการคำนวณแสงสว่าง (Lighting Calculation)</h2>
+        <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         {/* Input Form */}
-        <div className="equipment-card" style={{ padding: '2rem' }}>
+        <div className="equipment-card no-print" style={{ padding: '2rem' }}>
           <h3 style={{ margin: '0 0 1.5rem', color: 'var(--text-primary)' }}>ข้อมูลพื้นที่และการใช้งาน</h3>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -149,7 +173,7 @@ const LightingCalculator = () => {
           </div>
 
           {/* Advanced Settings Toggle */}
-          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+          <div className="no-print" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
             <button 
               onClick={() => setShowAdvanced(!showAdvanced)}
               style={{ background: 'transparent', border: 'none', color: 'var(--accent-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: 0 }}

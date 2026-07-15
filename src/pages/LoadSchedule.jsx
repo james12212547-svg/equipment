@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Activity, Save, RotateCcw, Download, Zap, Settings, Info } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Activity, Save, RotateCcw, Download, Zap, Settings, Info, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BREAKER_SIZES, APPLIANCE_PRESETS } from '../constants/engineeringConstants';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -169,6 +169,30 @@ const LoadSchedule = () => {
           <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>จัดตารางโหลด (Load Schedule)</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Phase Balancing & MDB Load Summary</p>
         </div>
+        <button 
+          className="no-print"
+          onClick={() => window.print()} 
+          style={{ 
+            marginLeft: 'auto', 
+            background: 'var(--accent-secondary)', 
+            color: 'white', 
+            border: 'none', 
+            padding: '0.75rem 1.5rem', 
+            borderRadius: '8px', 
+            fontWeight: 'bold', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <Printer size={20} /> พิมพ์เป็น PDF
+        </button>
+      </div>
+
+      <div className="print-only" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', display: 'none' }}>
+        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>เอกสารแสดงรายการคำนวณโหลด (Load Schedule)</h2>
+        <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
@@ -178,12 +202,12 @@ const LoadSchedule = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>สรุปกระแสโหลด (Phase Summary)</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.75rem', borderRadius: '8px' }}>
+              <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.75rem', borderRadius: '8px' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Demand Factor (DF) %:</span>
                 <input type="number" min="10" max="100" value={demandFactor} onChange={(e) => setDemandFactor(Number(e.target.value))} style={{ width: '60px', padding: '0.25rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', textAlign: 'center' }} />
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div className="no-print" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <button onClick={autoBalance} style={{ background: 'var(--accent-secondary)', color: 'white', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Activity size={16} /> Auto-Balance
               </button>
@@ -242,7 +266,7 @@ const LoadSchedule = () => {
         </div>
 
         {/* Add Load Form */}
-        <form onSubmit={addLoad} className="equipment-card" style={{ padding: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
+        <form onSubmit={addLoad} className="equipment-card no-print" style={{ padding: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
           <div style={{ flex: '1 1 200px' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>เครื่องใช้ไฟฟ้า (Template)</label>
             <select onChange={handlePresetChange} defaultValue="" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
@@ -278,7 +302,7 @@ const LoadSchedule = () => {
         <div className="equipment-card" style={{ padding: '1.5rem', overflowX: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>รายการโหลดทั้งหมด</h3>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div className="no-print" style={{ display: 'flex', gap: '0.5rem' }}>
               <button onClick={exportLoadScheduleToCSV} style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
                 <Download size={16} /> Export CSV
               </button>

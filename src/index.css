@@ -557,3 +557,58 @@ option {
   color: var(--text-primary) !important;
 }
 @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+
+/* Print Stylesheet for PDF Export */
+@media print {
+  @page {
+    margin: 15mm;
+  }
+  
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .no-print, nav, .sidebar, button:not(.print-visible) {
+    display: none !important;
+  }
+  
+  .equipment-card {
+    background: #ffffff !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    color: #000 !important;
+  }
+  
+  .text-gradient-ac, .text-gradient-solar {
+    background: none !important;
+    -webkit-text-fill-color: #000 !important;
+    color: #000 !important;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+  
+  table {
+    border-collapse: collapse !important;
+  }
+  
+  th, td {
+    border: 1px solid #999 !important;
+    color: #000 !important;
+  }
+  
+  /* Show print-only elements */
+  .print-only {
+    display: block !important;
+  }
+}
+.print-only {
+  display: none;
+}
