@@ -12,7 +12,7 @@ import SolarCalculator from './pages/SolarCalculator';
 import Quiz from './pages/Quiz';
 import InteractiveSchematic from './pages/InteractiveSchematic';
 import CompareTool from './pages/CompareTool';
-import BtuCalculator from './pages/BtuCalculator';
+// Old BtuCalculator replaced by AirConCalculator
 import CableSizing from './pages/CableSizing';
 import TroubleshootingSim from './pages/TroubleshootingSim';
 import Glossary from './pages/Glossary';
@@ -25,6 +25,7 @@ import LoadSchedule from './pages/LoadSchedule';
 import LightingCalculator from './pages/LightingCalculator';
 import ConduitSizing from './pages/ConduitSizing';
 import MotorCalculator from './pages/MotorCalculator';
+import AirConCalculator from './pages/AirConCalculator';
 import LabLogger from './pages/LabLogger';
 import Favorites from './pages/Favorites';
 import Settings from './pages/Settings';
@@ -84,7 +85,7 @@ function App() {
             <Route path="/learning/quiz" element={<Quiz />} />
             <Route path="/learning/schematic" element={<InteractiveSchematic />} />
             <Route path="/learning/compare" element={<CompareTool />} />
-            <Route path="/learning/btu" element={<BtuCalculator />} />
+            <Route path="/learning/btu" element={<AirConCalculator />} />
             <Route path="/learning/cable" element={<CableSizing />} />
             <Route path="/learning/simulator" element={<TroubleshootingSim />} />
             <Route path="/learning/glossary" element={<Glossary />} />
