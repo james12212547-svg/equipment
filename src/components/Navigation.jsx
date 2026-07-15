@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell, FolderGit2 } from 'lucide-react';
+import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell } from 'lucide-react';
 import useStore from '../store/useStore';
 
 const Navigation = () => {
@@ -13,13 +13,6 @@ const Navigation = () => {
       >
         <Home size={24} />
         <span>หน้าแรก</span>
-      </NavLink>
-      <NavLink 
-        to="/projects" 
-        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-      >
-        <FolderGit2 size={24} />
-        <span>โปรเจกต์</span>
       </NavLink>
       <NavLink 
         to="/calculators" 
