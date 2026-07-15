@@ -1,4 +1,4 @@
-export const BREAKER_SIZES = [16, 20, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 320, 400, 500, 630];
+export const BREAKER_SIZES = [10, 16, 20, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 320, 400, 500, 630];
 
 export const APPLIANCE_PRESETS = [
   { name: 'เครื่องปรับอากาศ 9,000 BTU', current: 3.5, type: 'AC' },

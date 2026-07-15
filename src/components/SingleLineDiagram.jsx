@@ -49,8 +49,8 @@ const SingleLineDiagram = ({ loads, mainBreaker, mainFeeder, systemPhase = 3 }) 
           {/* --- Branch Circuits --- */}
           {loads.map((load, index) => {
             const cx = startX + 60 + (index * nodeSpacing);
-            const branchBreakerSize = BREAKER_SIZES.find(b => b >= load.current * 1.25) || Math.ceil(load.current * 1.25);
-            const cableInfo = calculateCableSizing(load.current);
+            const cableInfo = calculateCableSizing(load.current, load.name);
+            const branchBreakerSize = cableInfo ? cableInfo.breakerSize : '?';
             const cableSize = cableInfo ? cableInfo.cableSize : '?';
             
             return (
@@ -96,7 +96,7 @@ const SingleLineDiagram = ({ loads, mainBreaker, mainFeeder, systemPhase = 3 }) 
         </svg>
       </div>
       <div className="no-print" style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-        * การจัดขนาดเบรกเกอร์ลูกย่อยใน SLD นี้คำนวณจาก (Load x 1.25) และปัดขึ้นตามขนาดมาตรฐาน
+        * การจับคู่ขนาดเบรกเกอร์ลูกย่อยและสายไฟใน SLD นี้ คำนวณตามมาตรฐาน (CB 10A-1.5, 16A-2.5, 20A-4 ฯลฯ)
       </div>
     </div>
   );
