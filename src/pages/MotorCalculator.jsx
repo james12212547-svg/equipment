@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ArrowLeft, Settings, Info, CheckCircle, Zap, ShieldAlert, Cpu } from 'lucide-react';
+import { ArrowLeft, Settings, Info, CheckCircle, Zap, ShieldAlert, Cpu, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BREAKER_SIZES } from '../constants/engineeringConstants';
 
@@ -117,12 +117,36 @@ const MotorCalculator = () => {
           <h1 className="text-gradient-ac" style={{ marginBottom: 0, fontSize: '2rem' }}>คำนวณอุปกรณ์มอเตอร์</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Motor Starter Calculator (DOL & Star-Delta)</p>
         </div>
+        <button 
+          className="no-print"
+          onClick={() => window.print()} 
+          style={{ 
+            marginLeft: 'auto', 
+            background: 'var(--accent-secondary)', 
+            color: 'white', 
+            border: 'none', 
+            padding: '0.75rem 1.5rem', 
+            borderRadius: '8px', 
+            fontWeight: 'bold', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <Printer size={20} /> พิมพ์เป็น PDF
+        </button>
+      </div>
+
+      <div className="print-only" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', display: 'none' }}>
+        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>เอกสารแสดงรายการคำนวณ (Motor Starter Calculator)</h2>
+        <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         
         {/* INPUT SECTION */}
-        <div className="equipment-card" style={{ padding: '2rem' }}>
+        <div className="equipment-card no-print" style={{ padding: '2rem' }}>
           <h3 style={{ margin: '0 0 1.5rem', color: 'var(--text-primary)' }}>ข้อมูลมอเตอร์ (Motor Specs)</h3>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>

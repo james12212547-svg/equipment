@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ArrowLeft, Plus, Trash2, ShieldAlert, CheckCircle, GripHorizontal } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, ShieldAlert, CheckCircle, GripHorizontal, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CONDUIT_SPECS, WIRE_AREAS } from '../constants/engineeringConstants';
 
@@ -82,11 +82,35 @@ const ConduitSizing = () => {
           <h1 className="text-gradient-ac" style={{ marginBottom: 0, fontSize: '2rem' }}>คำนวณขนาดท่อร้อยสายไฟ</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Conduit Fill Calculator (Max 40%)</p>
         </div>
+        <button 
+          className="no-print"
+          onClick={() => window.print()} 
+          style={{ 
+            marginLeft: 'auto', 
+            background: 'var(--accent-secondary)', 
+            color: 'white', 
+            border: 'none', 
+            padding: '0.75rem 1.5rem', 
+            borderRadius: '8px', 
+            fontWeight: 'bold', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <Printer size={20} /> พิมพ์เป็น PDF
+        </button>
+      </div>
+
+      <div className="print-only" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', display: 'none' }}>
+        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>เอกสารแสดงรายการคำนวณ (Conduit Sizing)</h2>
+        <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         {/* Input Form */}
-        <div className="equipment-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column' }}>
+        <div className="equipment-card no-print" style={{ padding: '2rem', display: 'flex', flexDirection: 'column' }}>
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>สายไฟที่ต้องการร้อย (Wires)</h3>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Zap } from 'lucide-react';
+import { ArrowLeft, Zap, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { calculateCableSizing } from '../utils/engineering/cableSizing';
 import Tooltip from '../components/Tooltip';
@@ -27,10 +27,34 @@ const CableSizing = () => {
           <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>โปรแกรมคำนวณขนาดสายไฟ</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Simplified Cable Sizing (EIT Guidelines)</p>
         </div>
+        <button 
+          className="no-print"
+          onClick={() => window.print()} 
+          style={{ 
+            marginLeft: 'auto', 
+            background: 'var(--accent-secondary)', 
+            color: 'white', 
+            border: 'none', 
+            padding: '0.75rem 1.5rem', 
+            borderRadius: '8px', 
+            fontWeight: 'bold', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <Printer size={20} /> พิมพ์เป็น PDF
+        </button>
+      </div>
+
+      <div className="print-only" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', display: 'none' }}>
+        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>เอกสารแสดงรายการคำนวณ (Cable Sizing)</h2>
+        <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
       </div>
 
       <div className="grid-2">
-        <div className="equipment-card" style={{ padding: '2rem' }}>
+        <div className="equipment-card no-print" style={{ padding: '2rem' }}>
           <form onSubmit={calculateCable} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             
             <div>
