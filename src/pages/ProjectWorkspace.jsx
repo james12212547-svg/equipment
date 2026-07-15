@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, Routes, Route, useLocation } from 'react-router-dom';
-import { ArrowLeft, LayoutDashboard, ListChecks, Thermometer, Printer, FolderGit2 } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, ListChecks, Thermometer, Printer, FolderGit2, Sun } from 'lucide-react';
 import useStore from '../store/useStore';
 import LoadSchedule from './LoadSchedule';
 import AirConCalculator from './AirConCalculator';
+import SolarCalculator from './SolarCalculator';
 
 const ProjectWorkspace = () => {
   const { id } = useParams();
@@ -76,6 +77,16 @@ const ProjectWorkspace = () => {
         >
           <Thermometer size={20} /> คำนวณแอร์ (BTU)
         </Link>
+        <Link 
+          to={`/project/${id}/solar`} 
+          style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', whiteSpace: 'nowrap',
+            background: currentTab === 'solar' ? 'var(--accent-solar)' : 'var(--bg-secondary)', 
+            color: currentTab === 'solar' ? 'white' : 'var(--text-secondary)',
+            border: currentTab === 'solar' ? 'none' : '1px solid var(--border-color)'
+          }}
+        >
+          <Sun size={20} /> คำนวณโซลาร์เซลล์
+        </Link>
       </div>
 
       {/* Content Area */}
@@ -84,6 +95,7 @@ const ProjectWorkspace = () => {
           <Route path="/" element={<ProjectOverview project={project} />} />
           <Route path="/load-schedule" element={<LoadSchedule projectId={id} />} />
           <Route path="/aircon" element={<AirConCalculator projectId={id} />} />
+          <Route path="/solar" element={<SolarCalculator projectId={id} />} />
         </Routes>
       </div>
 
@@ -114,6 +126,11 @@ const ProjectOverview = ({ project }) => {
       <div className="print-page-break">
         <h2 className="print-only" style={{ borderBottom: '2px solid #ccc', paddingBottom: '0.5rem', marginTop: '2rem' }}>2. รายการคำนวณเครื่องปรับอากาศ (Air Conditioning)</h2>
         <AirConCalculator projectId={project.id} isReadOnly={true} />
+      </div>
+
+      <div className="print-page-break">
+        <h2 className="print-only" style={{ borderBottom: '2px solid #ccc', paddingBottom: '0.5rem', marginTop: '2rem' }}>3. รายการคำนวณโซลาร์เซลล์ (Solar System Sizing)</h2>
+        <SolarCalculator projectId={project.id} isReadOnly={true} />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import { ArrowLeft, Calculator, TrendingUp, Printer } from 'lucide-react';
 import { AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useNavigate } from 'react-router-dom';
@@ -220,13 +221,15 @@ const InvestmentChart = ({ result }) => {
   );
 };
 
-const SolarCalculator = () => {
+const SolarCalculator = ({ projectId, isReadOnly = false }) => {
   const navigate = useNavigate();
-  const [calcMode, setCalcMode] = useState('bill');
-  const [inputValue, setInputValue] = useState('');
-  const [inflationRate, setInflationRate] = useState(3);
-  const [province, setProvince] = useState('กรุงเทพมหานคร');
-  const [result, setResult] = useState(null);
+  const keyPrefix = projectId ? `solar_${projectId}_` : 'solar_';
+
+  const [calcMode, setCalcMode] = useLocalStorage(keyPrefix + 'calcMode', 'bill');
+  const [inputValue, setInputValue] = useLocalStorage(keyPrefix + 'inputValue', '');
+  const [inflationRate, setInflationRate] = useLocalStorage(keyPrefix + 'inflationRate', 3);
+  const [province, setProvince] = useLocalStorage(keyPrefix + 'province', 'กรุงเทพมหานคร');
+  const [result, setResult] = useLocalStorage(keyPrefix + 'result', null);
 
   const selectedPSH = PROVINCE_PSH.find(p => p.label === province)?.psh ?? 4.5;
 
@@ -241,46 +244,53 @@ const SolarCalculator = () => {
   };
 
   return (
-    <div className="animate-fade-in" style={{ paddingBottom: '2rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-        <button 
-          onClick={() => navigate(-1)} 
-          style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}
-        >
-          <ArrowLeft size={24} />
-        </button>
-        <div>
-          <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>ประเมินจุดคุ้มทุนโซลาร์เซลล์</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Solar ROI & System Sizing Calculator</p>
+    <div className={`animate-fade-in ${isReadOnly ? 'print-only' : ''}`} style={{ paddingBottom: isReadOnly ? '0' : '2rem' }}>
+      
+      {!isReadOnly && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+          <button 
+            onClick={() => navigate(-1)} 
+            className="no-print"
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}
+          >
+            <ArrowLeft size={24} />
+          </button>
+          <div style={{ flex: 1 }}>
+            <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>ประเมินจุดคุ้มทุนโซลาร์เซลล์</h1>
+            <p style={{ color: 'var(--text-secondary)' }}>Solar ROI & System Sizing Calculator</p>
+          </div>
+          <button 
+            className="no-print"
+            onClick={() => window.print()} 
+            style={{ 
+              background: 'var(--accent-secondary)', 
+              color: 'white', 
+              border: 'none', 
+              padding: '0.75rem 1.5rem', 
+              borderRadius: '8px', 
+              fontWeight: 'bold', 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <Printer size={20} /> พิมพ์เป็น PDF
+          </button>
         </div>
-        <button 
-          className="no-print"
-          onClick={() => window.print()} 
-          style={{ 
-            marginLeft: 'auto', 
-            background: 'var(--accent-secondary)', 
-            color: 'white', 
-            border: 'none', 
-            padding: '0.75rem 1.5rem', 
-            borderRadius: '8px', 
-            fontWeight: 'bold', 
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-        >
-          <Printer size={20} /> พิมพ์เป็น PDF
-        </button>
-      </div>
+      )}
 
-      <div className="print-only" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', display: 'none' }}>
-        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>เอกสารแสดงรายการคำนวณ (Solar ROI)</h2>
-        <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
-      </div>
+      {!isReadOnly && (
+        <div className="print-only" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', display: 'none' }}>
+          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>เอกสารแสดงรายการคำนวณ (Solar ROI)</h2>
+          <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
+        </div>
+      )}
 
-      <div className="grid-2" style={{ alignItems: 'flex-start' }}>
-        <div className="equipment-card no-print" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div className={isReadOnly ? "" : "grid-2"} style={{ alignItems: 'flex-start', display: isReadOnly ? 'block' : 'grid' }}>
+        
+        {!isReadOnly && (
+          <div className="equipment-card no-print" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
             <button 
@@ -378,6 +388,7 @@ const SolarCalculator = () => {
             </button>
           </form>
         </div>
+        )}
 
         {result && (
           <div className="equipment-card animate-fade-in" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255, 165, 0, 0.05)', border: '1px solid rgba(255, 165, 0, 0.2)' }}>
