@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { BREAKER_SIZES, APPLIANCE_PRESETS } from '../constants/engineeringConstants';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { calculateCableSizing } from '../utils/engineering/cableSizing';
+import SingleLineDiagram from '../components/SingleLineDiagram';
 
 const LoadSchedule = () => {
   const navigate = useNavigate();
@@ -353,6 +354,15 @@ const LoadSchedule = () => {
               </tbody>
             </table>
           )}
+        </div>
+        
+        <div className="print-page-break">
+          <SingleLineDiagram 
+            loads={loads} 
+            mainBreaker={mainBreaker} 
+            mainFeeder={mainFeeder} 
+            systemPhase={3} 
+          />
         </div>
 
       </div>

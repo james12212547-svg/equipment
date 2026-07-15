@@ -618,6 +618,11 @@ option {
   .print-only {
     display: block !important;
   }
+  
+  .print-page-break {
+    page-break-before: always;
+    break-before: page;
+  }
 }
 .print-only {
   display: none;
