@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Calendar, Plus, CheckCircle, Clock, Trash2, Edit3, Settings, MapPin, Camera, Image, User } from 'lucide-react';
 import useStore from '../store/useStore';
 import toast from 'react-hot-toast';
