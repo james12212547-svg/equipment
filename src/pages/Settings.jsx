@@ -33,13 +33,7 @@ const Settings = () => {
 
   const [notifPermission, setNotifPermission] = useState(Notification?.permission || 'default');
 
-  const saveCompanyInfo = () => {
-    localStorage.setItem('companyName', company.name);
-    localStorage.setItem('companyAddress', company.address);
-    localStorage.setItem('companyPhone', company.phone);
-    localStorage.setItem('companyTax', company.tax);
-    toast.success('บันทึกข้อมูลบริษัทแล้ว!');
-  };
+
 
   const handleRequestNotif = async () => {
     const result = await requestNotificationPermission();
@@ -186,20 +180,26 @@ const Settings = () => {
                 ].map(([key, label]) => (
                   <div key={key}>
                     <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{label}</label>
-                    <input value={company[key]} onChange={e => setCompany(c => ({ ...c, [key]: e.target.value }))}
-                      style={{ width: '100%', padding: '0.75rem', borderRadius: '8px' }} />
+                    <input 
+                      value={company[key]} 
+                      readOnly
+                      style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', opacity: 0.7, cursor: 'not-allowed' }} 
+                    />
                   </div>
                 ))}
                 <div style={{ gridColumn: 'span 2' }}>
                   <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>ที่อยู่</label>
-                  <input value={company.address} onChange={e => setCompany(c => ({ ...c, address: e.target.value }))}
-                    placeholder="เลขที่ ถนน ตำบล อำเภอ จังหวัด" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px' }} />
+                  <input 
+                    value={company.address} 
+                    readOnly
+                    placeholder="เลขที่ ถนน ตำบล อำเภอ จังหวัด" 
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', opacity: 0.7, cursor: 'not-allowed' }} 
+                  />
                 </div>
               </div>
-              <button onClick={saveCompanyInfo}
-                style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-                💾 บันทึกข้อมูลบริษัท
-              </button>
+              <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', fontStyle: 'italic' }}>
+                (ข้อมูลส่วนนี้ถูกตั้งค่าให้แก้ไขจาก Source Code เท่านั้น)
+              </p>
             </div>
 
             {/* Notification Settings */}
