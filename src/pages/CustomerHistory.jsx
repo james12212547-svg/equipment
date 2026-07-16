@@ -24,44 +24,48 @@ const CustomerHistory = () => {
     // Process Schedules (Appointments)
     if (Array.isArray(schedules)) {
       schedules.forEach(schedule => {
-        const name = schedule?.customerName?.trim();
-      if (!name) return;
+        let name = schedule?.customerName;
+        if (name == null) return;
+        name = String(name).trim();
+        if (!name) return;
       
-      const key = name.toLowerCase();
-      if (!dataMap.has(key)) {
-        dataMap.set(key, { name: name, schedules: [], workLogs: [], totalSpent: 0 });
-      }
-      const customer = dataMap.get(key);
-      customer.schedules.push(schedule);
-      if (schedule.cost) {
-        customer.totalSpent += Number(schedule.cost);
-      }
+        const key = name.toLowerCase();
+        if (!dataMap.has(key)) {
+          dataMap.set(key, { name: name, schedules: [], workLogs: [], totalSpent: 0 });
+        }
+        const customer = dataMap.get(key);
+        customer.schedules.push(schedule);
+        if (schedule.cost) {
+          customer.totalSpent += Number(schedule.cost);
+        }
       });
     }
 
     // Process Work Logs (Past Services)
     if (Array.isArray(workLogs)) {
       workLogs.forEach(log => {
-        const name = log?.customer?.trim();
-      if (!name) return;
+        let name = log?.customer;
+        if (name == null) return;
+        name = String(name).trim();
+        if (!name) return;
 
-      const key = name.toLowerCase();
-      if (!dataMap.has(key)) {
-        dataMap.set(key, { name: name, schedules: [], workLogs: [], totalSpent: 0 });
-      }
-      const customer = dataMap.get(key);
-      customer.workLogs.push(log);
-      if (log.cost) {
-        customer.totalSpent += Number(log.cost);
-      }
+        const key = name.toLowerCase();
+        if (!dataMap.has(key)) {
+          dataMap.set(key, { name: name, schedules: [], workLogs: [], totalSpent: 0 });
+        }
+        const customer = dataMap.get(key);
+        customer.workLogs.push(log);
+        if (log.cost) {
+          customer.totalSpent += Number(log.cost);
+        }
       });
     }
 
-    return Array.from(dataMap.values()).sort((a, b) => a.name.localeCompare(b.name, 'th'));
+    return Array.from(dataMap.values()).sort((a, b) => String(a.name).localeCompare(String(b.name), 'th'));
   }, [schedules, workLogs]);
 
   const filteredCustomers = customerData.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+    String(c.name).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const renderCustomerList = () => (
