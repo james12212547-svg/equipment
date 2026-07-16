@@ -574,20 +574,34 @@ option {
     margin: 15mm;
   }
   
-  body {
+  html, body, #root {
     background-color: #ffffff !important;
     color: #000000 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
   }
   
   .no-print, nav, .sidebar, button:not(.print-visible) {
     display: none !important;
   }
   
+  .app-container, .main-content {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+  
   .equipment-card {
     background: #ffffff !important;
     border: 1px solid #ccc !important;
     box-shadow: none !important;
-    break-inside: avoid;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
     margin-bottom: 1rem;
     color: #000 !important;
   }

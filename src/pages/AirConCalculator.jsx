@@ -85,7 +85,7 @@ const AirConCalculator = ({ projectId, isReadOnly = false }) => {
       {/* Header (hidden in read-only / print mode) */}
       {!isReadOnly && (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+          <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
             <button onClick={() => navigate(-1)} className="no-print" style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
               <ArrowLeft size={24} />
             </button>

@@ -247,7 +247,7 @@ const SolarCalculator = ({ projectId, isReadOnly = false }) => {
     <div className={`animate-fade-in ${isReadOnly ? 'print-only' : ''}`} style={{ paddingBottom: isReadOnly ? '0' : '2rem' }}>
       
       {!isReadOnly && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+        <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
           <button 
             onClick={() => navigate(-1)} 
             className="no-print"
