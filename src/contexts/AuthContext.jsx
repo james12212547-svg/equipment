@@ -18,8 +18,12 @@ export const AuthProvider = ({ children }) => {
       if (user) {
         setCurrentUser(user);
         try {
-          // Fetch user role from Firestore (users collection)
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          // Fetch user role from Firestore (try 'users' first, then 'user')
+          let userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (!userDoc.exists()) {
+            userDoc = await getDoc(doc(db, 'user', user.uid));
+          }
+          
           if (userDoc.exists()) {
             setUserRole(userDoc.data().role);
           } else {
