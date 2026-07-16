@@ -623,6 +623,10 @@ option {
     page-break-before: always;
     break-before: page;
   }
+  
+  .print-block {
+    display: block !important;
+  }
 }
 .print-only {
   display: none;

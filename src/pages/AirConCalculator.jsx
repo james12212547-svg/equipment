@@ -104,7 +104,7 @@ const AirConCalculator = ({ projectId, isReadOnly = false }) => {
         </>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+      <div className="print-block" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
 
         {/* === INPUT SECTION === */}
         {!isReadOnly && (

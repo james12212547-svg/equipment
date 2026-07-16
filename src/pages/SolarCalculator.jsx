@@ -287,7 +287,7 @@ const SolarCalculator = ({ projectId, isReadOnly = false }) => {
         </div>
       )}
 
-      <div className={isReadOnly ? "" : "grid-2"} style={{ alignItems: 'flex-start', display: isReadOnly ? 'block' : 'grid' }}>
+      <div className={`print-block ${isReadOnly ? "" : "grid-2"}`} style={{ alignItems: 'flex-start', display: isReadOnly ? 'block' : 'grid' }}>
         
         {!isReadOnly && (
           <div className="equipment-card no-print" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
