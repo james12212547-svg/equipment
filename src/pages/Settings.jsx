@@ -198,7 +198,7 @@ const Settings = () => {
                 </div>
               </div>
               <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', fontStyle: 'italic' }}>
-                (ข้อมูลส่วนนี้ถูกตั้งค่าให้แก้ไขจาก Source Code เท่านั้น)
+                
               </p>
             </div>
 
