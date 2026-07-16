@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, FileText, Printer, Save, ChevronDown, ChevronUp, Edit3 } from 'lucide-react';
+import { Plus, Trash2, FileText, Printer, Save, ChevronDown, ChevronUp, Edit3, CheckCircle } from 'lucide-react';
 import { saveQuotationDB, getAllQuotationsDB, deleteQuotationDB } from '../utils/db';
 import toast from 'react-hot-toast';
 
@@ -72,6 +72,15 @@ const Quotation = () => {
     setView('form');
   };
 
+  const handleMarkAsPaid = async (q) => {
+    if (!window.confirm('ยืนยันว่าลูกค้ารายการนี้ชำระเงินเรียบร้อยแล้ว?')) return;
+    const toSave = { ...q, status: 'paid', updatedAt: new Date().toISOString() };
+    await saveQuotationDB(toSave);
+    const updated = await getAllQuotationsDB();
+    setQuotations(updated);
+    toast.success('อัปเดตสถานะเป็นชำระแล้ว');
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('ต้องการลบใบเสนอราคานี้หรือไม่?')) return;
     await deleteQuotationDB(id);
@@ -125,8 +134,12 @@ const Quotation = () => {
                   <strong style={{ color: 'var(--accent-solar)', fontSize: '1.2rem' }}>฿{Number(q.total || 0).toLocaleString()}</strong>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {q.status !== 'paid' && (
+                    <button onClick={() => handleMarkAsPaid(q)} title="ทำเครื่องหมายว่าชำระแล้ว"
+                      style={{ background: 'rgba(16,185,129,0.1)', border: 'none', color: '#10b981', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}><CheckCircle size={18} /></button>
+                  )}
                   <button onClick={() => { setForm(q); setView('preview'); }} title="พิมพ์/ดูตัวอย่าง"
-                    style={{ background: 'rgba(16,185,129,0.1)', border: 'none', color: '#10b981', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}><Printer size={18} /></button>
+                    style={{ background: 'rgba(99,102,241,0.1)', border: 'none', color: '#6366f1', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}><Printer size={18} /></button>
                   <button onClick={() => handleEdit(q)} title="แก้ไข"
                     style={{ background: 'rgba(59,130,246,0.1)', border: 'none', color: '#3b82f6', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}><Edit3 size={18} /></button>
                   <button onClick={() => handleDelete(q.id)} title="ลบ"

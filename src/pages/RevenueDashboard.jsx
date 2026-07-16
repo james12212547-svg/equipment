@@ -47,8 +47,8 @@ const RevenueDashboard = () => {
       months[d.getMonth()].schedule += Number(s.cost);
     });
 
-    // Paid quotations
-    quotations.filter(q => q.status === 'paid').forEach(q => {
+    // Sent or Paid quotations
+    quotations.filter(q => q.status === 'paid' || q.status === 'sent').forEach(q => {
       if (!q.total || !q.createdAt) return;
       const d = new Date(q.createdAt);
       if (d.getFullYear() !== selectedYear) return;
@@ -80,7 +80,7 @@ const RevenueDashboard = () => {
     const all = [
       ...workLogs.filter(l => l.cost).map(l => ({ date: l.date, label: l.issue || 'งานซ่อม', amount: Number(l.cost), source: 'จดงาน', customer: l.customer })),
       ...schedulesList.filter(s => s.cost).map(s => ({ date: s.date, label: s.equipmentType, amount: Number(s.cost), source: 'คิวงาน', customer: s.customerName })),
-      ...quotations.filter(q => q.status === 'paid').map(q => ({ date: q.createdAt?.split('T')[0], label: q.number, amount: Number(q.total), source: 'ใบเสนอราคา', customer: q.customerName })),
+      ...quotations.filter(q => q.status === 'paid' || q.status === 'sent').map(q => ({ date: q.createdAt?.split('T')[0], label: q.number, amount: Number(q.total), source: 'ใบเสนอราคา', customer: q.customerName })),
     ];
     return all.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 15);
   }, [workLogs, schedules, quotations]);
