@@ -405,8 +405,14 @@ const ScheduleCard = ({ schedule, onToggleStatus, onEdit, onDelete }) => {
   const isCompleted = schedule.status === 'completed';
   
   // Format date to Thai format
-  const dateObj = new Date(schedule.date);
-  const thaiDate = dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+  let dateObj = new Date(schedule.date);
+  if (isNaN(dateObj)) {
+    const parts = schedule.date.split(/[\/\-]/);
+    if (parts.length === 3) {
+      dateObj = new Date(`${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`);
+    }
+  }
+  const thaiDate = isNaN(dateObj) ? schedule.date : dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
   
   const getAccentColor = () => {
     if (schedule.equipmentType.includes('Solar')) return 'var(--accent-solar)';

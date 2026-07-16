@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Bell, Plus, Trash2, Edit3, CheckCircle, Search, Clock } from 'lucide-react';
+import { Bell, Plus, Trash2, Edit3, CheckCircle, Search, Clock, Calendar as CalendarIcon, User } from 'lucide-react';
 import toast from 'react-hot-toast';
+import useStore from '../store/useStore';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const REMINDERS_KEY = 'maintenanceReminders';
 
@@ -47,6 +50,18 @@ const MaintenanceReminders = () => {
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // all | due | upcoming | ok
+
+  const navigate = useNavigate();
+  const { schedules } = useStore();
+  const { currentUser, userRole } = useAuth();
+
+  const assignedTasks = useMemo(() => {
+    if (!schedules || !currentUser) return [];
+    return schedules.filter(s => 
+      s.status === 'pending' && 
+      (s.assignedTo === currentUser.email || s.assignedTo === currentUser.uid)
+    );
+  }, [schedules, currentUser]);
 
   const save = (data) => {
     setReminders(data);
@@ -129,6 +144,53 @@ const MaintenanceReminders = () => {
           <Plus size={20} /> เพิ่มรีไมนเดอร์
         </button>
       </div>
+
+      {/* Assigned Tasks Notifications */}
+      {assignedTasks.length > 0 && (
+        <div style={{ marginBottom: '2.5rem' }}>
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--accent-primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Bell size={22} /> งานที่ได้รับมอบหมายใหม่ ({assignedTasks.length})
+          </h2>
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {assignedTasks.map(task => {
+              // Parse date correctly
+              let dateObj = new Date(task.date);
+              if (isNaN(dateObj)) {
+                const parts = task.date.split(/[\/\-]/);
+                if (parts.length === 3) {
+                  dateObj = new Date(`${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`);
+                }
+              }
+              const thaiDate = isNaN(dateObj) ? task.date : dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+              return (
+                <div key={task.id} className="equipment-card" style={{ padding: '1.5rem', border: '1px solid var(--accent-primary)', background: 'rgba(59,130,246,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                      <strong style={{ color: 'var(--text-primary)', fontSize: '1.2rem' }}>{task.customerName}</strong>
+                      <span style={{ padding: '0.2rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 'bold', background: 'var(--accent-primary)', color: '#fff' }}>งานใหม่</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                      <span style={{ color: 'var(--accent-primary)' }}>{task.equipmentType}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <CalendarIcon size={16} /> {thaiDate}
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <Clock size={16} /> {task.timeStart || '08:00'} น.
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <button onClick={() => navigate('/schedule')} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                      ดูตารางงาน
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Alert banner */}
       {(overdueCount > 0 || dueCount > 0) && (
