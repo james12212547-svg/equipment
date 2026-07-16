@@ -227,7 +227,7 @@ const MaintenanceSchedule = () => {
                     <option value="">-- ไม่ระบุ (เห็นทุกคน) --</option>
                     {technicians.map(tech => (
                       <option key={tech.id} value={tech.email || tech.id}>
-                        {tech.email} {tech.role === 'admin' ? '(Admin)' : ''}
+                        {tech.email}
                       </option>
                     ))}
                   </select>

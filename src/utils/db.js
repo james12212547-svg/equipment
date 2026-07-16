@@ -266,8 +266,8 @@ export const deleteProjectDB = async (id) => {
 // --- Users (Technicians) ---
 export const getTechniciansDB = async () => {
   try {
-    const q1 = query(collection(firestoreDb, 'users'), where('role', 'in', ['technician', 'admin']));
-    const q2 = query(collection(firestoreDb, 'user'), where('role', 'in', ['technician', 'admin']));
+    const q1 = query(collection(firestoreDb, 'users'), where('role', '==', 'technician'));
+    const q2 = query(collection(firestoreDb, 'user'), where('role', '==', 'technician'));
     
     const [snap1, snap2] = await Promise.all([
       getDocs(q1).catch(() => ({ docs: [] })),
