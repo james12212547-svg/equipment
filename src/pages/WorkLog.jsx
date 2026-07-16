@@ -1,75 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Camera, Image as ImageIcon, Save, Trash2, Plus, X, ClipboardList, Printer, Search, Database, Download, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getAllImages, saveMultipleImages } from '../utils/db';
+import { getAllImages, saveMultipleImages, getWorkLogsDB, saveWorkLogDB, deleteWorkLogDB } from '../utils/db';
 import { compressImage } from '../utils/imageUtils';
 
-// --- IndexedDB Utility Functions ---
-const DB_NAME = 'EngineeringWorkLogDB';
-const STORE_NAME = 'worklogs';
-
-const initDB = () => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-};
-
-const getLogs = async () => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result.reverse()); // Newest first
-    request.onerror = () => reject(request.error);
-  });
-};
-
-const addLog = async (log) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.add({ ...log, date: new Date().toISOString() });
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-};
-
-const deleteLog = async (id) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.delete(id);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
-};
-
-const restoreLogs = async (logs) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    
-    logs.forEach(log => {
-      // Use put to overwrite or add without throwing error on duplicate IDs
-      store.put(log);
-    });
-    
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-};
+// DB functions imported from utils/db.js
 
 // --- Main Component ---
 const WorkLog = () => {
@@ -95,10 +30,13 @@ const WorkLog = () => {
 
   const fetchLogs = async () => {
     try {
-      const data = await getLogs();
+      const data = await getWorkLogsDB();
+      // sort by date descending
+      data.sort((a, b) => new Date(b.date) - new Date(a.date));
       setLogs(data);
     } catch (error) {
-      console.error('Error fetching logs:', error);
+      toast.error('ไม่สามารถโหลดข้อมูลได้');
+      console.error(error);
     }
   };
 
@@ -140,7 +78,9 @@ const WorkLog = () => {
       return; // Stop submission
     }
 
-    await addLog(formData);
+    const logToSave = { ...formData, id: Date.now().toString(), date: new Date().toISOString() };
+    await saveWorkLogDB(logToSave);
+    
     await fetchLogs();
     toast.success('บันทึกงานสำเร็จ!');
     
@@ -152,9 +92,14 @@ const WorkLog = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('คุณต้องการลบบันทึกนี้ใช่หรือไม่?')) {
-      await deleteLog(id);
-      await fetchLogs();
+    if (window.confirm('คุณต้องการลบรายงานนี้ใช่หรือไม่?')) {
+      try {
+        await deleteWorkLogDB(id);
+        toast.success('ลบรายงานแล้ว');
+        await fetchLogs();
+      } catch (error) {
+        toast.error('ไม่สามารถลบข้อมูลได้');
+      }
     }
   };
 
@@ -191,15 +136,19 @@ const WorkLog = () => {
     reader.onload = async (event) => {
       try {
         const data = JSON.parse(event.target.result);
-        if (!data.logs || !data.images) {
-          throw new Error('Invalid backup format');
+        
+        if (data.logs) {
+          for (const log of data.logs) {
+            await saveWorkLogDB(log);
+          }
         }
-
-        await saveMultipleImages(data.images);
-        await restoreLogs(data.logs);
+        
+        if (data.images) {
+          await saveMultipleImages(data.images);
+        }
         
         await fetchLogs();
-        toast.success(`นำเข้าข้อมูลสำเร็จ! จำนวน ${data.logs.length} รายการ`);
+        toast.success(`นำเข้าข้อมูลสำเร็จ! จำนวน ${data.logs ? data.logs.length : 0} รายการ`);
       } catch (error) {
         console.error('Import failed:', error);
         toast.error('ไฟล์ไม่ถูกต้อง หรือเกิดข้อผิดพลาดในการนำเข้าข้อมูล');

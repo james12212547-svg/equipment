@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Database, Sun, Moon, Info, HardDrive, MessageSquarePlus, Building2, Bell } from 'lucide-react';
+import { Settings as SettingsIcon, Database, Sun, Moon, Info, HardDrive, MessageSquarePlus, Building2, Bell, Trash2, AlertTriangle, CloudUpload } from 'lucide-react';
 import useStore from '../store/useStore';
 import toast from 'react-hot-toast';
+import { migrateLocalDataToCloud } from '../utils/migrateData';
 import { requestNotificationPermission } from '../utils/notifications';
 import AIChatbot from '../components/AIChatbot';
 import { Bot } from 'lucide-react';
@@ -292,6 +293,33 @@ const Settings = () => {
                     กำลังคำนวณพื้นที่... หรือเบราว์เซอร์นี้ไม่รองรับการเช็คพื้นที่
                   </div>
                 )}
+              </div>
+
+              <div className="equipment-card" style={{ padding: '2rem', border: '1px solid var(--border-color)', marginBottom: '2rem' }}>
+                <h2 style={{ color: 'var(--text-primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <CloudUpload size={24} color="#3b82f6" /> ระบบคลาวด์ (Cloud Sync)
+                </h2>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+                  ย้ายข้อมูลทั้งหมดจากเครื่องนี้ (โหมดออฟไลน์) ขึ้นสู่ฐานข้อมูลคลาวด์ (Firebase Firestore) เพื่อให้ช่างทุกคนสามารถเห็นข้อมูลตรงกัน
+                </p>
+                <button 
+                  onClick={() => migrateLocalDataToCloud()}
+                  style={{ 
+                    background: '#3b82f6', 
+                    color: 'white', 
+                    border: 'none', 
+                    padding: '0.75rem 1.5rem', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem', 
+                    fontWeight: 'bold' 
+                  }}
+                >
+                  <CloudUpload size={20} />
+                  ย้ายข้อมูลขึ้น Cloud ทันที
+                </button>
               </div>
 
               <div style={{ background: 'var(--bg-primary)', padding: '1rem', borderRadius: '8px', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>

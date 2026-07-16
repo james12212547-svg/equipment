@@ -1,3 +1,6 @@
+import { db as firestoreDb } from './firebase';
+import { collection, doc, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
+
 export const DB_NAME = 'EquipmentAppDB';
 export const STORE_NAME = 'images';
 export const CUSTOM_EQ_STORE = 'custom_equipment';
@@ -96,82 +99,6 @@ export const saveMultipleImages = async (imagesObj) => {
   });
 };
 
-// --- Custom Equipment ---
-
-export const saveCustomEquipmentDB = async (equipment) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(CUSTOM_EQ_STORE, 'readwrite');
-    const store = tx.objectStore(CUSTOM_EQ_STORE);
-    store.put(equipment);
-    
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-};
-
-export const deleteCustomEquipmentDB = async (id) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(CUSTOM_EQ_STORE, 'readwrite');
-    const store = tx.objectStore(CUSTOM_EQ_STORE);
-    store.delete(id);
-    
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-};
-
-export const getAllCustomEquipmentDB = async () => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(CUSTOM_EQ_STORE, 'readonly');
-    const store = tx.objectStore(CUSTOM_EQ_STORE);
-    const request = store.getAll();
-    
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
-};
-
-// --- Lab Experiments ---
-
-export const saveLabExperimentDB = async (experiment) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(LAB_EXPERIMENTS_STORE, 'readwrite');
-    const store = tx.objectStore(LAB_EXPERIMENTS_STORE);
-    store.put(experiment);
-    
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-};
-
-export const deleteLabExperimentDB = async (id) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(LAB_EXPERIMENTS_STORE, 'readwrite');
-    const store = tx.objectStore(LAB_EXPERIMENTS_STORE);
-    store.delete(id);
-    
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-};
-
-export const getAllLabExperimentsDB = async () => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(LAB_EXPERIMENTS_STORE, 'readonly');
-    const store = tx.objectStore(LAB_EXPERIMENTS_STORE);
-    const request = store.getAll();
-    
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
-};
-
 // --- 3D Models (stored as ArrayBuffer) ---
 
 export const saveModelDB = async (model) => {
@@ -238,95 +165,100 @@ export const updateModelAnnotationsDB = async (id, annotations) => {
   });
 };
 
-// --- WorkLog Database (used by WorkLog.jsx, accessible here for History) ---
-const WORKLOG_DB_NAME = 'EngineeringWorkLogDB';
-const WORKLOG_STORE_NAME = 'worklogs';
+// --- Custom Equipment ---
+export const saveCustomEquipmentDB = async (equipment) => {
+  await setDoc(doc(firestoreDb, 'custom_equipment', equipment.id), equipment);
+};
 
-const initWorkLogDB = () => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(WORKLOG_DB_NAME, 1);
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(WORKLOG_STORE_NAME)) {
-        db.createObjectStore(WORKLOG_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+export const deleteCustomEquipmentDB = async (id) => {
+  await deleteDoc(doc(firestoreDb, 'custom_equipment', id));
+};
+
+export const getAllCustomEquipmentDB = async () => {
+  const querySnapshot = await getDocs(collection(firestoreDb, 'custom_equipment'));
+  return querySnapshot.docs.map(doc => doc.data());
+};
+
+// --- Lab Experiments ---
+export const saveLabExperimentDB = async (experiment) => {
+  await setDoc(doc(firestoreDb, 'lab_experiments', experiment.id), experiment);
+};
+
+export const deleteLabExperimentDB = async (id) => {
+  await deleteDoc(doc(firestoreDb, 'lab_experiments', id));
+};
+
+export const getAllLabExperimentsDB = async () => {
+  const querySnapshot = await getDocs(collection(firestoreDb, 'lab_experiments'));
+  return querySnapshot.docs.map(doc => doc.data());
+};
+
+// --- WorkLogs ---
+export const saveWorkLogDB = async (log) => {
+  await setDoc(doc(firestoreDb, 'worklogs', log.id || Date.now().toString()), log);
 };
 
 export const getWorkLogsDB = async () => {
-  const db = await initWorkLogDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(WORKLOG_STORE_NAME, 'readonly');
-    const store = tx.objectStore(WORKLOG_STORE_NAME);
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
+  const querySnapshot = await getDocs(collection(firestoreDb, 'worklogs'));
+  return querySnapshot.docs.map(doc => doc.data());
+};
+
+export const deleteWorkLogDB = async (id) => {
+  await deleteDoc(doc(firestoreDb, 'worklogs', id));
 };
 
 // --- Quotations ---
-
 export const saveQuotationDB = async (quotation) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(QUOTATIONS_STORE, 'readwrite');
-    tx.objectStore(QUOTATIONS_STORE).put(quotation);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  await setDoc(doc(firestoreDb, 'quotations', quotation.id), quotation);
 };
 
 export const getAllQuotationsDB = async () => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(QUOTATIONS_STORE, 'readonly');
-    const req = tx.objectStore(QUOTATIONS_STORE).getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => reject(req.error);
-  });
+  const querySnapshot = await getDocs(collection(firestoreDb, 'quotations'));
+  return querySnapshot.docs.map(doc => doc.data());
 };
 
 export const deleteQuotationDB = async (id) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(QUOTATIONS_STORE, 'readwrite');
-    tx.objectStore(QUOTATIONS_STORE).delete(id);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  await deleteDoc(doc(firestoreDb, 'quotations', id));
 };
 
 // --- Inventory ---
-
 export const saveInventoryItemDB = async (item) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(INVENTORY_STORE, 'readwrite');
-    tx.objectStore(INVENTORY_STORE).put(item);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  await setDoc(doc(firestoreDb, 'inventory', item.id), item);
 };
 
 export const getAllInventoryDB = async () => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(INVENTORY_STORE, 'readonly');
-    const req = tx.objectStore(INVENTORY_STORE).getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => reject(req.error);
-  });
+  const querySnapshot = await getDocs(collection(firestoreDb, 'inventory'));
+  return querySnapshot.docs.map(doc => doc.data());
 };
 
 export const deleteInventoryItemDB = async (id) => {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(INVENTORY_STORE, 'readwrite');
-    tx.objectStore(INVENTORY_STORE).delete(id);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  await deleteDoc(doc(firestoreDb, 'inventory', id));
+};
+
+// --- Schedules ---
+export const saveScheduleDB = async (schedule) => {
+  await setDoc(doc(firestoreDb, 'schedules', schedule.id), schedule);
+};
+
+export const getAllSchedulesDB = async () => {
+  const querySnapshot = await getDocs(collection(firestoreDb, 'schedules'));
+  return querySnapshot.docs.map(doc => doc.data());
+};
+
+export const deleteScheduleDB = async (id) => {
+  await deleteDoc(doc(firestoreDb, 'schedules', id));
+};
+
+// --- Projects ---
+export const saveProjectDB = async (project) => {
+  await setDoc(doc(firestoreDb, 'projects', project.id), project);
+};
+
+export const getAllProjectsDB = async () => {
+  const querySnapshot = await getDocs(collection(firestoreDb, 'projects'));
+  return querySnapshot.docs.map(doc => doc.data());
+};
+
+export const deleteProjectDB = async (id) => {
+  await deleteDoc(doc(firestoreDb, 'projects', id));
 };

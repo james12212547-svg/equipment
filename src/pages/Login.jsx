@@ -1,17 +1,32 @@
-import { useState } from 'react';
-import { Lock, LogIn, ShieldAlert } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { Lock, LogIn, ShieldAlert, User, HardHat, Shield } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (password === 'jaidum02357') {
-      onLogin();
-    } else {
-      setError(true);
-      setPassword('');
+    if (!email || !password) {
+      toast.error('กรุณากรอกอีเมลและรหัสผ่าน');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      await login(email, password);
+      // Let the protected routes handle redirection, but we can explicitly push to / here
+      navigate('/');
+    } catch (error) {
+      // Error toast is handled in AuthContext
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,28 +62,25 @@ const Login = ({ onLogin }) => {
           color: 'white',
           boxShadow: '0 4px 20px rgba(0, 240, 255, 0.3)'
         }}>
-          <Lock size={32} />
+          <HardHat size={32} />
         </div>
 
-        <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.8rem', color: 'var(--text-primary)' }}>ระบบจัดการส่วนตัว</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Private Engineering Hub</p>
+        <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.8rem', color: 'var(--text-primary)' }}>Engineer Hub</h1>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>ระบบจัดการงานช่างและวิศวกรรม</p>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
           
           <div style={{ position: 'relative' }}>
             <input 
-              type="password" 
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError(false);
-              }}
-              placeholder="รหัสผ่านเข้าใช้งาน..."
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="อีเมล (Email)..."
               style={{
                 width: '100%',
                 padding: '1rem 1rem 1rem 3rem',
                 borderRadius: '8px',
-                border: `1px solid ${error ? '#F44336' : 'var(--border-color)'}`,
+                border: '1px solid var(--border-color)',
                 background: 'var(--bg-tertiary)',
                 color: 'var(--text-primary)',
                 fontSize: '1.1rem',
@@ -76,17 +88,33 @@ const Login = ({ onLogin }) => {
                 transition: 'border 0.3s'
               }}
             />
-            <Lock size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: error ? '#F44336' : 'var(--text-tertiary)' }} />
+            <User size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
           </div>
 
-          {error && (
-            <div className="animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#F44336', fontSize: '0.9rem', justifyContent: 'center' }}>
-              <ShieldAlert size={16} /> รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่
-            </div>
-          )}
+          <div style={{ position: 'relative' }}>
+            <input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="รหัสผ่าน (Password)..."
+              style={{
+                width: '100%',
+                padding: '1rem 1rem 1rem 3rem',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                background: 'var(--bg-tertiary)',
+                color: 'var(--text-primary)',
+                fontSize: '1.1rem',
+                outline: 'none',
+                transition: 'border 0.3s'
+              }}
+            />
+            <Lock size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+          </div>
 
           <button 
             type="submit"
+            disabled={isLoading}
             style={{
               width: '100%',
               padding: '1rem',
@@ -96,22 +124,37 @@ const Login = ({ onLogin }) => {
               color: 'white',
               fontSize: '1.1rem',
               fontWeight: 'bold',
-              cursor: 'pointer',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.5rem',
-              marginTop: '1rem',
-              transition: 'transform 0.2s, box-shadow 0.2s'
+              opacity: isLoading ? 0.7 : 1,
+              marginTop: '0.5rem'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 240, 255, 0.4)'}
-            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
           >
-            <LogIn size={20} /> เข้าสู่ระบบ
+            {isLoading ? (
+               <div style={{ width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <>
+                <LogIn size={20} />
+                เข้าสู่ระบบ
+              </>
+            )}
           </button>
         </form>
-        
+
+        <div style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--text-tertiary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+          <Shield size={14} />
+          <span>Secured by Firebase</span>
+        </div>
       </div>
+      
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import useStore from './store/useStore';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
@@ -12,7 +13,6 @@ import SolarCalculator from './pages/SolarCalculator';
 import Quiz from './pages/Quiz';
 import InteractiveSchematic from './pages/InteractiveSchematic';
 import CompareTool from './pages/CompareTool';
-// Old BtuCalculator replaced by AirConCalculator
 import CableSizing from './pages/CableSizing';
 import TroubleshootingSim from './pages/TroubleshootingSim';
 import Glossary from './pages/Glossary';
@@ -41,9 +41,26 @@ import MaintenanceReminders from './pages/MaintenanceReminders';
 import ReloadPrompt from './components/ReloadPrompt';
 import { requestNotificationPermission, scheduleAppointmentReminders } from './utils/notifications';
 
-function App() {
-  const isAuthenticated = useStore(state => state.isAuthenticated);
-  const login = useStore(state => state.login);
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+  const { currentUser, userRole, loading } = useAuth();
+  
+  if (loading) {
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)' }}>Loading...</div>;
+  }
+  
+  if (!currentUser) {
+    return <Login />;
+  }
+  
+  if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}><h2>Access Denied</h2><p>คุณไม่มีสิทธิ์เข้าถึงหน้านี้</p></div>;
+  }
+
+  return children;
+};
+
+function AppContent() {
+  const { currentUser } = useAuth();
   const loadCustomEquipment = useStore(state => state.loadCustomEquipment);
   const theme = useStore(state => state.theme);
 
@@ -52,69 +69,78 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (currentUser) {
       loadCustomEquipment();
       requestNotificationPermission();
     }
-  }, [isAuthenticated, loadCustomEquipment]);
+  }, [currentUser, loadCustomEquipment]);
 
   // Schedule reminders whenever schedules change
   const schedules = useStore(state => state.schedules);
   useEffect(() => {
-    if (isAuthenticated && schedules) {
+    if (currentUser && schedules) {
       scheduleAppointmentReminders(schedules);
     }
-  }, [schedules, isAuthenticated]);
-
-  if (!isAuthenticated) {
-    return <Login onLogin={login} />;
-  }
+  }, [schedules, currentUser]);
 
   return (
     <Router>
       <Toaster position="bottom-right" toastOptions={{ style: { background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' } }} />
       <ReloadPrompt />
       <div className="app-container" style={{ transition: 'background-color 0.3s ease, color 0.3s ease' }}>
-        <Navigation />
-        <main className="main-content">
+        {currentUser && <Navigation />}
+        <main className="main-content" style={{ paddingLeft: currentUser ? undefined : '0' }}>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/category/:categoryId" element={<CategoryGrid />} />
-            <Route path="/equipment/:id" element={<EquipmentDetail />} />
-            <Route path="/calculators" element={<CalculatorsHub />} />
-            <Route path="/learning" element={<LearningHub />} />
-            <Route path="/learning/calculator" element={<SolarCalculator />} />
-            <Route path="/learning/quiz" element={<Quiz />} />
-            <Route path="/learning/schematic" element={<InteractiveSchematic />} />
-            <Route path="/learning/compare" element={<CompareTool />} />
-            <Route path="/learning/btu" element={<AirConCalculator />} />
-            <Route path="/learning/cable" element={<CableSizing />} />
-            <Route path="/learning/simulator" element={<TroubleshootingSim />} />
-            <Route path="/learning/glossary" element={<Glossary />} />
-            <Route path="/learning/pfc" element={<PfcCalculator />} />
-            <Route path="/learning/voltage-drop" element={<VoltageDrop />} />
-            <Route path="/learning/load-schedule" element={<LoadSchedule />} />
-            <Route path="/learning/lighting" element={<LightingCalculator />} />
-            <Route path="/learning/conduit" element={<ConduitSizing />} />
-            <Route path="/learning/motor" element={<MotorCalculator />} />
-            <Route path="/learning/3d" element={<ModelViewer />} />
-            <Route path="/learning/lab-logger" element={<LabLogger />} />
-            <Route path="/projects" element={<ProjectDashboard />} />
-            <Route path="/project/:id/*" element={<ProjectWorkspace />} />
-            <Route path="/work-log" element={<WorkLog />} />
-            <Route path="/schedule" element={<MaintenanceSchedule />} />
-            <Route path="/customer-history" element={<CustomerHistory />} />
-            <Route path="/quotation" element={<Quotation />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/revenue" element={<RevenueDashboard />} />
-            <Route path="/team-chat" element={<TeamChat />} />
-            <Route path="/reminders" element={<MaintenanceReminders />} />
-            <Route path="/favorites" element={<Favorites />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/login" element={<Login />} />
+            
+            {/* Public/All Users */}
+            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/category/:categoryId" element={<ProtectedRoute><CategoryGrid /></ProtectedRoute>} />
+            <Route path="/equipment/:id" element={<ProtectedRoute><EquipmentDetail /></ProtectedRoute>} />
+            <Route path="/calculators" element={<ProtectedRoute><CalculatorsHub /></ProtectedRoute>} />
+            <Route path="/learning" element={<ProtectedRoute><LearningHub /></ProtectedRoute>} />
+            <Route path="/learning/calculator" element={<ProtectedRoute><SolarCalculator /></ProtectedRoute>} />
+            <Route path="/learning/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
+            <Route path="/learning/schematic" element={<ProtectedRoute><InteractiveSchematic /></ProtectedRoute>} />
+            <Route path="/learning/compare" element={<ProtectedRoute><CompareTool /></ProtectedRoute>} />
+            <Route path="/learning/btu" element={<ProtectedRoute><AirConCalculator /></ProtectedRoute>} />
+            <Route path="/learning/cable" element={<ProtectedRoute><CableSizing /></ProtectedRoute>} />
+            <Route path="/learning/simulator" element={<ProtectedRoute><TroubleshootingSim /></ProtectedRoute>} />
+            <Route path="/learning/glossary" element={<ProtectedRoute><Glossary /></ProtectedRoute>} />
+            <Route path="/learning/pfc" element={<ProtectedRoute><PfcCalculator /></ProtectedRoute>} />
+            <Route path="/learning/voltage-drop" element={<ProtectedRoute><VoltageDrop /></ProtectedRoute>} />
+            <Route path="/learning/load-schedule" element={<ProtectedRoute><LoadSchedule /></ProtectedRoute>} />
+            <Route path="/learning/lighting" element={<ProtectedRoute><LightingCalculator /></ProtectedRoute>} />
+            <Route path="/learning/conduit" element={<ProtectedRoute><ConduitSizing /></ProtectedRoute>} />
+            <Route path="/learning/motor" element={<ProtectedRoute><MotorCalculator /></ProtectedRoute>} />
+            <Route path="/learning/3d" element={<ProtectedRoute><ModelViewer /></ProtectedRoute>} />
+            <Route path="/work-log" element={<ProtectedRoute><WorkLog /></ProtectedRoute>} />
+            <Route path="/projects" element={<ProtectedRoute><ProjectDashboard /></ProtectedRoute>} />
+            <Route path="/project/:id" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
+            <Route path="/lab-logger" element={<ProtectedRoute><LabLogger /></ProtectedRoute>} />
+            <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+            <Route path="/schedule" element={<ProtectedRoute><MaintenanceSchedule /></ProtectedRoute>} />
+            <Route path="/customers" element={<ProtectedRoute><CustomerHistory /></ProtectedRoute>} />
+            <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+            <Route path="/team-chat" element={<ProtectedRoute><TeamChat /></ProtectedRoute>} />
+            <Route path="/reminders" element={<ProtectedRoute><MaintenanceReminders /></ProtectedRoute>} />
+            
+            {/* Admin Only */}
+            <Route path="/quotation" element={<ProtectedRoute allowedRoles={['admin']}><Quotation /></ProtectedRoute>} />
+            <Route path="/revenue" element={<ProtectedRoute allowedRoles={['admin']}><RevenueDashboard /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute allowedRoles={['admin']}><Settings /></ProtectedRoute>} />
           </Routes>
         </main>
       </div>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

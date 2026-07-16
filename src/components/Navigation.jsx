@@ -1,9 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell } from 'lucide-react';
+import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell, LogOut } from 'lucide-react';
 import useStore from '../store/useStore';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navigation = () => {
   const favorites = useStore(state => state.favorites);
+  const { userRole, logout } = useAuth();
+  
   return (
     <nav className="nav-bar">
       <NavLink 
@@ -44,20 +47,24 @@ const Navigation = () => {
         <span>ประวัติลูกค้า</span>
       </NavLink>
 
-      <NavLink to="/quotation" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-        <FileText size={24} />
-        <span>ใบเสนอราคา</span>
-      </NavLink>
-
       <NavLink to="/inventory" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <Package size={24} />
         <span>คลังอะไหล่</span>
       </NavLink>
 
-      <NavLink to="/revenue" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-        <BarChart2 size={24} />
-        <span>รายได้</span>
-      </NavLink>
+      {userRole === 'admin' && (
+        <>
+          <NavLink to="/quotation" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <FileText size={24} />
+            <span>ใบเสนอราคา</span>
+          </NavLink>
+
+          <NavLink to="/revenue" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <BarChart2 size={24} />
+            <span>รายได้</span>
+          </NavLink>
+        </>
+      )}
 
       <NavLink to="/team-chat" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <MessageCircle size={24} />
@@ -74,10 +81,17 @@ const Navigation = () => {
         <span>โปรด ({favorites.length})</span>
       </NavLink>
       
-      <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-        <SettingsIcon size={24} />
-        <span>ตั้งค่า</span>
-      </NavLink>
+      {userRole === 'admin' && (
+        <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <SettingsIcon size={24} />
+          <span>ตั้งค่า</span>
+        </NavLink>
+      )}
+
+      <button onClick={logout} className="nav-item" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
+        <LogOut size={24} />
+        <span>ออกจากระบบ</span>
+      </button>
     </nav>
   );
 };

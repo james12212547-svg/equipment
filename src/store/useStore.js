@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { saveCustomEquipmentDB, deleteCustomEquipmentDB, getAllCustomEquipmentDB } from '../utils/db';
+import { 
+  saveCustomEquipmentDB, deleteCustomEquipmentDB, getAllCustomEquipmentDB,
+  saveScheduleDB, deleteScheduleDB, getAllSchedulesDB,
+  saveProjectDB, deleteProjectDB, getAllProjectsDB 
+} from '../utils/db';
 
 const useStore = create(
   persist(
@@ -74,32 +78,92 @@ const useStore = create(
 
       // --- Maintenance Schedule State ---
       schedules: [],
-      addSchedule: (schedule) => set((state) => ({ 
-        schedules: [...state.schedules, { ...schedule, id: Date.now().toString() }] 
-      })),
-      updateSchedule: (id, updatedSchedule) => set((state) => ({
-        schedules: state.schedules.map(s => s.id === id ? { ...s, ...updatedSchedule } : s)
-      })),
-      deleteSchedule: (id) => set((state) => ({
-        schedules: state.schedules.filter(s => s.id !== id)
-      })),
+      loadSchedules: async () => {
+        try {
+          const list = await getAllSchedulesDB();
+          set({ schedules: list });
+        } catch (error) {
+          console.error("Failed to load schedules", error);
+        }
+      },
+      addSchedule: async (schedule) => {
+        try {
+          const newSchedule = { ...schedule, id: schedule.id || Date.now().toString() };
+          await saveScheduleDB(newSchedule);
+          set((state) => ({ schedules: [...state.schedules, newSchedule] }));
+        } catch (error) {
+          console.error("Failed to add schedule", error);
+          throw error;
+        }
+      },
+      updateSchedule: async (id, updatedSchedule) => {
+        try {
+          const scheduleToUpdate = { ...updatedSchedule, id };
+          await saveScheduleDB(scheduleToUpdate);
+          set((state) => ({
+            schedules: state.schedules.map(s => s.id === id ? { ...s, ...updatedSchedule } : s)
+          }));
+        } catch (error) {
+          console.error("Failed to update schedule", error);
+          throw error;
+        }
+      },
+      deleteSchedule: async (id) => {
+        try {
+          await deleteScheduleDB(id);
+          set((state) => ({ schedules: state.schedules.filter(s => s.id !== id) }));
+        } catch (error) {
+          console.error("Failed to delete schedule", error);
+          throw error;
+        }
+      },
 
       // --- Projects State ---
       projects: [],
-      addProject: (project) => set((state) => ({
-        projects: [...state.projects, { ...project, id: Date.now().toString(), createdAt: new Date().toISOString() }]
-      })),
-      updateProject: (id, updatedProject) => set((state) => ({
-        projects: state.projects.map(p => p.id === id ? { ...p, ...updatedProject } : p)
-      })),
-      deleteProject: (id) => set((state) => ({
-        projects: state.projects.filter(p => p.id !== id)
-      })),
+      loadProjects: async () => {
+        try {
+          const list = await getAllProjectsDB();
+          set({ projects: list });
+        } catch (error) {
+          console.error("Failed to load projects", error);
+        }
+      },
+      addProject: async (project) => {
+        try {
+          const newProject = { ...project, id: project.id || Date.now().toString(), createdAt: project.createdAt || new Date().toISOString() };
+          await saveProjectDB(newProject);
+          set((state) => ({ projects: [...state.projects, newProject] }));
+        } catch (error) {
+          console.error("Failed to add project", error);
+          throw error;
+        }
+      },
+      updateProject: async (id, updatedProject) => {
+        try {
+          const projectToUpdate = { ...updatedProject, id };
+          await saveProjectDB(projectToUpdate);
+          set((state) => ({
+            projects: state.projects.map(p => p.id === id ? { ...p, ...updatedProject } : p)
+          }));
+        } catch (error) {
+          console.error("Failed to update project", error);
+          throw error;
+        }
+      },
+      deleteProject: async (id) => {
+        try {
+          await deleteProjectDB(id);
+          set((state) => ({ projects: state.projects.filter(p => p.id !== id) }));
+        } catch (error) {
+          console.error("Failed to delete project", error);
+          throw error;
+        }
+      },
     }),
     {
-      name: 'equipment-store-persist', // name of the item in the storage (must be unique)
+      name: 'equipment-store-persist', 
+      partialize: (state) => ({ theme: state.theme, favorites: state.favorites }),
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ theme: state.theme, favorites: state.favorites, schedules: state.schedules, projects: state.projects }), // Only persist these fields
       onRehydrateStorage: () => (state) => {
         if (state) {
           document.documentElement.setAttribute('data-theme', state.theme);
