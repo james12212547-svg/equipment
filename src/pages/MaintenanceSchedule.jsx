@@ -1,9 +1,24 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { Calendar, Plus, CheckCircle, Clock, Trash2, Edit3, Settings, MapPin, Camera, Image, User } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Calendar, Plus, CheckCircle, Clock, Trash2, Edit3, MapPin, Camera, User } from 'lucide-react';
 import useStore from '../store/useStore';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
-import { getTechniciansDB } from '../utils/db';
+import { getTechniciansDB, uploadImageToStorage } from '../utils/db';
+
+const initialFormState = {
+  customerName: '',
+  equipmentType: 'Air Conditioner',
+  location: '',
+  date: '',
+  timeStart: '',
+  timeEnd: '',
+  cost: '',
+  notes: '',
+  beforeImg: '',
+  afterImg: '',
+  status: 'pending',
+  assignedTo: ''
+};
 
 const MaintenanceSchedule = () => {
   const { schedules, addSchedule, updateSchedule, deleteSchedule } = useStore();
@@ -12,6 +27,9 @@ const MaintenanceSchedule = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [technicians, setTechnicians] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
     if (userRole === 'admin') {
@@ -19,59 +37,59 @@ const MaintenanceSchedule = () => {
     }
   }, [userRole]);
   
-  const [formData, setFormData] = useState({
-    customerName: '',
-    equipmentType: 'Air Conditioner',
-    location: '',
-    date: '',
-    timeStart: '',
-    timeEnd: '',
-    cost: '',
-    notes: '',
-    beforeImg: '',
-    afterImg: '',
-    status: 'pending',
-    assignedTo: ''
-  });
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.customerName || !formData.date || !formData.timeStart) {
-      toast.error('กรุณากรอกข้อมูลให้ครบถ้วน');
+      toast.error('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
       return;
     }
 
-    if (editingId) {
-      updateSchedule(editingId, formData);
-      toast.success('อัปเดตตารางงานสำเร็จ!');
-    } else {
-      addSchedule(formData);
-      toast.success('เพิ่มตารางงานใหม่สำเร็จ!');
-    }
+    setIsSubmitting(true);
+    const toastId = toast.loading(editingId ? 'กำลังอัปเดตข้อมูลและรูปภาพ...' : 'กำลังบันทึกข้อมูลและอัปโหลดรูปภาพ...');
     
-    resetForm();
+    try {
+      let finalBeforeImg = formData.beforeImg;
+      let finalAfterImg = formData.afterImg;
+
+      const timestamp = Date.now();
+
+      if (formData.beforeImg && formData.beforeImg.startsWith('data:image/')) {
+        finalBeforeImg = await uploadImageToStorage(formData.beforeImg, `schedules/before_${timestamp}_${Math.random().toString(36).substring(7)}.jpg`) || formData.beforeImg;
+      }
+      if (formData.afterImg && formData.afterImg.startsWith('data:image/')) {
+        finalAfterImg = await uploadImageToStorage(formData.afterImg, `schedules/after_${timestamp}_${Math.random().toString(36).substring(7)}.jpg`) || formData.afterImg;
+      }
+
+      const scheduleData = {
+        ...formData,
+        beforeImg: finalBeforeImg,
+        afterImg: finalAfterImg
+      };
+
+      if (editingId) {
+        await updateSchedule(editingId, scheduleData);
+        toast.success('อัปเดตข้อมูลสำเร็จ', { id: toastId });
+      } else {
+        await addSchedule(scheduleData);
+        toast.success('บันทึกคิวงานสำเร็จ', { id: toastId });
+      }
+
+      resetForm();
+    } catch (error) {
+      console.error(error);
+      toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล', { id: toastId });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
-    setFormData({
-      customerName: '',
-      equipmentType: 'Air Conditioner',
-      location: '',
-      date: '',
-      timeStart: '',
-      timeEnd: '',
-      cost: '',
-      notes: '',
-      beforeImg: '',
-      afterImg: '',
-      status: 'pending',
-      assignedTo: ''
-    });
+    setFormData(initialFormState);
     setEditingId(null);
     setShowForm(false);
   };
@@ -101,11 +119,9 @@ const MaintenanceSchedule = () => {
     toast.success(newStatus === 'completed' ? 'ทำเครื่องหมายว่าเสร็จสิ้นแล้ว' : 'เปลี่ยนสถานะเป็นรอดำเนินการ');
   };
 
-  // Sort and filter by role
   const sortedSchedules = useMemo(() => {
     let filtered = schedules || [];
     
-    // If technician, only show their own tasks or unassigned tasks
     if (userRole === 'technician' && currentUser) {
       filtered = filtered.filter(s => 
         !s.assignedTo || 
@@ -201,7 +217,6 @@ const MaintenanceSchedule = () => {
               </div>
             </div>
 
-            {/* Row 1: วันที่นัดหมาย & ผู้รับผิดชอบ */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>วันที่นัดหมาย</label>
@@ -235,7 +250,6 @@ const MaintenanceSchedule = () => {
               )}
             </div>
 
-            {/* Row 2: เวลาเริ่ม + เวลาเลิก */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>เวลาเริ่ม <span style={{ color: '#ef4444' }}>*</span></label>
@@ -287,7 +301,6 @@ const MaintenanceSchedule = () => {
               </div>
             </div>
 
-            {/* Location */}
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <MapPin size={16} /> ที่อยู่ / พิกัด (Optional — ใส่ชื่อสถานที่หรือลิงก์ Google Maps)
@@ -302,7 +315,6 @@ const MaintenanceSchedule = () => {
               />
             </div>
 
-            {/* Before/After Photos */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               {[['beforeImg', 'รูปก่อนซ่อม 📸'], ['afterImg', 'รูปหลังซ่อม ✅']].map(([field, label]) => (
                 <div key={field}>

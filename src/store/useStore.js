@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { 
   saveCustomEquipmentDB, deleteCustomEquipmentDB, getAllCustomEquipmentDB,
-  saveScheduleDB, deleteScheduleDB, getAllSchedulesDB,
+  saveScheduleDB, deleteScheduleDB, getAllSchedulesDB, subscribeToSchedulesDB,
   saveProjectDB, deleteProjectDB, getAllProjectsDB 
 } from '../utils/db';
 
@@ -78,10 +78,18 @@ const useStore = create(
 
       // --- Maintenance Schedule State ---
       schedules: [],
+      unsubscribeSchedules: null,
       loadSchedules: async () => {
         try {
-          const list = await getAllSchedulesDB();
-          set({ schedules: list });
+          // Unsubscribe if already listening
+          const { unsubscribeSchedules } = useStore.getState();
+          if (unsubscribeSchedules) unsubscribeSchedules();
+
+          // Start listening to real-time changes
+          const unsubscribe = subscribeToSchedulesDB((list) => {
+            set({ schedules: list });
+          });
+          set({ unsubscribeSchedules: unsubscribe });
         } catch (error) {
           console.error("Failed to load schedules", error);
         }

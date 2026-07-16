@@ -1,5 +1,6 @@
-import { db as firestoreDb } from './firebase';
-import { collection, doc, setDoc, getDocs, deleteDoc, query, where } from 'firebase/firestore';
+import { db as firestoreDb, storage } from './firebase';
+import { collection, doc, setDoc, getDocs, deleteDoc, query, where, onSnapshot } from 'firebase/firestore';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 export const DB_NAME = 'EquipmentAppDB';
 export const STORE_NAME = 'images';
@@ -245,8 +246,28 @@ export const getAllSchedulesDB = async () => {
   return querySnapshot.docs.map(doc => doc.data());
 };
 
+export const subscribeToSchedulesDB = (callback) => {
+  const q = collection(firestoreDb, 'schedules');
+  return onSnapshot(q, (snapshot) => {
+    const schedules = snapshot.docs.map(doc => doc.data());
+    callback(schedules);
+  });
+};
+
 export const deleteScheduleDB = async (id) => {
   await deleteDoc(doc(firestoreDb, 'schedules', id));
+};
+
+export const uploadImageToStorage = async (base64String, path) => {
+  if (!base64String || !base64String.startsWith('data:image/')) return base64String; // Return original if not a new upload
+  try {
+    const imageRef = ref(storage, path);
+    await uploadString(imageRef, base64String, 'data_url');
+    return await getDownloadURL(imageRef);
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return null;
+  }
 };
 
 // --- Projects ---
