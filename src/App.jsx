@@ -128,11 +128,11 @@ function AppContent() {
             <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
             <Route path="/team-chat" element={<ProtectedRoute><TeamChat /></ProtectedRoute>} />
             <Route path="/reminders" element={<ProtectedRoute><MaintenanceReminders /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             
             {/* Admin Only */}
             <Route path="/quotation" element={<ProtectedRoute allowedRoles={['admin']}><Quotation /></ProtectedRoute>} />
             <Route path="/revenue" element={<ProtectedRoute allowedRoles={['admin']}><RevenueDashboard /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute allowedRoles={['admin']}><Settings /></ProtectedRoute>} />
           </Routes>
         </main>
       </div>
