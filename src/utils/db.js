@@ -238,7 +238,7 @@ export const deleteInventoryItemDB = async (id) => {
 
 // --- Schedules ---
 export const saveScheduleDB = async (schedule) => {
-  await setDoc(doc(firestoreDb, 'schedules', schedule.id), schedule);
+  await setDoc(doc(firestoreDb, 'schedules', schedule.id), schedule, { merge: true });
 };
 
 export const getAllSchedulesDB = async () => {
@@ -262,11 +262,22 @@ export const uploadImageToStorage = async (base64String, path) => {
   if (!base64String || !base64String.startsWith('data:image/')) return base64String; // Return original if not a new upload
   try {
     const imageRef = ref(storage, path);
-    await uploadString(imageRef, base64String, 'data_url');
+    
+    // Create a timeout promise (10 seconds)
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Storage upload timed out. Please check Firebase Storage rules.")), 10000)
+    );
+    
+    // Race between upload and timeout
+    await Promise.race([
+      uploadString(imageRef, base64String, 'data_url'),
+      timeout
+    ]);
+    
     return await getDownloadURL(imageRef);
   } catch (error) {
     console.error("Error uploading image:", error);
-    return null;
+    return null; // Fallback to base64 if it fails
   }
 };
 
