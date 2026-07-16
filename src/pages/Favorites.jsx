@@ -35,7 +35,7 @@ const Favorites = () => {
           <h3>ยังไม่มีรายการโปรด</h3>
           <p>กลับไปที่คลังอุปกรณ์แล้วกดรูปหัวใจเพื่อเพิ่มอุปกรณ์ที่คุณสนใจมาไว้ที่นี่</p>
           <button 
-            onClick={() => navigate('/learning')}
+            onClick={() => navigate('/')}
             style={{ marginTop: '1.5rem', background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
           >
             ไปหน้าคลังอุปกรณ์
