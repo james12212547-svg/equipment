@@ -4,6 +4,7 @@ import useStore from '../store/useStore';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { getTechniciansDB, uploadImageToStorage } from '../utils/db';
+import { compressImage } from '../utils/imageUtils';
 
 const initialFormState = {
   customerName: '',
@@ -322,12 +323,18 @@ const MaintenanceSchedule = () => {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={e => {
+                    onChange={async (e) => {
                       const file = e.target.files[0];
                       if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = ev => setFormData(f => ({ ...f, [field]: ev.target.result }));
-                      reader.readAsDataURL(file);
+                      toast.loading('กำลังประมวลผลรูปภาพ...', { id: 'compressing' });
+                      try {
+                        const compressedBase64 = await compressImage(file, 800, 800, 0.7);
+                        setFormData(f => ({ ...f, [field]: compressedBase64 }));
+                        toast.success('เตรียมรูปภาพสำเร็จ', { id: 'compressing' });
+                      } catch (err) {
+                        toast.error('ไม่สามารถประมวลผลรูปภาพได้', { id: 'compressing' });
+                        console.error(err);
+                      }
                     }}
                     style={{ display: 'none' }}
                     id={`img-${field}`}
