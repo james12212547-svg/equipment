@@ -638,7 +638,7 @@ option {
     break-before: page;
   }
   
-  .print-block {
+  .print-block, .grid-2, .grid-3, .grid-4 {
     display: block !important;
   }
 }

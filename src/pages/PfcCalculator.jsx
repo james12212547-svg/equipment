@@ -28,7 +28,7 @@ const PfcCalculator = () => {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
           <ArrowLeft size={24} />
         </button>
@@ -140,7 +140,7 @@ const PfcCalculator = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#4CAF50' }}>
                   <TrendingUp size={20} /> <strong style={{ fontSize: '1.1rem' }}>วิเคราะห์ความคุ้มทุน (ประเมิน)</strong>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>ประหยัดค่าปรับ (ต่อเดือน)</span>
                     <strong style={{ fontSize: '1.2rem' }}>{Number(result.savings).toLocaleString()} ฿</strong>

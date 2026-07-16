@@ -70,7 +70,7 @@ const LightingCalculator = () => {
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
           <ArrowLeft size={24} />
         </button>
@@ -104,12 +104,12 @@ const LightingCalculator = () => {
         <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+      <div className="print-block" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         {/* Input Form */}
         <div className="equipment-card no-print" style={{ padding: '2rem' }}>
           <h3 style={{ margin: '0 0 1.5rem', color: 'var(--text-primary)' }}>ข้อมูลพื้นที่และการใช้งาน</h3>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>ความกว้าง (เมตร)</label>
               <input 
@@ -233,7 +233,7 @@ const LightingCalculator = () => {
               คำนวณเป๊ะๆ ได้ {result.exactLamps} ดวง (ปัดเศษขึ้นเพื่อความสว่างที่เพียงพอ)
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
+            <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
               <div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>ความสว่างที่ได้จริง</div>
                 <div style={{ color: result.actualLux >= targetLux ? '#4CAF50' : '#F44336', fontSize: '1.5rem', fontWeight: 'bold' }}>

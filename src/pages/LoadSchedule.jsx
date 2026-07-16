@@ -166,7 +166,7 @@ const LoadSchedule = ({ projectId, isReadOnly = false }) => {
   return (
     <div className={`animate-fade-in ${isReadOnly ? 'print-only' : ''}`} style={{ paddingBottom: isReadOnly ? '0' : '3rem' }}>
       {!isReadOnly && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+        <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
           <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
             <ArrowLeft size={24} />
           </button>
@@ -201,7 +201,7 @@ const LoadSchedule = ({ projectId, isReadOnly = false }) => {
         <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
+      <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
         
         {/* Phase Summary Dashboard */}
         <div className="equipment-card" style={{ padding: '2rem', border: summary.unbalance > 15 ? '2px solid #F44336' : '1px solid var(--border-color)' }}>
@@ -223,7 +223,7 @@ const LoadSchedule = ({ projectId, isReadOnly = false }) => {
             </div>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div className="print-block" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>
             <div style={{ background: 'rgba(255,0,0,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,0,0,0.2)', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: 'rgba(255, 107, 107, 0.15)', width: `${summary.maxPhase > 0 ? (parseFloat(summary.L1) / summary.maxPhase) * 100 : 0}%`, transition: 'width 0.5s ease', zIndex: 0 }} />
               <div style={{ position: 'relative', zIndex: 1 }}>

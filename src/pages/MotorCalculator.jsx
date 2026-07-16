@@ -109,7 +109,7 @@ const MotorCalculator = () => {
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
           <ArrowLeft size={24} />
         </button>
@@ -143,13 +143,13 @@ const MotorCalculator = () => {
         <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+      <div className="print-block" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         
         {/* INPUT SECTION */}
         <div className="equipment-card no-print" style={{ padding: '2rem' }}>
           <h3 style={{ margin: '0 0 1.5rem', color: 'var(--text-primary)' }}>ข้อมูลมอเตอร์ (Motor Specs)</h3>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>ระบบไฟ (Phase)</label>
               <select 
@@ -201,7 +201,7 @@ const MotorCalculator = () => {
 
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>รูปแบบการสตาร์ท (Starter Type)</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+            <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
               <button 
                 onClick={() => setStarterType('DOL')}
                 style={{ 
