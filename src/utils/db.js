@@ -265,10 +265,32 @@ export const deleteProjectDB = async (id) => {
 
 // --- Users (Technicians) ---
 export const getTechniciansDB = async () => {
-  const q = query(collection(firestoreDb, 'users'), where('role', 'in', ['technician', 'admin']));
-  // Including admin so admins can be assigned tasks as well
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    const q1 = query(collection(firestoreDb, 'users'), where('role', 'in', ['technician', 'admin']));
+    const q2 = query(collection(firestoreDb, 'user'), where('role', 'in', ['technician', 'admin']));
+    
+    const [snap1, snap2] = await Promise.all([
+      getDocs(q1).catch(() => ({ docs: [] })),
+      getDocs(q2).catch(() => ({ docs: [] }))
+    ]);
+
+    const usersMap = new Map();
+    
+    snap1.docs.forEach(doc => {
+      usersMap.set(doc.id, { id: doc.id, ...doc.data() });
+    });
+    
+    snap2.docs.forEach(doc => {
+      if (!usersMap.has(doc.id)) {
+        usersMap.set(doc.id, { id: doc.id, ...doc.data() });
+      }
+    });
+
+    return Array.from(usersMap.values());
+  } catch (error) {
+    console.error("Error fetching technicians:", error);
+    return [];
+  }
 };
 
 // --- Inventory Logs ---
