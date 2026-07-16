@@ -1,7 +1,7 @@
 // TeamChat Component - Real-time chat with Firebase
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, MessageCircle, X, Camera, Bell, BellOff } from 'lucide-react';
-import { db } from '../utils/firebase';
+import { rtdb } from '../utils/firebase';
 import { ref, push, onValue, remove, serverTimestamp, query, limitToLast } from 'firebase/database';
 import toast from 'react-hot-toast';
 
@@ -69,7 +69,7 @@ const TeamChat = () => {
 
   useEffect(() => {
     if (!senderSet) return;
-    const messagesRef = query(ref(db, 'teamchat'), limitToLast(100));
+    const messagesRef = query(ref(rtdb, 'teamchat'), limitToLast(100));
     let firstLoad = true;
     const unsubscribe = onValue(messagesRef, (snapshot) => {
       const data = snapshot.val();
@@ -145,7 +145,7 @@ const TeamChat = () => {
       timestamp: serverTimestamp(),
     };
     try {
-      await push(ref(db, 'teamchat'), msg);
+      await push(ref(rtdb, 'teamchat'), msg);
       setInput('');
     } catch {
       toast.error('ส่งข้อความไม่สำเร็จ');
@@ -153,11 +153,13 @@ const TeamChat = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await remove(ref(db, `teamchat/${id}`));
-      toast.success('ลบข้อความแล้ว');
-    } catch {
-      toast.error('ลบไม่สำเร็จ');
+    if (window.confirm('ลบข้อความนี้?')) {
+      try {
+        await remove(ref(rtdb, `teamchat/${id}`));
+        toast.success('ลบข้อความแล้ว');
+      } catch {
+        toast.error('ลบไม่สำเร็จ');
+      }
     }
   };
 

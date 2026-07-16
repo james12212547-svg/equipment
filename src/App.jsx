@@ -62,6 +62,8 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 function AppContent() {
   const { currentUser } = useAuth();
   const loadCustomEquipment = useStore(state => state.loadCustomEquipment);
+  const loadSchedules = useStore(state => state.loadSchedules);
+  const loadProjects = useStore(state => state.loadProjects);
   const theme = useStore(state => state.theme);
 
   useEffect(() => {
@@ -71,9 +73,11 @@ function AppContent() {
   useEffect(() => {
     if (currentUser) {
       loadCustomEquipment();
+      loadSchedules();
+      loadProjects();
       requestNotificationPermission();
     }
-  }, [currentUser, loadCustomEquipment]);
+  }, [currentUser, loadCustomEquipment, loadSchedules, loadProjects]);
 
   // Schedule reminders whenever schedules change
   const schedules = useStore(state => state.schedules);

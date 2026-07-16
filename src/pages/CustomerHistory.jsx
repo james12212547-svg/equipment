@@ -4,7 +4,8 @@ import useStore from '../store/useStore';
 import { getWorkLogsDB } from '../utils/db';
 
 const CustomerHistory = () => {
-  const schedules = useStore(state => state.schedules) || [];
+  const rawSchedules = useStore(state => state.schedules);
+  const schedules = Array.isArray(rawSchedules) ? rawSchedules : [];
   const [workLogs, setWorkLogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -21,8 +22,9 @@ const CustomerHistory = () => {
     const dataMap = new Map();
 
     // Process Schedules (Appointments)
-    schedules.forEach(schedule => {
-      const name = schedule.customerName?.trim();
+    if (Array.isArray(schedules)) {
+      schedules.forEach(schedule => {
+        const name = schedule?.customerName?.trim();
       if (!name) return;
       
       const key = name.toLowerCase();
@@ -34,11 +36,13 @@ const CustomerHistory = () => {
       if (schedule.cost) {
         customer.totalSpent += Number(schedule.cost);
       }
-    });
+      });
+    }
 
     // Process Work Logs (Past Services)
-    workLogs.forEach(log => {
-      const name = log.customer?.trim();
+    if (Array.isArray(workLogs)) {
+      workLogs.forEach(log => {
+        const name = log?.customer?.trim();
       if (!name) return;
 
       const key = name.toLowerCase();
@@ -50,7 +54,8 @@ const CustomerHistory = () => {
       if (log.cost) {
         customer.totalSpent += Number(log.cost);
       }
-    });
+      });
+    }
 
     return Array.from(dataMap.values()).sort((a, b) => a.name.localeCompare(b.name, 'th'));
   }, [schedules, workLogs]);
@@ -190,7 +195,11 @@ const CustomerHistory = () => {
         beforeImg: w.beforeImg,
         afterImg: w.afterImg
       }))
-    ].sort((a, b) => b.date - a.date); // Newest first
+    ].sort((a, b) => {
+      const timeA = a.date instanceof Date && !isNaN(a.date) ? a.date.getTime() : 0;
+      const timeB = b.date instanceof Date && !isNaN(b.date) ? b.date.getTime() : 0;
+      return timeB - timeA;
+    }); // Newest first
 
     return (
       <div className="animate-fade-in">

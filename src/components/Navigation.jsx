@@ -81,12 +81,10 @@ const Navigation = () => {
         <span>โปรด ({favorites.length})</span>
       </NavLink>
       
-      {userRole === 'admin' && (
-        <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <SettingsIcon size={24} />
-          <span>ตั้งค่า</span>
-        </NavLink>
-      )}
+      <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+        <SettingsIcon size={24} />
+        <span>ตั้งค่า</span>
+      </NavLink>
 
       <button onClick={logout} className="nav-item" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
         <LogOut size={24} />
