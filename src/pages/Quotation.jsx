@@ -60,7 +60,8 @@ const Quotation = () => {
     await saveQuotationDB(toSave);
     const updated = await getAllQuotationsDB();
     setQuotations(updated);
-    toast.success(status === 'sent' ? 'บันทึกและส่งใบเสนอราคาแล้ว!' : 'บันทึกแบบร่างแล้ว');
+    const statusMsg = status === 'paid' ? 'บันทึกสถานะชำระเงินแล้ว!' : status === 'sent' ? 'บันทึกและส่งใบเสนอราคาแล้ว!' : 'บันทึกแบบร่างแล้ว';
+    toast.success(statusMsg);
     setView('list');
     setForm(emptyForm());
     setEditingId(null);
@@ -275,14 +276,11 @@ const Quotation = () => {
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-        <button onClick={() => handleSave('draft')} style={{ background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.75rem 1.5rem', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Save size={18} /> บันทึกร่าง
-        </button>
         <button onClick={() => { setForm(f => ({ ...f, subtotal, vat, total })); setView('preview'); }} style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid #10b981', color: '#10b981', padding: '0.75rem 1.5rem', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Printer size={18} /> ดูตัวอย่าง / พิมพ์
         </button>
-        <button onClick={() => handleSave('sent')} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <FileText size={18} /> บันทึกและส่ง
+        <button onClick={() => handleSave(form.status)} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Save size={18} /> บันทึกใบเสนอราคา
         </button>
       </div>
     </div>
