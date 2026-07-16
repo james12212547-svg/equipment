@@ -83,7 +83,7 @@ const Home = () => {
       {!isSearching ? (
         <>
           <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>หมวดหมู่อุปกรณ์</h2>
-          <div className="grid-2">
+          <div className="grid-3">
             {categories.map(category => (
               <Link 
                 to={`/category/${category.id}`} 
@@ -104,6 +104,23 @@ const Home = () => {
                 </div>
               </Link>
             ))}
+            <Link 
+              to="/inventory" 
+              className="category-card"
+            >
+              <img src="/images/inventory.jpg" alt="คลังอะไหล่และอุปกรณ์" />
+              <div className="category-card-content">
+                <h3 className="text-gradient" style={{ fontSize: '1.75rem', marginBottom: '0.25rem', background: 'linear-gradient(135deg, #10B981 0%, #3B82F6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  คลังอะไหล่และอุปกรณ์
+                </h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.9rem', fontWeight: '500' }}>
+                  Equipment Inventory
+                </p>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', marginTop: '1rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  ระบบจัดการคลังอะไหล่ เพิ่ม-ลด จำนวน และตรวจสอบรายการอุปกรณ์ทั้งหมด
+                </p>
+              </div>
+            </Link>
           </div>
         </>
       ) : (

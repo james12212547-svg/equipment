@@ -105,7 +105,7 @@ function App() {
             <Route path="/schedule" element={<MaintenanceSchedule />} />
             <Route path="/customer-history" element={<CustomerHistory />} />
             <Route path="/quotation" element={<Quotation />} />
-            <Route path="/inventory" element={<Home />} />
+            <Route path="/inventory" element={<Inventory />} />
             <Route path="/revenue" element={<RevenueDashboard />} />
             <Route path="/team-chat" element={<TeamChat />} />
             <Route path="/reminders" element={<MaintenanceReminders />} />
