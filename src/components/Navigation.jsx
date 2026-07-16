@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell } from 'lucide-react';
 import useStore from '../store/useStore';
 
@@ -49,10 +49,10 @@ const Navigation = () => {
         <span>ใบเสนอราคา</span>
       </NavLink>
 
-      <NavLink to="/" className={() => 'nav-item'}>
+      <Link to="/" className="nav-item">
         <Package size={24} />
         <span>คลังอะไหล่</span>
-      </NavLink>
+      </Link>
 
       <NavLink to="/revenue" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <BarChart2 size={24} />
