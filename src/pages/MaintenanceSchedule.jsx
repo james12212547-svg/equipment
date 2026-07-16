@@ -1,13 +1,23 @@
 import { useState, useMemo, useRef } from 'react';
-import { Calendar, Plus, CheckCircle, Clock, Trash2, Edit3, Settings, MapPin, Camera, Image } from 'lucide-react';
+import { Calendar, Plus, CheckCircle, Clock, Trash2, Edit3, Settings, MapPin, Camera, Image, User } from 'lucide-react';
 import useStore from '../store/useStore';
 import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
+import { getTechniciansDB } from '../utils/db';
 
 const MaintenanceSchedule = () => {
   const { schedules, addSchedule, updateSchedule, deleteSchedule } = useStore();
+  const { currentUser, userRole } = useAuth();
   
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [technicians, setTechnicians] = useState([]);
+
+  useEffect(() => {
+    if (userRole === 'admin') {
+      getTechniciansDB().then(setTechnicians).catch(console.error);
+    }
+  }, [userRole]);
   
   const [formData, setFormData] = useState({
     customerName: '',
@@ -20,7 +30,8 @@ const MaintenanceSchedule = () => {
     notes: '',
     beforeImg: '',
     afterImg: '',
-    status: 'pending'
+    status: 'pending',
+    assignedTo: ''
   });
 
   const handleInputChange = (e) => {
@@ -58,7 +69,8 @@ const MaintenanceSchedule = () => {
       notes: '',
       beforeImg: '',
       afterImg: '',
-      status: 'pending'
+      status: 'pending',
+      assignedTo: ''
     });
     setEditingId(null);
     setShowForm(false);
@@ -76,7 +88,8 @@ const MaintenanceSchedule = () => {
       notes: schedule.notes || '',
       beforeImg: schedule.beforeImg || '',
       afterImg: schedule.afterImg || '',
-      status: schedule.status
+      status: schedule.status,
+      assignedTo: schedule.assignedTo || ''
     });
     setEditingId(schedule.id);
     setShowForm(true);
@@ -88,14 +101,25 @@ const MaintenanceSchedule = () => {
     toast.success(newStatus === 'completed' ? 'ทำเครื่องหมายว่าเสร็จสิ้นแล้ว' : 'เปลี่ยนสถานะเป็นรอดำเนินการ');
   };
 
-  // Sort by date and time
+  // Sort and filter by role
   const sortedSchedules = useMemo(() => {
-    return [...(schedules || [])].sort((a, b) => {
-      const dateTimeA = new Date(`${a.date}T${a.time}`);
-      const dateTimeB = new Date(`${b.date}T${b.time}`);
+    let filtered = schedules || [];
+    
+    // If technician, only show their own tasks or unassigned tasks
+    if (userRole === 'technician' && currentUser) {
+      filtered = filtered.filter(s => 
+        !s.assignedTo || 
+        s.assignedTo === currentUser.uid || 
+        s.assignedTo === currentUser.email
+      );
+    }
+
+    return [...filtered].sort((a, b) => {
+      const dateTimeA = new Date(`${a.date}T${a.time || a.timeStart || '00:00'}`);
+      const dateTimeB = new Date(`${b.date}T${b.time || b.timeStart || '00:00'}`);
       return dateTimeA - dateTimeB;
     });
-  }, [schedules]);
+  }, [schedules, userRole, currentUser]);
 
   const pendingSchedules = sortedSchedules.filter(s => s.status === 'pending');
   const completedSchedules = sortedSchedules.filter(s => s.status === 'completed');
@@ -177,18 +201,38 @@ const MaintenanceSchedule = () => {
               </div>
             </div>
 
-            {/* Row 1: วันที่นัดหมาย (full width) */}
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>วันที่นัดหมาย</label>
-              <input
-                type="text"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                placeholder="เช่น 7/6/2025 หรือ 07-06-2025"
-                required
-                style={{ width: '100%', padding: '1rem', borderRadius: '8px', fontSize: '1rem' }}
-              />
+            {/* Row 1: วันที่นัดหมาย & ผู้รับผิดชอบ */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>วันที่นัดหมาย</label>
+                <input
+                  type="text"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  placeholder="เช่น 7/6/2025 หรือ 07-06-2025"
+                  required
+                  style={{ width: '100%', padding: '1rem', borderRadius: '8px', fontSize: '1rem' }}
+                />
+              </div>
+              {userRole === 'admin' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>มอบหมายให้ (Assigned To)</label>
+                  <select
+                    name="assignedTo"
+                    value={formData.assignedTo}
+                    onChange={handleInputChange}
+                    style={{ width: '100%', padding: '1rem', borderRadius: '8px', fontSize: '1rem', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                  >
+                    <option value="">-- ไม่ระบุ (เห็นทุกคน) --</option>
+                    {technicians.map(tech => (
+                      <option key={tech.id} value={tech.email || tech.id}>
+                        {tech.email} {tech.role === 'admin' ? '(Admin)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Row 2: เวลาเริ่ม + เวลาเลิก */}
@@ -402,6 +446,11 @@ const ScheduleCard = ({ schedule, onToggleStatus, onEdit, onDelete }) => {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem', zIndex: 2 }}>
+        {schedule.assignedTo && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)' }}>
+            <User size={16} /> <span>ช่างที่รับผิดชอบ: <strong>{schedule.assignedTo}</strong></span>
+          </div>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Calendar size={16} /> <span>{thaiDate}</span>
         </div>

@@ -1,5 +1,5 @@
 import { db as firestoreDb } from './firebase';
-import { collection, doc, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, deleteDoc, query, where } from 'firebase/firestore';
 
 export const DB_NAME = 'EquipmentAppDB';
 export const STORE_NAME = 'images';
@@ -261,4 +261,22 @@ export const getAllProjectsDB = async () => {
 
 export const deleteProjectDB = async (id) => {
   await deleteDoc(doc(firestoreDb, 'projects', id));
+};
+
+// --- Users (Technicians) ---
+export const getTechniciansDB = async () => {
+  const q = query(collection(firestoreDb, 'users'), where('role', 'in', ['technician', 'admin']));
+  // Including admin so admins can be assigned tasks as well
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+// --- Inventory Logs ---
+export const saveInventoryLogDB = async (log) => {
+  await setDoc(doc(firestoreDb, 'inventory_logs', log.id), log);
+};
+
+export const getInventoryLogsDB = async () => {
+  const querySnapshot = await getDocs(collection(firestoreDb, 'inventory_logs'));
+  return querySnapshot.docs.map(doc => doc.data());
 };
