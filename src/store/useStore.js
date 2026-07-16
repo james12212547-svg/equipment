@@ -98,7 +98,7 @@ const useStore = create(
         try {
           const newSchedule = { ...schedule, id: schedule.id || Date.now().toString() };
           await saveScheduleDB(newSchedule);
-          set((state) => ({ schedules: [...state.schedules, newSchedule] }));
+          // State is updated by onSnapshot listener
         } catch (error) {
           console.error("Failed to add schedule", error);
           throw error;
@@ -108,9 +108,7 @@ const useStore = create(
         try {
           const scheduleToUpdate = { ...updatedSchedule, id };
           await saveScheduleDB(scheduleToUpdate);
-          set((state) => ({
-            schedules: state.schedules.map(s => s.id === id ? { ...s, ...updatedSchedule } : s)
-          }));
+          // State is updated by onSnapshot listener
         } catch (error) {
           console.error("Failed to update schedule", error);
           throw error;
@@ -119,7 +117,7 @@ const useStore = create(
       deleteSchedule: async (id) => {
         try {
           await deleteScheduleDB(id);
-          set((state) => ({ schedules: state.schedules.filter(s => s.id !== id) }));
+          // State is updated by onSnapshot listener
         } catch (error) {
           console.error("Failed to delete schedule", error);
           throw error;

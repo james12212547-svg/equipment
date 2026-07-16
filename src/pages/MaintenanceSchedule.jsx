@@ -45,6 +45,7 @@ const MaintenanceSchedule = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent double submission
     if (!formData.customerName || !formData.date || !formData.timeStart) {
       toast.error('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
       return;
