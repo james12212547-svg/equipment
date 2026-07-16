@@ -49,7 +49,7 @@ const Navigation = () => {
         <span>ใบเสนอราคา</span>
       </NavLink>
 
-      <NavLink to="/inventory" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+      <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <Package size={24} />
         <span>คลังอะไหล่</span>
       </NavLink>
