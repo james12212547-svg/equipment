@@ -42,10 +42,6 @@ const Navigation = () => {
         <span>จดงาน</span>
       </NavLink>
 
-      <NavLink to="/customer-history" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-        <Users size={24} />
-        <span>ประวัติลูกค้า</span>
-      </NavLink>
 
       <NavLink to="/inventory" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <Package size={24} />
@@ -57,6 +53,11 @@ const Navigation = () => {
           <NavLink to="/quotation" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <FileText size={24} />
             <span>ใบเสนอราคา</span>
+          </NavLink>
+
+          <NavLink to="/customer-history" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <Users size={24} />
+            <span>ประวัติลูกค้า</span>
           </NavLink>
 
           <NavLink to="/revenue" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>

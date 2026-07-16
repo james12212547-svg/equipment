@@ -124,7 +124,6 @@ function AppContent() {
             <Route path="/lab-logger" element={<ProtectedRoute><LabLogger /></ProtectedRoute>} />
             <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
             <Route path="/schedule" element={<ProtectedRoute><MaintenanceSchedule /></ProtectedRoute>} />
-            <Route path="/customer-history" element={<ProtectedRoute><CustomerHistory /></ProtectedRoute>} />
             <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
             <Route path="/team-chat" element={<ProtectedRoute><TeamChat /></ProtectedRoute>} />
             <Route path="/reminders" element={<ProtectedRoute><MaintenanceReminders /></ProtectedRoute>} />
@@ -132,6 +131,7 @@ function AppContent() {
             
             {/* Admin Only */}
             <Route path="/quotation" element={<ProtectedRoute allowedRoles={['admin']}><Quotation /></ProtectedRoute>} />
+            <Route path="/customer-history" element={<ProtectedRoute allowedRoles={['admin']}><CustomerHistory /></ProtectedRoute>} />
             <Route path="/revenue" element={<ProtectedRoute allowedRoles={['admin']}><RevenueDashboard /></ProtectedRoute>} />
           </Routes>
         </main>
