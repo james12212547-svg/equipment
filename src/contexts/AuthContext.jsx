@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../utils/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
@@ -27,7 +27,13 @@ export const AuthProvider = ({ children }) => {
           if (userDoc.exists()) {
             setUserRole(userDoc.data().role);
           } else {
-            // Default role if not found
+            // Document doesn't exist, create it in 'users' collection as technician
+            const newUserDoc = {
+              email: user.email,
+              role: 'technician',
+              createdAt: new Date().toISOString()
+            };
+            await setDoc(doc(db, 'users', user.uid), newUserDoc);
             setUserRole('technician');
           }
         } catch (error) {
