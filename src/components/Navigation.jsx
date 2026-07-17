@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Navigation = () => {
   const favorites = useStore(state => state.favorites);
+  const notifications = useStore(state => state.notifications) || [];
+  const unreadCount = notifications.filter(n => !n.isRead).length;
   const { userRole, logout } = useAuth();
   
   return (
@@ -72,8 +74,15 @@ const Navigation = () => {
         <span>แชททีม</span>
       </NavLink>
 
-      <NavLink to="/reminders" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-        <Bell size={24} />
+      <NavLink to="/notifications" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ position: 'relative' }}>
+        <div style={{ position: 'relative' }}>
+          <Bell size={24} />
+          {unreadCount > 0 && (
+            <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#ef4444', color: 'white', fontSize: '10px', fontWeight: 'bold', width: '16px', height: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </div>
         <span>แจ้งเตือน</span>
       </NavLink>
 

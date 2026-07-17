@@ -258,6 +258,24 @@ export const deleteScheduleDB = async (id) => {
   await deleteDoc(doc(firestoreDb, 'schedules', id));
 };
 
+// --- Notifications ---
+export const saveNotificationDB = async (notification) => {
+  await setDoc(doc(firestoreDb, 'notifications', notification.id), notification);
+};
+
+export const subscribeToNotificationsDB = (email, callback) => {
+  if (!email) return () => {};
+  const q = query(collection(firestoreDb, 'notifications'), where('userEmail', '==', email));
+  return onSnapshot(q, (snapshot) => {
+    const notifications = snapshot.docs.map(doc => doc.data()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    callback(notifications);
+  });
+};
+
+export const markNotificationReadDB = async (id) => {
+  await setDoc(doc(firestoreDb, 'notifications', id), { isRead: true }, { merge: true });
+};
+
 export const uploadImageToStorage = async (base64String, path) => {
   if (!base64String || !base64String.startsWith('data:image/')) return base64String; // Return original if not a new upload
   try {

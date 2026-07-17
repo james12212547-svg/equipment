@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { 
   saveCustomEquipmentDB, deleteCustomEquipmentDB, getAllCustomEquipmentDB,
   saveScheduleDB, deleteScheduleDB, getAllSchedulesDB, subscribeToSchedulesDB,
-  saveProjectDB, deleteProjectDB, getAllProjectsDB 
+  saveProjectDB, deleteProjectDB, getAllProjectsDB, subscribeToNotificationsDB
 } from '../utils/db';
 
 const useStore = create(
@@ -92,6 +92,27 @@ const useStore = create(
           set({ unsubscribeSchedules: unsubscribe });
         } catch (error) {
           console.error("Failed to load schedules", error);
+        }
+      },
+      
+      // --- Notifications State ---
+      notifications: [],
+      unsubscribeNotifications: null,
+      loadNotifications: (email) => {
+        try {
+          const { unsubscribeNotifications } = useStore.getState();
+          if (unsubscribeNotifications) unsubscribeNotifications();
+
+          if (email) {
+            const unsubscribe = subscribeToNotificationsDB(email, (list) => {
+              set({ notifications: list });
+            });
+            set({ unsubscribeNotifications: unsubscribe });
+          } else {
+            set({ notifications: [] });
+          }
+        } catch (error) {
+          console.error("Failed to load notifications", error);
         }
       },
       addSchedule: async (schedule) => {

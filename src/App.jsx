@@ -38,6 +38,7 @@ import Inventory from './pages/Inventory';
 import RevenueDashboard from './pages/RevenueDashboard';
 import TeamChat from './pages/TeamChat';
 import MaintenanceReminders from './pages/MaintenanceReminders';
+import Notifications from './pages/Notifications';
 import ReloadPrompt from './components/ReloadPrompt';
 import { requestNotificationPermission, scheduleAppointmentReminders } from './utils/notifications';
 
@@ -64,6 +65,7 @@ function AppContent() {
   const loadCustomEquipment = useStore(state => state.loadCustomEquipment);
   const loadSchedules = useStore(state => state.loadSchedules);
   const loadProjects = useStore(state => state.loadProjects);
+  const loadNotifications = useStore(state => state.loadNotifications);
   const theme = useStore(state => state.theme);
 
   useEffect(() => {
@@ -75,9 +77,12 @@ function AppContent() {
       loadCustomEquipment();
       loadSchedules();
       loadProjects();
+      loadNotifications(currentUser.email);
       requestNotificationPermission();
+    } else {
+      loadNotifications(null);
     }
-  }, [currentUser, loadCustomEquipment, loadSchedules, loadProjects]);
+  }, [currentUser, loadCustomEquipment, loadSchedules, loadProjects, loadNotifications]);
 
   // Schedule reminders whenever schedules change
   const schedules = useStore(state => state.schedules);
@@ -126,6 +131,7 @@ function AppContent() {
             <Route path="/schedule" element={<ProtectedRoute><MaintenanceSchedule /></ProtectedRoute>} />
             <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
             <Route path="/team-chat" element={<ProtectedRoute><TeamChat /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/reminders" element={<ProtectedRoute><MaintenanceReminders /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             

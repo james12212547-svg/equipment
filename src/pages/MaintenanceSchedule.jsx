@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Calendar, Plus, CheckCircle, Clock, Trash2, Edit3, MapPin, Camera, User } from 'lucide-react';
+import { Calendar, Plus, CheckCircle, Clock, Trash2, Edit3, MapPin, Camera, User, Package } from 'lucide-react';
 import useStore from '../store/useStore';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
-import { getTechniciansDB, uploadImageToStorage } from '../utils/db';
+import { getTechniciansDB, uploadImageToStorage, saveNotificationDB, getAllInventoryDB, saveInventoryItemDB, saveInventoryLogDB } from '../utils/db';
 import { compressImage } from '../utils/imageUtils';
 
 const initialFormState = {
@@ -18,7 +18,8 @@ const initialFormState = {
   beforeImg: '',
   afterImg: '',
   status: 'pending',
-  assignedTo: ''
+  assignedTo: '',
+  partsUsed: [] // Array of { id, name, qty, unitPrice }
 };
 
 const MaintenanceSchedule = () => {
@@ -28,6 +29,7 @@ const MaintenanceSchedule = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [technicians, setTechnicians] = useState([]);
+  const [inventoryItems, setInventoryItems] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState(initialFormState);
@@ -36,6 +38,7 @@ const MaintenanceSchedule = () => {
     if (userRole === 'admin') {
       getTechniciansDB().then(setTechnicians).catch(console.error);
     }
+    getAllInventoryDB().then(setInventoryItems).catch(console.error);
   }, [userRole]);
   
   const handleInputChange = (e) => {
@@ -76,9 +79,70 @@ const MaintenanceSchedule = () => {
       if (editingId) {
         await updateSchedule(editingId, scheduleData);
         toast.success('อัปเดตข้อมูลสำเร็จ', { id: toastId });
+        
+        // Notify if assignedTo changed
+        const oldSchedule = schedules.find(s => s.id === editingId);
+        if (scheduleData.assignedTo && scheduleData.assignedTo !== oldSchedule?.assignedTo) {
+          await saveNotificationDB({
+            id: `NOTIF-${Date.now()}`,
+            userEmail: scheduleData.assignedTo,
+            title: 'มีการมอบหมายงานใหม่ (อัปเดต)',
+            message: `แอดมินได้แก้ไขและมอบหมายงาน "${scheduleData.customerName}" ให้คุณ`,
+            type: 'schedule_assigned',
+            isRead: false,
+            createdAt: new Date().toISOString()
+          });
+        }
       } else {
         await addSchedule(scheduleData);
         toast.success('บันทึกคิวงานสำเร็จ', { id: toastId });
+        
+        // Notify assigned technician
+        if (scheduleData.assignedTo) {
+          await saveNotificationDB({
+            id: `NOTIF-${Date.now()}`,
+            userEmail: scheduleData.assignedTo,
+            title: 'มีการมอบหมายงานใหม่',
+            message: `แอดมินได้มอบหมายงานซ่อมสำหรับ "${scheduleData.customerName}" ให้คุณ`,
+            type: 'schedule_assigned',
+            isRead: false,
+            createdAt: new Date().toISOString()
+          });
+        }
+      }
+
+      // Deduct from inventory if new parts were used
+      if (scheduleData.partsUsed && scheduleData.partsUsed.length > 0) {
+        let oldParts = [];
+        if (editingId) {
+           const oldSchedule = schedules.find(s => s.id === editingId);
+           oldParts = oldSchedule?.partsUsed || [];
+        }
+        
+        for (const part of scheduleData.partsUsed) {
+          const oldPart = oldParts.find(p => p.id === part.id);
+          const oldQty = oldPart ? oldPart.qty : 0;
+          const diffQty = part.qty - oldQty;
+          
+          if (diffQty > 0) {
+            // They added more of this part, deduct from inventory
+            const invItem = inventoryItems.find(i => i.id === part.id);
+            if (invItem) {
+              const newStockQty = Number(invItem.qty) - diffQty;
+              await saveInventoryItemDB({ ...invItem, qty: newStockQty, updatedAt: new Date().toISOString() });
+              await saveInventoryLogDB({
+                id: `LOG-${Date.now()}-${part.id}`,
+                itemId: part.id,
+                itemName: part.name,
+                qty: diffQty,
+                purpose: `เบิกใช้งานซ่อม: ${scheduleData.customerName}`,
+                date: new Date().toISOString(),
+                userEmail: currentUser?.email || 'Unknown',
+                userId: currentUser?.uid || 'Unknown'
+              });
+            }
+          }
+        }
       }
 
       resetForm();
@@ -351,6 +415,100 @@ const MaintenanceSchedule = () => {
                   )}
                 </div>
               ))}
+            </div>
+
+            {/* Inventory Checkout section */}
+            <div style={{ padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
+                <Package size={20} /> เบิกอะไหล่สำหรับงานนี้
+              </h3>
+              
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <select id="partSelect" style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+                  <option value="">-- เลือกอะไหล่ --</option>
+                  {inventoryItems.map(item => (
+                    <option key={item.id} value={item.id} disabled={Number(item.qty) <= 0}>
+                      {item.name} (คงเหลือ: {item.qty}) - ฿{item.unitPrice}
+                    </option>
+                  ))}
+                </select>
+                <input id="partQty" type="number" min="1" defaultValue="1" style={{ width: '80px', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }} />
+                <button type="button" onClick={() => {
+                  const select = document.getElementById('partSelect');
+                  const qtyInput = document.getElementById('partQty');
+                  const selectedId = select.value;
+                  const qty = Number(qtyInput.value);
+                  if (!selectedId || qty <= 0) return;
+                  
+                  const item = inventoryItems.find(i => i.id === selectedId);
+                  if (!item) return;
+
+                  if (qty > Number(item.qty)) {
+                    toast.error(`จำนวนในสต็อกไม่พอ (เหลือ ${item.qty})`);
+                    return;
+                  }
+
+                  setFormData(prev => {
+                    const existingPart = prev.partsUsed?.find(p => p.id === selectedId);
+                    if (existingPart) {
+                      return {
+                        ...prev,
+                        partsUsed: prev.partsUsed.map(p => p.id === selectedId ? { ...p, qty: p.qty + qty } : p)
+                      };
+                    } else {
+                      return {
+                        ...prev,
+                        partsUsed: [...(prev.partsUsed || []), { id: item.id, name: item.name, qty, unitPrice: item.unitPrice }]
+                      };
+                    }
+                  });
+                  select.value = '';
+                  qtyInput.value = '1';
+                }} style={{ padding: '0 1rem', background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+                  <Plus size={20} />
+                </button>
+              </div>
+
+              {formData.partsUsed && formData.partsUsed.length > 0 && (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <th style={{ textAlign: 'left', padding: '0.5rem' }}>รายการ</th>
+                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>จำนวน</th>
+                      <th style={{ textAlign: 'right', padding: '0.5rem' }}>รวมราคา</th>
+                      <th style={{ width: '40px' }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.partsUsed.map((part, index) => (
+                      <tr key={index} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '0.5rem' }}>{part.name}</td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem' }}>{part.qty}</td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem', color: 'var(--accent-solar)' }}>฿{(part.qty * Number(part.unitPrice)).toLocaleString()}</td>
+                        <td style={{ textAlign: 'center' }}>
+                          <button type="button" onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              partsUsed: prev.partsUsed.filter((_, i) => i !== index)
+                            }));
+                          }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colSpan="2" style={{ textAlign: 'right', padding: '0.5rem', fontWeight: 'bold' }}>ยอดรวมค่าอะไหล่:</td>
+                      <td style={{ textAlign: 'right', padding: '0.5rem', fontWeight: 'bold', color: 'var(--accent-solar)' }}>
+                        ฿{formData.partsUsed.reduce((sum, part) => sum + (part.qty * Number(part.unitPrice)), 0).toLocaleString()}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>

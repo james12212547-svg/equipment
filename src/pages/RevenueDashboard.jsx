@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, DollarSign, ClipboardList, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import useStore from '../store/useStore';
-import { getWorkLogsDB, getAllQuotationsDB } from '../utils/db';
+import { getWorkLogsDB, getAllQuotationsDB, getInventoryLogsDB } from '../utils/db';
 
 const COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444'];
 
@@ -12,11 +12,13 @@ const RevenueDashboard = () => {
   const schedules = useStore(state => state.schedules);
   const [workLogs, setWorkLogs] = useState([]);
   const [quotations, setQuotations] = useState([]);
+  const [inventoryLogs, setInventoryLogs] = useState([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     getWorkLogsDB().then(setWorkLogs).catch(console.error);
     getAllQuotationsDB().then(setQuotations).catch(console.error);
+    getInventoryLogsDB().then(setInventoryLogs).catch(console.error);
   }, []);
 
   // Aggregate all revenue sources into monthly buckets
@@ -27,7 +29,9 @@ const RevenueDashboard = () => {
       workLog: 0,
       schedule: 0,
       quotation: 0,
+      inventoryCost: 0,
       total: 0,
+      netProfit: 0,
     }));
 
     // Work logs
@@ -45,6 +49,13 @@ const RevenueDashboard = () => {
       const d = new Date(s.date);
       if (isNaN(d) || d.getFullYear() !== selectedYear) return;
       months[d.getMonth()].schedule += Number(s.cost);
+      
+      // Calculate parts cost for schedules
+      if (s.partsUsed && s.partsUsed.length > 0) {
+        s.partsUsed.forEach(part => {
+          months[d.getMonth()].inventoryCost += (Number(part.qty) * Number(part.unitPrice));
+        });
+      }
     });
 
     // Paid quotations
@@ -55,13 +66,21 @@ const RevenueDashboard = () => {
       months[d.getMonth()].quotation += Number(q.total);
     });
 
+    // Manual Inventory Logs (not attached to schedules)
+    // Actually, let's just use all inventory logs that are for "ซ่อม" or similar?
+    // We already accounted for parts used in schedules. What if there are other inventory deductions?
+    // Let's rely on the schedule parts used for direct job costs. 
+
     return months.map(m => ({
       ...m,
       total: m.workLog + m.schedule + m.quotation,
+      netProfit: (m.workLog + m.schedule + m.quotation) - m.inventoryCost,
     }));
-  }, [workLogs, schedules, quotations, selectedYear]);
+  }, [workLogs, schedules, quotations, inventoryLogs, selectedYear]);
 
   const totalRevenue = monthlyData.reduce((s, m) => s + m.total, 0);
+  const totalInventoryCost = monthlyData.reduce((s, m) => s + m.inventoryCost, 0);
+  const totalNetProfit = totalRevenue - totalInventoryCost;
   const totalWorkLog = monthlyData.reduce((s, m) => s + m.workLog, 0);
   const totalSchedule = monthlyData.reduce((s, m) => s + m.schedule, 0);
   const totalQuotation = monthlyData.reduce((s, m) => s + m.quotation, 0);
@@ -104,9 +123,9 @@ const RevenueDashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         {[
           { label: `รายได้รวม ปี ${selectedYear + 543}`, value: `฿${totalRevenue.toLocaleString()}`, color: '#3b82f6', icon: <DollarSign size={24} /> },
-          { label: 'เดือนที่ดีที่สุด', value: bestMonth.total > 0 ? `${bestMonth.month} (฿${bestMonth.total.toLocaleString()})` : '-', color: '#10b981', icon: <TrendingUp size={24} /> },
-          { label: 'รายการทั้งหมด', value: `${recentTransactions.length} งาน`, color: '#f59e0b', icon: <ClipboardList size={24} /> },
-          { label: 'เดือนปัจจุบัน', value: `฿${(monthlyData.find(m => m.month === currentMonth)?.total || 0).toLocaleString()}`, color: '#8b5cf6', icon: <Calendar size={24} /> },
+          { label: `ต้นทุนอะไหล่`, value: `฿${totalInventoryCost.toLocaleString()}`, color: '#ef4444', icon: <TrendingDown size={24} /> },
+          { label: `กำไรสุทธิ`, value: `฿${totalNetProfit.toLocaleString()}`, color: '#10b981', icon: <TrendingUp size={24} /> },
+          { label: 'เดือนปัจจุบัน (กำไร)', value: `฿${(monthlyData.find(m => m.month === currentMonth)?.netProfit || 0).toLocaleString()}`, color: '#8b5cf6', icon: <Calendar size={24} /> },
         ].map(card => (
           <div key={card.label} className="equipment-card" style={{ padding: '1.5rem', border: `1px solid ${card.color}33`, display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{ background: `${card.color}22`, color: card.color, padding: '0.75rem', borderRadius: '10px', flexShrink: 0 }}>{card.icon}</div>
@@ -122,20 +141,19 @@ const RevenueDashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
         {/* Bar Chart */}
         <div className="equipment-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color)' }}>
-          <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)' }}>📊 รายได้รายเดือน (บาท)</h3>
+          <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)' }}>📊 รายได้และกำไรรายเดือน (บาท)</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={monthlyData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
               <XAxis dataKey="month" tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }} />
               <YAxis tick={{ fill: 'var(--text-tertiary)', fontSize: 12 }} tickFormatter={v => v > 0 ? `฿${(v/1000).toFixed(0)}k` : '0'} />
               <Tooltip formatter={(v) => [`฿${v.toLocaleString()}`, '']} contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
-              <Bar dataKey="workLog" name="จดงาน" stackId="a" fill="#3b82f6" radius={[0,0,0,0]} />
-              <Bar dataKey="schedule" name="คิวงาน" stackId="a" fill="#f59e0b" />
-              <Bar dataKey="quotation" name="ใบเสนอราคา" stackId="a" fill="#10b981" radius={[4,4,0,0]} />
+              <Bar dataKey="total" name="รายได้รวม" fill="#3b82f6" radius={[4,4,0,0]} />
+              <Bar dataKey="netProfit" name="กำไรสุทธิ" fill="#10b981" radius={[4,4,0,0]} />
             </BarChart>
           </ResponsiveContainer>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '0.75rem' }}>
-            {[['#3b82f6', 'จดงาน'], ['#f59e0b', 'คิวงาน'], ['#10b981', 'ใบเสนอราคา']].map(([color, label]) => (
+            {[['#3b82f6', 'รายได้รวม'], ['#10b981', 'กำไรสุทธิ']].map(([color, label]) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: color }} />
                 {label}
