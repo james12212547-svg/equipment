@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, DollarSign, ClipboardList, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, ClipboardList, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import useStore from '../store/useStore';
 import { getWorkLogsDB, getAllQuotationsDB, getInventoryLogsDB } from '../utils/db';
 
