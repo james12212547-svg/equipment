@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Zap, Info, Settings, AlertTriangle, Upload, Image as ImageIcon, Download, FileText, ChevronRight, Home, Heart, Box } from 'lucide-react';
+import { ArrowLeft, Zap, Info, Settings, AlertTriangle, Upload, Image as ImageIcon, Download, FileText, ChevronRight, Home, Heart, Box, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { equipmentData, categories } from '../data/equipment';
 import { saveImage, loadImage } from '../utils/db';
 import { compressImage } from '../utils/imageUtils';
 import useStore from '../store/useStore';
 import AddEquipmentModal from '../components/AddEquipmentModal';
-import { Pencil } from 'lucide-react';
+
 
 const EquipmentDetail = () => {
   const { id } = useParams();

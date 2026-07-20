@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bot, X, Send, User, ChevronDown, Trash2 } from 'lucide-react';
+import { Bot, X, Send, User, Trash2 } from 'lucide-react';
 
 const knowledgeBase = [
   {

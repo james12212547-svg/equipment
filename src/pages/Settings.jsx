@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Database, Sun, Moon, Info, HardDrive, MessageSquarePlus, Building2, Bell, Trash2, AlertTriangle, CloudUpload } from 'lucide-react';
+import { Settings as SettingsIcon, Sun, Moon, Info, HardDrive, MessageSquarePlus, Building2, Bell, Trash2, AlertTriangle, CloudUpload } from 'lucide-react';
 import useStore from '../store/useStore';
 import toast from 'react-hot-toast';
 import { migrateLocalDataToCloud } from '../utils/migrateData';
