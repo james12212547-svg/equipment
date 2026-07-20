@@ -470,8 +470,12 @@ button:active {
   .nav-bar {
     position: sticky;
     top: 0;
+    left: 0;
+    bottom: auto;
+    transform: none;
     width: 80px;
     height: 100vh;
+    border-radius: 0;
     flex-direction: column;
     justify-content: flex-start;
     padding: 1.5rem 0.75rem;
@@ -522,12 +526,16 @@ button:active {
   }
   
   .nav-item:hover {
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.05);
     transform: none;
   }
   
   .nav-item.active {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(59, 130, 246, 0.15);
+  }
+
+  .nav-item::before {
+    display: none;
   }
   
   .main-content {
