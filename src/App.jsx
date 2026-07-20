@@ -97,6 +97,7 @@ function AppContent() {
       <Toaster position="bottom-right" toastOptions={{ style: { background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' } }} />
       <ReloadPrompt />
       <div className="app-container" style={{ transition: 'background-color 0.3s ease, color 0.3s ease' }}>
+        <div className="animated-bg"></div>
         {currentUser && <Navigation />}
         <main className="main-content" style={{ paddingLeft: currentUser ? undefined : '0' }}>
           <Routes>
