@@ -673,7 +673,7 @@ const SingleLineDiagram = () => {
             </div>
           )}
 
-          {/* SVG Connection Lines & Junction Dots */}
+          {/* SVG Connection Lines & Junction Dots (lines + dots ONLY - no text in SVG) */}
           <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'all', zIndex: 2 }}>
             {connections.map((conn, idx) => {
               const fromNode = nodes.find(n => n.id === conn.from);
@@ -689,61 +689,86 @@ const SingleLineDiagram = () => {
               const vd = getNodeVoltageDrop(toNode);
               const status = getVoltageDropStatus(toNode, vd);
 
-              // Calculate staggered position along the line to prevent any label overlapping!
-              const t = 0.3 + ((idx % 4) * 0.18); 
-              const labelX = x1 + (x2 - x1) * t;
-              const labelY = y1 + (y2 - y1) * t;
-
-              const labelText = toNode.cableSize || (systemPhase === '3P' ? '4x4 sq.mm.' : '2x2.5 sq.mm.');
-              const badgeWidth = Math.max(100, labelText.length * 6.2 + 14);
-
               return (
                 <g key={idx} style={{ cursor: 'pointer' }} onClick={(e) => handleDeleteConnection(conn.from, conn.to, e)}>
-                  {/* Thick Neon Connection Line */}
                   <line
-                    x1={x1}
-                    y1={y1}
-                    x2={x2}
-                    y2={y2}
-                    stroke={status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : calcResults.isOverloaded ? '#ef4444' : '#00f0ff'}
+                    x1={x1} y1={y1} x2={x2} y2={y2}
+                    stroke={status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : '#00f0ff'}
                     strokeWidth="4"
-                    strokeDasharray={fromNode.type === 'solar' ? '6,6' : 'none'}
-                    style={{ filter: status.isCritical ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.9))' : 'drop-shadow(0 0 6px rgba(0, 240, 255, 0.5))' }}
+                    strokeDasharray={fromNode.type === 'solar' ? '8,5' : 'none'}
+                    style={{ filter: status.isCritical ? 'drop-shadow(0 0 10px rgba(239,68,68,0.9))' : 'drop-shadow(0 0 6px rgba(0,240,255,0.5))' }}
                   />
-
-                  {/* Junction Solid Dot for Parallel Tap Connections */}
                   {isTap && (
-                    <circle cx={x1} cy={y1} r="6" fill="#ff7300" stroke="#ffffff" strokeWidth="2" />
+                    <circle cx={x1} cy={y1} r="7" fill="#ff7300" stroke="#ffffff" strokeWidth="2.5" />
                   )}
-
-                  {/* Cable Size Badge (Staggered & Auto-width to prevent overlap) */}
-                  <g>
-                    <rect
-                      x={labelX - badgeWidth / 2}
-                      y={labelY - 10}
-                      width={badgeWidth}
-                      height="20"
-                      rx="5"
-                      fill="#020617"
-                      stroke={status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : '#00f0ff'}
-                      strokeWidth="1.5"
-                      style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.8))' }}
-                    />
-                    <text
-                      x={labelX}
-                      y={labelY + 4}
-                      fill={status.isCritical ? '#fca5a5' : status.isWarning ? '#fde047' : '#ffffff'}
-                      fontSize="10"
-                      textAnchor="middle"
-                      fontWeight="bold"
-                    >
-                      {labelText}
-                    </text>
-                  </g>
                 </g>
               );
             })}
           </svg>
+
+          {/* Cable Size HTML Labels — rendered outside SVG to prevent all overlapping */}
+          {connections.map((conn, idx) => {
+            const fromNode = nodes.find(n => n.id === conn.from);
+            const toNode = nodes.find(n => n.id === conn.to);
+            if (!fromNode || !toNode) return null;
+
+            const x1 = fromNode.x + 80;
+            const y1 = fromNode.y + 30;
+            const x2 = toNode.x + 80;
+            const y2 = toNode.y + 30;
+
+            // Place label at 40% along the line
+            const t = 0.4;
+            const midX = x1 + (x2 - x1) * t;
+            const midY = y1 + (y2 - y1) * t;
+
+            // Compute perpendicular unit vector to offset label away from line
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const len = Math.sqrt(dx * dx + dy * dy) || 1;
+            // Alternate left/right offset per index to spread colliding labels
+            const side = idx % 2 === 0 ? 1 : -1;
+            const offsetDist = 28;
+            const perpX = (-dy / len) * offsetDist * side;
+            const perpY = (dx / len) * offsetDist * side;
+
+            const labelX = midX + perpX;
+            const labelY = midY + perpY;
+
+            const vd = getNodeVoltageDrop(toNode);
+            const status = getVoltageDropStatus(toNode, vd);
+            const labelText = toNode.cableSize || (systemPhase === '3P' ? '4x4 sq.mm.' : '2x2.5 sq.mm.');
+
+            const textColor = status.isCritical ? '#fca5a5' : status.isWarning ? '#fbbf24' : '#e2e8f0';
+            const borderColor = status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : '#00f0ff';
+
+            return (
+              <div
+                key={`lbl-${idx}`}
+                style={{
+                  position: 'absolute',
+                  left: labelX,
+                  top: labelY,
+                  transform: 'translate(-50%, -50%)',
+                  background: 'rgba(2, 6, 23, 0.96)',
+                  border: `1.5px solid ${borderColor}`,
+                  borderRadius: '6px',
+                  padding: '3px 8px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: textColor,
+                  whiteSpace: 'nowrap',
+                  pointerEvents: 'none',
+                  zIndex: 5,
+                  boxShadow: `0 2px 10px rgba(0,0,0,0.9), 0 0 8px ${borderColor}55`,
+                  letterSpacing: '0.3px',
+                  fontFamily: 'monospace',
+                }}
+              >
+                {labelText}
+              </div>
+            );
+          })}
 
           {/* Component Nodes (Bounded inside Canvas) */}
           {nodes.map(node => {
