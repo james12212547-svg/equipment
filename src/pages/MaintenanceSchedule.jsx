@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Calendar, Plus, CheckCircle, Clock, Trash2, Edit3, MapPin, Camera, User, Package } from 'lucide-react';
+import { Calendar, Plus, CheckCircle, Clock, Trash2, Edit3, MapPin, Camera, User, Package, Navigation, Compass, AlertCircle } from 'lucide-react';
 import useStore from '../store/useStore';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,7 +19,8 @@ const initialFormState = {
   afterImg: '',
   status: 'pending',
   assignedTo: '',
-  partsUsed: [] // Array of { id, name, qty, unitPrice }
+  partsUsed: [], // Array of { id, name, qty, unitPrice }
+  checkInInfo: null, // { time, lat, lng, technicianEmail }
 };
 
 const MaintenanceSchedule = () => {
@@ -31,7 +32,8 @@ const MaintenanceSchedule = () => {
   const [technicians, setTechnicians] = useState([]);
   const [inventoryItems, setInventoryItems] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [gettingGps, setGettingGps] = useState(false);
+
   const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
@@ -40,15 +42,40 @@ const MaintenanceSchedule = () => {
     }
     getAllInventoryDB().then(setInventoryItems).catch(console.error);
   }, [userRole]);
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Helper to fetch current GPS location in form
+  const handleFetchGpsLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('อุปกรณ์นี้ไม่รองรับ GPS');
+      return;
+    }
+    setGettingGps(true);
+    const toastId = toast.loading('กำลังค้นหาพิกัด GPS...');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        setFormData(prev => ({ ...prev, location: mapsUrl }));
+        setGettingGps(false);
+        toast.success('ปักหมุดพิกัด GPS สำเร็จ!', { id: toastId });
+      },
+      (error) => {
+        setGettingGps(false);
+        toast.error('ไม่สามารถดึงพิกัด GPS ได้ กรุณาเปิด Location Service', { id: toastId });
+        console.error(error);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return; // Prevent double submission
+    if (isSubmitting) return;
     if (!formData.customerName || !formData.date || !formData.timeStart) {
       toast.error('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
       return;
@@ -60,7 +87,6 @@ const MaintenanceSchedule = () => {
     try {
       let finalBeforeImg = formData.beforeImg;
       let finalAfterImg = formData.afterImg;
-
       const timestamp = Date.now();
 
       if (formData.beforeImg && formData.beforeImg.startsWith('data:image/')) {
@@ -80,7 +106,6 @@ const MaintenanceSchedule = () => {
         await updateSchedule(editingId, scheduleData);
         toast.success('อัปเดตข้อมูลสำเร็จ', { id: toastId });
         
-        // Notify if assignedTo changed
         const oldSchedule = schedules.find(s => s.id === editingId);
         if (scheduleData.assignedTo && scheduleData.assignedTo !== oldSchedule?.assignedTo) {
           await saveNotificationDB({
@@ -97,51 +122,16 @@ const MaintenanceSchedule = () => {
         await addSchedule(scheduleData);
         toast.success('บันทึกคิวงานสำเร็จ', { id: toastId });
         
-        // Notify assigned technician
         if (scheduleData.assignedTo) {
           await saveNotificationDB({
             id: `NOTIF-${Date.now()}`,
             userEmail: scheduleData.assignedTo,
-            title: 'มีการมอบหมายงานใหม่',
-            message: `แอดมินได้มอบหมายงานซ่อมสำหรับ "${scheduleData.customerName}" ให้คุณ`,
+            title: 'มีการมอบหมายงานใหม่ 🛠️',
+            message: `คุณได้รับมอบหมายงานใหม่ "${scheduleData.customerName}" (${scheduleData.equipmentType})`,
             type: 'schedule_assigned',
             isRead: false,
             createdAt: new Date().toISOString()
           });
-        }
-      }
-
-      // Deduct from inventory if new parts were used
-      if (scheduleData.partsUsed && scheduleData.partsUsed.length > 0) {
-        let oldParts = [];
-        if (editingId) {
-           const oldSchedule = schedules.find(s => s.id === editingId);
-           oldParts = oldSchedule?.partsUsed || [];
-        }
-        
-        for (const part of scheduleData.partsUsed) {
-          const oldPart = oldParts.find(p => p.id === part.id);
-          const oldQty = oldPart ? oldPart.qty : 0;
-          const diffQty = part.qty - oldQty;
-          
-          if (diffQty > 0) {
-            // They added more of this part, deduct from inventory
-            const invItem = inventoryItems.find(i => i.id === part.id);
-            if (invItem) {
-              const newStockQty = Number(invItem.qty) - diffQty;
-              await saveInventoryItemDB({ ...invItem, qty: newStockQty, updatedAt: new Date().toISOString() });
-              await saveInventoryLogDB({
-                id: `LOG-${Date.now()}-${part.id}`,
-                itemId: part.id,
-                itemName: part.name,
-                qty: diffQty,
-                purpose: `เบิกใช้งานซ่อม: ${scheduleData.customerName}`,
-                date: new Date().toISOString(),
-                userEmail: currentUser?.email || 'Unknown',
-                userId: currentUser?.uid || 'Unknown'
-              });
-            }
-          }
         }
       }
 
@@ -162,8 +152,8 @@ const MaintenanceSchedule = () => {
 
   const handleEdit = (schedule) => {
     setFormData({
-      customerName: schedule.customerName,
-      equipmentType: schedule.equipmentType,
+      customerName: schedule.customerName || '',
+      equipmentType: schedule.equipmentType || 'Air Conditioner',
       location: schedule.location || '',
       date: schedule.date || '',
       timeStart: schedule.timeStart || schedule.time || '',
@@ -172,80 +162,96 @@ const MaintenanceSchedule = () => {
       notes: schedule.notes || '',
       beforeImg: schedule.beforeImg || '',
       afterImg: schedule.afterImg || '',
-      status: schedule.status,
-      assignedTo: schedule.assignedTo || ''
+      status: schedule.status || 'pending',
+      assignedTo: schedule.assignedTo || '',
+      partsUsed: schedule.partsUsed || [],
+      checkInInfo: schedule.checkInInfo || null,
     });
     setEditingId(schedule.id);
     setShowForm(true);
   };
 
-  const handleToggleStatus = (id, currentStatus) => {
-    const newStatus = currentStatus === 'pending' ? 'completed' : 'pending';
-    updateSchedule(id, { status: newStatus });
-    toast.success(newStatus === 'completed' ? 'ทำเครื่องหมายว่าเสร็จสิ้นแล้ว' : 'เปลี่ยนสถานะเป็นรอดำเนินการ');
+  const handleToggleStatus = async (id, currentStatus) => {
+    const nextStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+    await updateSchedule(id, { status: nextStatus });
+    toast.success(nextStatus === 'completed' ? 'ทำเครื่องหมายว่าเสร็จสิ้นแล้ว 🎉' : 'เปลี่ยนสถานะเป็นรอดำเนินการ');
   };
 
-  const sortedSchedules = useMemo(() => {
-    let filtered = schedules || [];
-    
-    if (userRole === 'technician' && currentUser) {
-      filtered = filtered.filter(s => 
-        !s.assignedTo || 
-        s.assignedTo === currentUser.uid || 
-        s.assignedTo === currentUser.email
-      );
+  // Technician GPS Check-in
+  const handleTechnicianCheckIn = async (schedule) => {
+    if (!navigator.geolocation) {
+      toast.error('อุปกรณ์นี้ไม่รองรับ GPS');
+      return;
     }
 
-    return [...filtered].sort((a, b) => {
-      const dateTimeA = new Date(`${a.date}T${a.time || a.timeStart || '00:00'}`);
-      const dateTimeB = new Date(`${b.date}T${b.time || b.timeStart || '00:00'}`);
-      return dateTimeA - dateTimeB;
-    });
-  }, [schedules, userRole, currentUser]);
+    const toastId = toast.loading('กำลังเช็คอินพิกัดหน้างาน...');
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const checkInInfo = {
+          time: new Date().toISOString(),
+          lat: latitude,
+          lng: longitude,
+          technicianEmail: currentUser?.email || 'ช่างผู้ปฏิบัติงาน',
+        };
 
-  const pendingSchedules = sortedSchedules.filter(s => s.status === 'pending');
-  const completedSchedules = sortedSchedules.filter(s => s.status === 'completed');
+        await updateSchedule(schedule.id, { checkInInfo });
+
+        // Alert admin about technician check-in
+        await saveNotificationDB({
+          id: `NOTIF-CHECKIN-${Date.now()}`,
+          userEmail: 'admin',
+          title: '📍 ช่างเช็คอินถึงหน้างานแล้ว!',
+          message: `ช่าง ${checkInInfo.technicianEmail} ถึงหน้างาน "${schedule.customerName}" แล้วเมื่อ ${new Date().toLocaleTimeString('th-TH')} น.`,
+          type: 'technician_checkin',
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        });
+
+        toast.success('📍 เช็คอินถึงหน้างานสำเร็จเรียบร้อย!', { id: toastId });
+      },
+      (error) => {
+        toast.error('ไม่สามารถเช็คอินได้ กรุณาเปิด Location (GPS)', { id: toastId });
+        console.error(error);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const pendingSchedules = useMemo(() => schedules.filter(s => s.status !== 'completed'), [schedules]);
+  const completedSchedules = useMemo(() => schedules.filter(s => s.status === 'completed'), [schedules]);
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
+      
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>ตารางคิวงาน</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Maintenance Schedule & Appointments
-          </p>
+          <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>ตารางงานซ่อมบำรุง</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Maintenance Schedule & Technician GPS Tracking</p>
         </div>
-        {!showForm && (
-          <button 
-            onClick={() => setShowForm(true)}
-            style={{ 
-              background: 'linear-gradient(135deg, #00F0FF 0%, #0080FF 100%)', 
-              color: 'white', 
-              padding: '0.75rem 1.5rem', 
-              borderRadius: '8px', 
-              border: 'none', 
-              fontWeight: 'bold', 
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              boxShadow: '0 4px 15px rgba(0, 128, 255, 0.4)'
-            }}
-          >
-            <Plus size={20} /> เพิ่มคิวงาน
-          </button>
-        )}
+        
+        <button 
+          onClick={() => {
+            if (showForm) resetForm();
+            else setShowForm(true);
+          }}
+          className="primary-btn"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          {showForm ? 'ปิดฟอร์ม' : <><Plus size={20} /> เพิ่มคิวงานใหม่</>}
+        </button>
       </div>
 
+      {/* Form Section */}
       {showForm && (
-        <div className="equipment-card animate-fade-in" style={{ padding: '2rem', marginBottom: '2rem', border: '1px solid var(--accent-primary)' }}>
-          <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Calendar size={20} color="var(--accent-primary)" />
-            {editingId ? 'แก้ไขคิวงาน' : 'บันทึกคิวงานใหม่'}
-          </h3>
+        <div className="equipment-card" style={{ padding: '2rem', marginBottom: '2rem', border: '1px solid var(--accent-primary)' }}>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>
+            {editingId ? 'แก้ไขข้อมูลคิวงาน' : 'เพิ่มคิวงานใหม่'}
+          </h2>
           
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>ชื่อลูกค้า / สถานที่</label>
                 <input 
@@ -367,20 +373,32 @@ const MaintenanceSchedule = () => {
               </div>
             </div>
 
+            {/* GPS Location Input & Pin Button */}
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <MapPin size={16} /> ที่อยู่ / พิกัด (Optional — ใส่ชื่อสถานที่หรือลิงก์ Google Maps)
+                <MapPin size={16} /> ที่อยู่ / ลิงก์ Google Maps / พิกัด GPS
               </label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="เช่น บ้านเลขที่ 123 ถนนสุขุมวิท กรุงเทพ หรือวาง Link Google Maps"
-                style={{ width: '100%', padding: '1rem', borderRadius: '8px', fontSize: '1rem' }}
-              />
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  placeholder="เช่น บ้านเลขที่ 123 กรุงเทพ หรือวาง ลิงก์ Google Maps"
+                  style={{ flex: 1, padding: '1rem', borderRadius: '8px', fontSize: '1rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={handleFetchGpsLocation}
+                  disabled={gettingGps}
+                  style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', color: '#10b981', padding: '0.75rem 1rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
+                >
+                  <Compass size={18} /> {gettingGps ? 'กำลังปักหมุด...' : '📍 ดึงพิกัด GPS'}
+                </button>
+              </div>
             </div>
 
+            {/* Before/After Images */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               {[['beforeImg', 'รูปก่อนซ่อม 📸'], ['afterImg', 'รูปหลังซ่อม ✅']].map(([field, label]) => (
                 <div key={field}>
@@ -449,49 +467,40 @@ const MaintenanceSchedule = () => {
                   }
 
                   setFormData(prev => {
-                    const existingPart = prev.partsUsed?.find(p => p.id === selectedId);
-                    if (existingPart) {
-                      return {
-                        ...prev,
-                        partsUsed: prev.partsUsed.map(p => p.id === selectedId ? { ...p, qty: p.qty + qty } : p)
-                      };
+                    const existingIdx = prev.partsUsed.findIndex(p => p.id === item.id);
+                    let newParts = [...prev.partsUsed];
+                    if (existingIdx >= 0) {
+                      newParts[existingIdx].qty += qty;
                     } else {
-                      return {
-                        ...prev,
-                        partsUsed: [...(prev.partsUsed || []), { id: item.id, name: item.name, qty, unitPrice: item.unitPrice }]
-                      };
+                      newParts.push({ id: item.id, name: item.name, qty, unitPrice: item.unitPrice });
                     }
+                    return { ...prev, partsUsed: newParts };
                   });
-                  select.value = '';
-                  qtyInput.value = '1';
-                }} style={{ padding: '0 1rem', background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-                  <Plus size={20} />
+                  toast.success(`เพิ่ม ${item.name} x${qty} แล้ว`);
+                }} style={{ background: 'var(--accent-primary)', border: 'none', color: 'white', padding: '0.75rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                  + เพิ่ม
                 </button>
               </div>
 
-              {formData.partsUsed && formData.partsUsed.length > 0 && (
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+              {/* Parts Table */}
+              {formData.partsUsed.length > 0 && (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-tertiary)' }}>
                       <th style={{ textAlign: 'left', padding: '0.5rem' }}>รายการ</th>
                       <th style={{ textAlign: 'center', padding: '0.5rem' }}>จำนวน</th>
-                      <th style={{ textAlign: 'right', padding: '0.5rem' }}>รวมราคา</th>
-                      <th style={{ width: '40px' }}></th>
+                      <th style={{ textAlign: 'right', padding: '0.5rem' }}>รวม</th>
+                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>ลบ</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {formData.partsUsed.map((part, index) => (
-                      <tr key={index} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    {formData.partsUsed.map((part, idx) => (
+                      <tr key={part.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                         <td style={{ padding: '0.5rem' }}>{part.name}</td>
                         <td style={{ textAlign: 'center', padding: '0.5rem' }}>{part.qty}</td>
-                        <td style={{ textAlign: 'right', padding: '0.5rem', color: 'var(--accent-solar)' }}>฿{(part.qty * Number(part.unitPrice)).toLocaleString()}</td>
-                        <td style={{ textAlign: 'center' }}>
-                          <button type="button" onClick={() => {
-                            setFormData(prev => ({
-                              ...prev,
-                              partsUsed: prev.partsUsed.filter((_, i) => i !== index)
-                            }));
-                          }} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                        <td style={{ textAlign: 'right', padding: '0.5rem' }}>฿{(part.qty * Number(part.unitPrice)).toLocaleString()}</td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                          <button type="button" onClick={() => setFormData(p => ({ ...p, partsUsed: p.partsUsed.filter((_, i) => i !== idx) }))} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
                             <Trash2 size={16} />
                           </button>
                         </td>
@@ -550,6 +559,7 @@ const MaintenanceSchedule = () => {
                 onToggleStatus={() => handleToggleStatus(schedule.id, schedule.status)}
                 onEdit={() => handleEdit(schedule)}
                 onDelete={() => deleteSchedule(schedule.id)}
+                onCheckIn={() => handleTechnicianCheckIn(schedule)}
               />
             ))}
           </div>
@@ -569,6 +579,7 @@ const MaintenanceSchedule = () => {
                 onToggleStatus={() => handleToggleStatus(schedule.id, schedule.status)}
                 onEdit={() => handleEdit(schedule)}
                 onDelete={() => deleteSchedule(schedule.id)}
+                onCheckIn={() => handleTechnicianCheckIn(schedule)}
               />
             ))}
           </div>
@@ -579,10 +590,9 @@ const MaintenanceSchedule = () => {
   );
 };
 
-const ScheduleCard = ({ schedule, onToggleStatus, onEdit, onDelete }) => {
+const ScheduleCard = ({ schedule, onToggleStatus, onEdit, onDelete, onCheckIn }) => {
   const isCompleted = schedule.status === 'completed';
   
-  // Format date to Thai format
   let dateObj = new Date(schedule.date);
   if (isNaN(dateObj)) {
     const parts = schedule.date.split(/[\/\-]/);
@@ -595,8 +605,16 @@ const ScheduleCard = ({ schedule, onToggleStatus, onEdit, onDelete }) => {
   const getAccentColor = () => {
     if (schedule.equipmentType.includes('Solar')) return 'var(--accent-solar)';
     if (schedule.equipmentType.includes('Air')) return 'var(--accent-ac)';
-    return 'var(--text-primary)';
+    return 'var(--accent-primary)';
   };
+
+  const navUrl = schedule.location
+    ? schedule.location.startsWith('http')
+      ? schedule.location
+      : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(schedule.location)}`
+    : null;
+
+  const checkIn = schedule.checkInInfo;
 
   return (
     <div className="equipment-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden' }}>
@@ -656,17 +674,81 @@ const ScheduleCard = ({ schedule, onToggleStatus, onEdit, onDelete }) => {
             <span style={{ color: 'var(--accent-solar)' }}>฿{Number(schedule.cost).toLocaleString()}</span>
           </div>
         )}
-        {/* GPS Map Link */}
-        {schedule.location && (
+
+        {/* GPS Google Maps Navigation Button */}
+        {navUrl && (
           <a
-            href={schedule.location.startsWith('http') ? schedule.location : `https://maps.google.com/?q=${encodeURIComponent(schedule.location)}`}
+            href={navUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem', padding: '0.6rem 0.75rem', borderRadius: '8px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981', fontSize: '0.85rem', textDecoration: 'none', fontWeight: '500' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              marginTop: '0.5rem',
+              padding: '0.7rem 0.9rem',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: 'white',
+              fontSize: '0.9rem',
+              textDecoration: 'none',
+              fontWeight: 'bold',
+              boxShadow: '0 4px 12px rgba(16,185,129,0.3)',
+              transition: 'all 0.2s',
+            }}
           >
-            <MapPin size={14} /> เปิดแผนที่ Google Maps
+            <Navigation size={18} /> 🧭 เปิดนำทาง Google Maps ไปบ้านลูกค้า
           </a>
         )}
+
+        {/* Technician GPS Check-in Section */}
+        {!isCompleted && (
+          <div style={{ marginTop: '0.5rem' }}>
+            {checkIn ? (
+              <div style={{ padding: '0.75rem', borderRadius: '8px', background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                <span style={{ color: '#10b981', fontWeight: 'bold', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <MapPin size={16} /> ✅ ช่างเช็คอินถึงหน้างานแล้ว
+                </span>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                  โดย: {checkIn.technicianEmail} | {new Date(checkIn.time).toLocaleString('th-TH')}
+                </span>
+                <a
+                  href={`https://www.google.com/maps?q=${checkIn.lat},${checkIn.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#10b981', fontSize: '0.78rem', textDecoration: 'underline', marginTop: '0.2rem' }}
+                >
+                  📍 ดูพิกัดปักหมุดจริงบนแผนที่ ({checkIn.lat?.toFixed(4)}, {checkIn.lng?.toFixed(4)})
+                </a>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={onCheckIn}
+                style={{
+                  width: '100%',
+                  padding: '0.7rem 0.9rem',
+                  borderRadius: '8px',
+                  background: 'rgba(245,158,11,0.15)',
+                  border: '1px solid #f59e0b',
+                  color: '#f59e0b',
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Compass size={18} /> 📍 กดเช็คอินเมื่อถึงหน้างานลูกค้า (GPS Check-in)
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Before/After images */}
         {(schedule.beforeImg || schedule.afterImg) && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.75rem' }}>
