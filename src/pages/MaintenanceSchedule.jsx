@@ -218,8 +218,8 @@ const MaintenanceSchedule = () => {
     );
   };
 
-  const pendingSchedules = useMemo(() => schedules.filter(s => s.status !== 'completed'), [schedules]);
-  const completedSchedules = useMemo(() => schedules.filter(s => s.status === 'completed'), [schedules]);
+  const pendingSchedules = useMemo(() => (schedules || []).filter(s => s?.status !== 'completed'), [schedules]);
+  const completedSchedules = useMemo(() => (schedules || []).filter(s => s?.status === 'completed'), [schedules]);
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
@@ -591,6 +591,7 @@ const MaintenanceSchedule = () => {
 };
 
 const ScheduleCard = ({ schedule, onToggleStatus, onEdit, onDelete, onCheckIn }) => {
+  const { userRole } = useAuth();
   const isCompleted = schedule.status === 'completed';
   
   let dateObj = new Date(schedule.date);
@@ -603,8 +604,8 @@ const ScheduleCard = ({ schedule, onToggleStatus, onEdit, onDelete, onCheckIn })
   const thaiDate = isNaN(dateObj) ? schedule.date : dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
   
   const getAccentColor = () => {
-    if (schedule.equipmentType.includes('Solar')) return 'var(--accent-solar)';
-    if (schedule.equipmentType.includes('Air')) return 'var(--accent-ac)';
+    if (schedule.equipmentType && schedule.equipmentType.includes('Solar')) return 'var(--accent-solar)';
+    if (schedule.equipmentType && schedule.equipmentType.includes('Air')) return 'var(--accent-ac)';
     return 'var(--accent-primary)';
   };
 
