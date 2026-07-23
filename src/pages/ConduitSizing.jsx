@@ -79,7 +79,7 @@ const ConduitSizing = () => {
           <ArrowLeft size={24} />
         </button>
         <div>
-          <h1 className="text-gradient-ac" style={{ marginBottom: 0, fontSize: '2rem' }}>คำนวณขนาดท่อร้อยสายไฟ</h1>
+          <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>คำนวณขนาดท่อร้อยสายไฟ</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Conduit Fill Calculator (Max 40%)</p>
         </div>
         <button 

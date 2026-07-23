@@ -10,9 +10,10 @@ const CalculatorsHub = () => {
       </p>
 
       <div className="grid-2">
+        {/* BTU Air Con - Cyan / Blue */}
         <Link to="/learning/btu" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(0, 240, 255, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-ac)' }}>
+            <div style={{ background: 'rgba(0, 240, 255, 0.15)', padding: '1rem', borderRadius: '50%', color: '#00f0ff' }}>
               <Thermometer size={48} />
             </div>
           </div>
@@ -22,9 +23,10 @@ const CalculatorsHub = () => {
           </div>
         </Link>
 
+        {/* Solar ROI - Orange */}
         <Link to="/learning/calculator" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: '#ff7300' }}>
               <Calculator size={48} />
             </div>
           </div>
@@ -34,9 +36,10 @@ const CalculatorsHub = () => {
           </div>
         </Link>
 
+        {/* Cable Sizing - Orange */}
         <Link to="/learning/cable" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: '#ff7300' }}>
               <Zap size={48} />
             </div>
           </div>
@@ -46,9 +49,10 @@ const CalculatorsHub = () => {
           </div>
         </Link>
 
+        {/* PFC - Orange */}
         <Link to="/learning/pfc" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: '#ff7300' }}>
               <Zap size={48} />
             </div>
           </div>
@@ -58,9 +62,10 @@ const CalculatorsHub = () => {
           </div>
         </Link>
 
+        {/* Voltage Drop - Orange */}
         <Link to="/learning/voltage-drop" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: '#ff7300' }}>
               <ShieldAlert size={48} />
             </div>
           </div>
@@ -70,9 +75,10 @@ const CalculatorsHub = () => {
           </div>
         </Link>
 
+        {/* Load Schedule - Orange */}
         <Link to="/learning/load-schedule" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: '#ff7300' }}>
               <ListChecks size={48} />
             </div>
           </div>
@@ -81,9 +87,11 @@ const CalculatorsHub = () => {
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>Load Schedule & Phase Balancing สำหรับไฟ 3 เฟส</p>
           </div>
         </Link>
+
+        {/* Lighting - Orange */}
         <Link to="/learning/lighting" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: '#ff7300' }}>
               <Lightbulb size={48} />
             </div>
           </div>
@@ -92,9 +100,11 @@ const CalculatorsHub = () => {
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>คำนวณจำนวนหลอดไฟเพื่อความสว่างที่พอดี</p>
           </div>
         </Link>
+
+        {/* Conduit - Orange */}
         <Link to="/learning/conduit" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: '#ff7300' }}>
               <Cylinder size={48} />
             </div>
           </div>
@@ -103,9 +113,11 @@ const CalculatorsHub = () => {
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>หาขนาดท่อ PVC/EMT ให้พอดีกับจำนวนสายไฟ (Max 40%)</p>
           </div>
         </Link>
+
+        {/* Motor - Orange */}
         <Link to="/learning/motor" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-secondary)' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: '#ff7300' }}>
               <Cpu size={48} />
             </div>
           </div>
