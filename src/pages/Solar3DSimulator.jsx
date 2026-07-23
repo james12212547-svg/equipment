@@ -106,15 +106,72 @@ const Solar3DSimulator = () => {
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, width, height);
 
+    // Sun & Light Rays (Draw in background)
+    const sunAngleRad = (normTime * Math.PI);
+    const sunX = width - (normTime * (width - 100));
+    const sunY = height - 120 - Math.sin(sunAngleRad) * (height - 180);
+
+    ctx.shadowBlur = 25;
+    ctx.shadowColor = '#f59e0b';
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, 26, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
     // Ground Surface
     ctx.fillStyle = '#15803d';
     ctx.fillRect(0, height - 100, width, 100);
 
-    // House 3D Isometric View
     const centerX = width / 2;
     const centerY = height / 2 + 40;
 
-    // Draw House Walls
+    // Draw Obstacles (Trees / Buildings) on BOTH sides to explain morning & evening shading
+    const { azimuthDeg, elevationDeg } = calculateSunPosition(timeOfDay);
+    const isMorningShade = timeOfDay < 9.5;
+    const isEveningShade = timeOfDay > 15.5;
+
+    if (obstacleType !== 'none') {
+      const drawObstacle = (ox, oy, type) => {
+        if (type === 'tree') {
+          ctx.fillStyle = '#78350f'; // Trunk
+          ctx.fillRect(ox - 10, oy - 30, 20, 80);
+          ctx.fillStyle = '#14532d'; // Leaves
+          ctx.beginPath();
+          ctx.arc(ox, oy - 60, 45, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (type === 'building') {
+          ctx.fillStyle = '#64748b'; // Building Wall
+          ctx.fillRect(ox - 45, oy - 150, 90, 200);
+          ctx.fillStyle = '#475569'; // Windows
+          for (let i = 0; i < 4; i++) {
+            ctx.fillRect(ox - 30, oy - 130 + (i * 30), 20, 15);
+            ctx.fillRect(ox + 10, oy - 130 + (i * 30), 20, 15);
+          }
+        }
+      };
+
+      // Draw East Obstacle (Morning Shade) & West Obstacle (Evening Shade)
+      drawObstacle(centerX + 260, centerY + 20, obstacleType); // East
+      drawObstacle(centerX - 260, centerY + 20, obstacleType); // West
+
+      // Draw dynamic shadow for East obstacle in morning
+      if (isMorningShade) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.beginPath();
+        ctx.ellipse(centerX + 100, centerY + 40, 140, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Draw dynamic shadow for West obstacle in evening
+      if (isEveningShade) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.beginPath();
+        ctx.ellipse(centerX - 100, centerY + 40, 140, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // House Walls
     ctx.fillStyle = '#cbd5e1';
     ctx.beginPath();
     ctx.moveTo(centerX - 120, centerY);
@@ -126,7 +183,7 @@ const Solar3DSimulator = () => {
     ctx.strokeStyle = '#475569';
     ctx.stroke();
 
-    // Draw 3D Roof
+    // 3D Roof
     ctx.fillStyle = roofType === 'flat' ? '#64748b' : '#b91c1c';
     ctx.beginPath();
     const pitchOffset = (roofPitch / 45) * 50;
@@ -145,7 +202,7 @@ const Solar3DSimulator = () => {
     ctx.fill();
     ctx.stroke();
 
-    // Draw Solar Panels Grid on Roof
+    // Draw Solar Panels Grid on Roof (Shading Effect Applied)
     const panelRows = 2;
     const panelCols = Math.min(8, Math.ceil(panelCount / 2));
     const startPx = centerX - (panelCols * 14);
@@ -154,64 +211,31 @@ const Solar3DSimulator = () => {
       for (let c = 0; c < panelCols; c++) {
         const px = startPx + c * 28;
         const py = centerY - 35 - pitchOffset * 0.5 + r * 16;
-        ctx.fillStyle = '#1e3a8a'; // Solar Blue
+        
+        // Determine if this specific panel is shaded by obstacle
+        const isPanelShaded = obstacleType !== 'none' && (
+          (isMorningShade && c >= panelCols / 2) || // East shadow hits right panels
+          (isEveningShade && c < panelCols / 2)     // West shadow hits left panels
+        );
+
+        ctx.fillStyle = isPanelShaded ? '#1e293b' : '#1e3a8a'; // Dark grey if shaded, blue if active
         ctx.fillRect(px, py, 24, 12);
-        ctx.strokeStyle = '#38bdf8';
+        ctx.strokeStyle = isPanelShaded ? '#334155' : '#38bdf8';
         ctx.strokeRect(px, py, 24, 12);
       }
     }
 
-    // Draw Obstacle (Tree / Building) & Cast Shadows
-    const { azimuthDeg, elevationDeg } = calculateSunPosition(timeOfDay);
-    if (obstacleType !== 'none') {
-      const treeX = centerX - 220;
-      const treeY = centerY + 30;
-
-      if (obstacleType === 'tree') {
-        // Tree Trunk & Leaves
-        ctx.fillStyle = '#78350f';
-        ctx.fillRect(treeX - 8, treeY - 20, 16, 60);
-        ctx.fillStyle = '#15803d';
-        ctx.beginPath();
-        ctx.arc(treeX, treeY - 50, 40, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Draw Dynamic Shadow
-      const shadowLength = (90 - Number(elevationDeg)) * 2.5;
-      const shadowAngle = ((Number(azimuthDeg) - 180) * Math.PI) / 180;
-      const shadowEndX = treeX + Math.sin(shadowAngle) * shadowLength;
-      const shadowEndY = treeY + Math.cos(shadowAngle) * shadowLength * 0.4;
-
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    // Sun Rays to Roof (only if not heavily shaded)
+    if (!isMorningShade && !isEveningShade) {
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
       ctx.beginPath();
-      ctx.ellipse(shadowEndX, shadowEndY, 50, 20, 0, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(sunX, sunY);
+      ctx.lineTo(centerX, centerY - 40);
+      ctx.stroke();
+      ctx.setLineDash([]);
     }
-
-    // Draw Sun & Light Rays
-    const sunAngleRad = (normTime * Math.PI);
-    const sunX = width - (normTime * (width - 100));
-    const sunY = height - 120 - Math.sin(sunAngleRad) * (height - 180);
-
-    // Glowing Sun
-    ctx.shadowBlur = 25;
-    ctx.shadowColor = '#f59e0b';
-    ctx.fillStyle = '#fbbf24';
-    ctx.beginPath();
-    ctx.arc(sunX, sunY, 26, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Sun Rays to Roof
-    ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(sunX, sunY);
-    ctx.lineTo(centerX, centerY - 40);
-    ctx.stroke();
-    ctx.setLineDash([]);
 
   }, [timeOfDay, roofType, roofPitch, panelCount, obstacleType]);
 
