@@ -135,7 +135,7 @@ function AppContent() {
             <Route path="/work-log" element={<ProtectedRoute><WorkLog /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><ProjectDashboard /></ProtectedRoute>} />
             <Route path="/project/:id" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
-            <Route path="/lab-logger" element={<ProtectedRoute><LabLogger /></ProtectedRoute>} />
+            <Route path="/learning/lab-logger" element={<ProtectedRoute><LabLogger /></ProtectedRoute>} />
             <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
             <Route path="/schedule" element={<ProtectedRoute><MaintenanceSchedule /></ProtectedRoute>} />
             <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />

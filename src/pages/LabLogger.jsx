@@ -142,7 +142,7 @@ const LabLogger = () => {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {experiments.length === 0 ? (
+        {!experiments || experiments.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-color)' }}>
             <p style={{ color: 'var(--text-tertiary)' }}>ยังไม่มีข้อมูลการทดลอง เริ่มเพิ่มข้อมูลด้านบนเลย</p>
           </div>
