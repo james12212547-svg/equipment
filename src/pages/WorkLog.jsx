@@ -363,20 +363,25 @@ const WorkLog = () => {
             ข้อมูลสมุดจดและรูปภาพทั้งหมดถูกเก็บไว้ในเครื่องนี้ (Offline) หากคุณต้องการย้ายข้อมูลไปเครื่องอื่น หรือคอมพิวเตอร์ สามารถกดปุ่มด้านล่างเพื่อดาวน์โหลดไฟล์สำรองและนำไป Import ได้ครับ
           </p>
           
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button 
-              onClick={handleExport}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', transition: 'all 0.2s' }}
-            >
-              <Download size={20} color="var(--accent-primary)" />
-              Export ข้อมูล (ดาวน์โหลด)
-            </button>
-            
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', transition: 'all 0.2s' }}>
-              <Upload size={20} color="var(--accent-secondary)" />
-              Import ข้อมูล (นำเข้า)
-              <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
-            </label>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button 
+                onClick={handleExport}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', transition: 'all 0.2s' }}
+              >
+                <Download size={20} color="var(--accent-primary)" />
+                Export ข้อมูล (ดาวน์โหลด)
+              </button>
+              
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '1rem', transition: 'all 0.2s' }}>
+                <Upload size={20} color="var(--accent-secondary)" />
+                Import ข้อมูล (นำเข้า)
+                <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
+              </label>
+            </div>
+            <span style={{ fontSize: '0.8rem', color: 'var(--accent-solar)', fontWeight: 'bold', marginTop: '0.4rem' }}>
+              📌 ปุ่ม Import รองรับเฉพาะไฟล์สำรองข้อมูล: .JSON
+            </span>
           </div>
         </div>
       </div>
