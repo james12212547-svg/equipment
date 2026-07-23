@@ -40,6 +40,7 @@ import RevenueDashboard from './pages/RevenueDashboard';
 import TeamChat from './pages/TeamChat';
 import MaintenanceReminders from './pages/MaintenanceReminders';
 import Notifications from './pages/Notifications';
+import AIDiagnostic from './pages/AIDiagnostic';
 import ReloadPrompt from './components/ReloadPrompt';
 import { requestNotificationPermission, scheduleAppointmentReminders } from './utils/notifications';
 
@@ -135,6 +136,7 @@ function AppContent() {
             <Route path="/team-chat" element={<ProtectedRoute><TeamChat /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/reminders" element={<ProtectedRoute><MaintenanceReminders /></ProtectedRoute>} />
+            <Route path="/ai-diagnostic" element={<ProtectedRoute><AIDiagnostic /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             
             {/* Admin Only */}

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell, LogOut, CreditCard } from 'lucide-react';
+import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell, LogOut, CreditCard, Sparkles } from 'lucide-react';
 import useStore from '../store/useStore';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -32,6 +32,14 @@ const Navigation = () => {
       >
         <BookOpen size={24} />
         <span>ความรู้</span>
+      </NavLink>
+
+      <NavLink 
+        to="/ai-diagnostic" 
+        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+      >
+        <Sparkles size={24} color="var(--accent-primary)" />
+        <span>AI สแกน</span>
       </NavLink>
 
       <NavLink to="/schedule" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
