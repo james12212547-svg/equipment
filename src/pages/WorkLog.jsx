@@ -253,6 +253,7 @@ const WorkLog = () => {
                   <button type="button" onClick={() => fileInputRefBefore.current.click()} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Camera size={16} /> {preview.before ? 'เปลี่ยนรูป' : 'ถ่ายรูป / เลือกรูป'}
                   </button>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>📌 รองรับภาพ: JPG, PNG, WEBP (ไม่เกิน 10MB)</div>
                 </div>
 
                 {/* After Image */}
@@ -269,6 +270,7 @@ const WorkLog = () => {
                   <button type="button" onClick={() => fileInputRefAfter.current.click()} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Camera size={16} /> {preview.after ? 'เปลี่ยนรูป' : 'ถ่ายรูป / เลือกรูป'}
                   </button>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>📌 รองรับภาพ: JPG, PNG, WEBP (ไม่เกิน 10MB)</div>
                 </div>
               </div>
 

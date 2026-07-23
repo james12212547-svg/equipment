@@ -185,6 +185,7 @@ const EquipmentDetail = () => {
           <Upload size={18} />
           {displayImage ? 'เปลี่ยนรูปภาพ' : 'อัปโหลดรูปภาพ'}
         </button>
+        <span style={{ position: 'absolute', top: '65px', right: '2rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', zIndex: 10, background: 'rgba(0,0,0,0.6)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>📌 รองรับภาพ: JPG, PNG, WEBP (ไม่เกิน 10MB)</span>
         <input 
           type="file" 
           ref={fileInputRef}

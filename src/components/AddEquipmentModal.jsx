@@ -134,6 +134,7 @@ const AddEquipmentModal = ({ categoryId, onClose, onSave, initialData = null }) 
             </div>
             <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleImageCapture} />
             <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleImageCapture} />
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginTop: '0.4rem', display: 'block' }}>📌 รองรับไฟล์รูปภาพ: JPG, JPEG, PNG, WEBP (ขนาดไม่เกิน 10MB)</span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

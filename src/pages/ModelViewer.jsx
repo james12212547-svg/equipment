@@ -282,7 +282,7 @@ const ModelViewer = () => {
                 <input type="file" accept=".glb,.gltf" onChange={handleFileUpload} style={{ display: 'none' }} />
               </label>
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '1rem' }}>รองรับไฟล์ .glb / .gltf • บันทึกถาวรในเครื่องคุณ</p>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginBottom: '1rem' }}>📌 รองรับไฟล์โมเดล 3D: .GLB, .GLTF, .OBJ (ขนาดไม่เกิน 50MB) • บันทึกถาวรในเครื่องคุณ</p>
 
             {uploadedModels.length === 0 ? (
               <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', background: 'var(--bg-tertiary)', border: '2px dashed var(--border-color)', color: 'var(--text-tertiary)', padding: '2rem', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center' }}>

@@ -322,6 +322,10 @@ const AIDiagnostic = () => {
               <Camera size={22} /> เลือกรูปภาพ หรือ ถ่ายรูปอุปกรณ์
             </label>
 
+            <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
+              📌 รองรับไฟล์รูปภาพ: JPG, JPEG, PNG, WEBP, HEIC (ขนาดไม่เกิน 15MB)
+            </div>
+
             {imagePreview && (
               <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
                 <img
