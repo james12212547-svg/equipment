@@ -45,6 +45,7 @@ import SingleLineDiagram from './pages/SingleLineDiagram';
 import Solar3DSimulator from './pages/Solar3DSimulator';
 import GamifiedSimulator from './pages/GamifiedSimulator';
 import ReloadPrompt from './components/ReloadPrompt';
+import ErrorBoundary from './components/ErrorBoundary';
 import { requestNotificationPermission, scheduleAppointmentReminders } from './utils/notifications';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -159,9 +160,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
