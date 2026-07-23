@@ -689,6 +689,14 @@ const SingleLineDiagram = () => {
               const vd = getNodeVoltageDrop(toNode);
               const status = getVoltageDropStatus(toNode, vd);
 
+              // Calculate staggered position along the line to prevent any label overlapping!
+              const t = 0.3 + ((idx % 4) * 0.18); 
+              const labelX = x1 + (x2 - x1) * t;
+              const labelY = y1 + (y2 - y1) * t;
+
+              const labelText = toNode.cableSize || (systemPhase === '3P' ? '4x4 sq.mm.' : '2x2.5 sq.mm.');
+              const badgeWidth = Math.max(100, labelText.length * 6.2 + 14);
+
               return (
                 <g key={idx} style={{ cursor: 'pointer' }} onClick={(e) => handleDeleteConnection(conn.from, conn.to, e)}>
                   {/* Thick Neon Connection Line */}
@@ -708,27 +716,28 @@ const SingleLineDiagram = () => {
                     <circle cx={x1} cy={y1} r="6" fill="#ff7300" stroke="#ffffff" strokeWidth="2" />
                   )}
 
-                  {/* Cable Size Badge (Clickable to delete wire) */}
+                  {/* Cable Size Badge (Staggered & Auto-width to prevent overlap) */}
                   <g>
                     <rect
-                      x={(x1 + x2) / 2 - 40}
-                      y={(y1 + y2) / 2 - 18}
-                      width="80"
-                      height="16"
-                      rx="4"
-                      fill="#0f172a"
+                      x={labelX - badgeWidth / 2}
+                      y={labelY - 10}
+                      width={badgeWidth}
+                      height="20"
+                      rx="5"
+                      fill="#020617"
                       stroke={status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : '#00f0ff'}
-                      strokeWidth="1"
+                      strokeWidth="1.5"
+                      style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.8))' }}
                     />
                     <text
-                      x={(x1 + x2) / 2}
-                      y={(y1 + y2) / 2 - 6}
-                      fill={status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : '#00f0ff'}
-                      fontSize="9"
+                      x={labelX}
+                      y={labelY + 4}
+                      fill={status.isCritical ? '#fca5a5' : status.isWarning ? '#fde047' : '#ffffff'}
+                      fontSize="10"
                       textAnchor="middle"
                       fontWeight="bold"
                     >
-                      {toNode.cableSize || '2x2.5 sq.mm.'}
+                      {labelText}
                     </text>
                   </g>
                 </g>
