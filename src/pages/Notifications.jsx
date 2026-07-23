@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, CheckCircle, Info, Calendar } from 'lucide-react';
+import { Bell, CheckCircle, Info, Calendar, ShieldAlert } from 'lucide-react';
 import useStore from '../store/useStore';
 import { markNotificationReadDB } from '../utils/db';
 import { useNavigate } from 'react-router-dom';
@@ -12,10 +12,7 @@ const Notifications = () => {
     if (!notification.isRead) {
       await markNotificationReadDB(notification.id);
     }
-    
-    if (notification.type === 'schedule_assigned') {
-      navigate('/schedule');
-    }
+    if (notification.type === 'schedule_assigned') navigate('/schedule');
   };
 
   const markAllAsRead = async () => {
@@ -53,9 +50,11 @@ const Notifications = () => {
             <div 
               key={notification.id}
               onClick={() => handleNotificationClick(notification)}
-              style={{ 
-                background: notification.isRead ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
-                border: `1px solid ${notification.isRead ? 'var(--border-color)' : 'var(--accent-primary)'}`,
+                          style={{ 
+                background: notification.type === 'security_alert' 
+                  ? 'rgba(239,68,68,0.08)'
+                  : notification.isRead ? 'var(--bg-secondary)' : 'var(--bg-tertiary)',
+                border: `1px solid ${notification.type === 'security_alert' ? 'rgba(239,68,68,0.5)' : notification.isRead ? 'var(--border-color)' : 'var(--accent-primary)'}`,
                 padding: '1.25rem',
                 borderRadius: '12px',
                 cursor: 'pointer',
@@ -67,20 +66,31 @@ const Notifications = () => {
               }}
             >
               <div style={{ 
-                background: notification.type === 'schedule_assigned' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255, 255, 255, 0.1)', 
-                color: notification.type === 'schedule_assigned' ? '#3b82f6' : 'var(--text-primary)',
+                background: notification.type === 'security_alert'
+                  ? 'rgba(239,68,68,0.15)'
+                  : notification.type === 'schedule_assigned' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255, 255, 255, 0.1)', 
+                color: notification.type === 'security_alert'
+                  ? '#ef4444'
+                  : notification.type === 'schedule_assigned' ? '#3b82f6' : 'var(--text-primary)',
                 padding: '0.75rem', 
                 borderRadius: '50%'
               }}>
-                {notification.type === 'schedule_assigned' ? <Calendar size={24} /> : <Info size={24} />}
+                {notification.type === 'security_alert' 
+                  ? <ShieldAlert size={24} />
+                  : notification.type === 'schedule_assigned' ? <Calendar size={24} /> : <Info size={24} />}
               </div>
               
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-                  <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.05rem' }}>{notification.title}</h4>
-                  {!notification.isRead && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-primary)', flexShrink: 0, marginTop: '6px' }} />}
+                  <h4 style={{ margin: 0, color: notification.type === 'security_alert' ? '#ef4444' : 'var(--text-primary)', fontSize: '1.05rem' }}>
+                    {notification.type === 'security_alert' ? '🔒 Security Alert' : notification.title}
+                  </h4>
+                  {!notification.isRead && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: notification.type === 'security_alert' ? '#ef4444' : 'var(--accent-primary)', flexShrink: 0, marginTop: '6px' }} />}
                 </div>
                 <p style={{ margin: '0 0 0.5rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.4' }}>{notification.message}</p>
+                {notification.type === 'security_alert' && notification.email && (
+                  <p style={{ margin: '0 0 0.5rem 0', color: '#ef4444', fontSize: '0.8rem' }}>อีเมล: {notification.email} | พยายาม: {notification.attempts} ครั้ง</p>
+                )}
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
                   {new Date(notification.createdAt).toLocaleString('th-TH')}
                 </span>

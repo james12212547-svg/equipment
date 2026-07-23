@@ -233,3 +233,19 @@ export const uploadImageToStorage = async (base64String, path) => {
     return null;
   }
 };
+
+// ─── Security Alerts (Admin Notifications) ───────────────────────────────
+export const saveSecurityAlertDB = async (alert) => {
+  // Saves a security alert that all admins will see in Notifications
+  const id = `sec_${Date.now()}`;
+  await setDoc(doc(firestoreDb, 'notifications', id), {
+    id,
+    type: 'security_alert',
+    message: alert.message,
+    email: alert.email,
+    attempts: alert.attempts,
+    createdAt: new Date().toISOString(),
+    isRead: false,
+    userEmail: 'admin', // broadcast to admin
+  });
+};
