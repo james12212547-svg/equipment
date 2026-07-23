@@ -206,14 +206,12 @@ const SingleLineDiagram = () => {
     let newX = e.clientX - dragOffset.x;
     let newY = e.clientY - dragOffset.y;
 
-    // Strict Canvas Bounds Clamping so nodes NEVER get lost outside bounds!
     const maxX = Math.max(50, rect.width - 170);
     const maxY = Math.max(50, rect.height - 75);
 
     newX = Math.max(10, Math.min(maxX, newX));
     newY = Math.max(10, Math.min(maxY, newY));
 
-    // Snap to Grid 10px
     newX = Math.round(newX / 10) * 10;
     newY = Math.round(newY / 10) * 10;
 
@@ -247,7 +245,6 @@ const SingleLineDiagram = () => {
     const mainBreakerNode = nodes.find(n => n.type === 'mccb' || n.type === 'grid');
     const actualMainBreaker = mainBreakerNode ? Number(mainBreakerNode.breakerAmp) || 50 : 50;
 
-    // Engineering Cable Sizing Rule: Iz >= In
     const cableSizingAmps = Math.max(totalAmps * 1.25, actualMainBreaker);
     const recommendedBreaker = Math.ceil(totalAmps * 1.25);
     
@@ -298,6 +295,7 @@ const SingleLineDiagram = () => {
     setNodes(prev => prev.map(n => n.id === selectedNodeId ? { ...n, [field]: value } : n));
   };
 
+  // Node Voltage Drop (%VD) Calculation
   const getNodeVoltageDrop = (node) => {
     if (!node.kw || node.kw <= 0 || !node.cableLength) return 0;
     const len = Number(node.cableLength) || 10;
@@ -324,6 +322,51 @@ const SingleLineDiagram = () => {
     }
 
     return ((vdVolts / v) * 100).toFixed(2);
+  };
+
+  // Multi-Threshold Voltage Drop Warning Status (Green / Orange / Red)
+  const getVoltageDropStatus = (node, vdVal) => {
+    const numVd = Number(vdVal);
+    if (!numVd || numVd <= 0) return { color: '#10b981', label: '', border: null, isWarning: false, isCritical: false };
+
+    const isMotor = node.type === 'motor';
+    const warningThreshold = isMotor ? 3.0 : 2.0;
+    const criticalThreshold = isMotor ? 5.0 : 3.0;
+
+    if (numVd > criticalThreshold) {
+      return {
+        color: '#ef4444', // Neon Red
+        bgColor: 'rgba(239, 68, 68, 0.25)',
+        label: `⚠️ เกินมาตรฐาน (${numVd}% > ${criticalThreshold}%)`,
+        border: '2px solid #ef4444',
+        boxShadow: '0 0 15px rgba(239, 68, 68, 0.8)',
+        isWarning: true,
+        isCritical: true,
+        badgeText: `🔴 VD: ${numVd}% (เกินเกณฑ์แนะนำเพิ่มสาย!)`
+      };
+    } else if (numVd > warningThreshold) {
+      return {
+        color: '#f59e0b', // Amber/Orange
+        bgColor: 'rgba(245, 158, 11, 0.2)',
+        label: `⚡ เตือนแรงดันตกสูง (${numVd}%)`,
+        border: '1.5px solid #f59e0b',
+        boxShadow: '0 0 10px rgba(245, 158, 11, 0.5)',
+        isWarning: true,
+        isCritical: false,
+        badgeText: `🍊 VD: ${numVd}% (เฝ้าระวัง)`
+      };
+    } else {
+      return {
+        color: '#10b981', // Emerald Green
+        bgColor: 'transparent',
+        label: 'ปกติ',
+        border: null,
+        boxShadow: null,
+        isWarning: false,
+        isCritical: false,
+        badgeText: `🟢 VD: ${numVd}%`
+      };
+    }
   };
 
   const handlePrintDiagram = () => window.print();
@@ -399,6 +442,7 @@ const SingleLineDiagram = () => {
             <tbody>
               {nodes.map((n, i) => {
                 const vd = getNodeVoltageDrop(n);
+                const status = getVoltageDropStatus(n, vd);
                 const kw = Number(n.kw) || 0;
                 const df = Number(n.demandFactor) || 100;
                 const amps = systemPhase === '3P' ? (kw * 1000 * (df/100)) / (Math.sqrt(3)*400*0.85) : (kw * 1000 * (df/100)) / (230*0.85);
@@ -413,8 +457,18 @@ const SingleLineDiagram = () => {
                     <td style={{ padding: '0.55rem', textAlign: 'center' }}>{n.breakerAmp}A ({n.icRating || '10kA'}/{n.tripCurve || 'C'})</td>
                     <td style={{ padding: '0.55rem', textAlign: 'center' }}>{n.cableSize || '2x2.5 sq.mm.'}</td>
                     <td style={{ padding: '0.55rem', textAlign: 'center' }}>{n.cableLength || 10} m</td>
-                    <td style={{ padding: '0.55rem', textAlign: 'center', fontWeight: 'bold', color: Number(vd) > 3.0 ? '#dc2626' : '#059669' }}>
-                      {vd > 0 ? `${vd}%` : '-'}
+                    <td style={{ padding: '0.55rem', textAlign: 'center', fontWeight: 'bold' }}>
+                      {vd > 0 ? (
+                        <span style={{
+                          color: status.color,
+                          background: status.isCritical ? '#fee2e2' : status.isWarning ? '#fef3c7' : '#d1fae5',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '4px',
+                          border: status.isCritical ? '1px solid #ef4444' : status.isWarning ? '1px solid #f59e0b' : '1px solid #10b981'
+                        }}>
+                          {vd}% {status.isCritical ? '⚠️ (เกินเกณฑ์)' : status.isWarning ? '⚡ (เตือน)' : ''}
+                        </span>
+                      ) : '-'}
                     </td>
                   </tr>
                 );
@@ -613,6 +667,8 @@ const SingleLineDiagram = () => {
               const y2 = toNode.y + 30;
 
               const isTap = toNode.type === 'spd' || toNode.isTapNode;
+              const vd = getNodeVoltageDrop(toNode);
+              const status = getVoltageDropStatus(toNode, vd);
 
               return (
                 <g key={idx} style={{ cursor: 'pointer' }} onClick={(e) => handleDeleteConnection(conn.from, conn.to, e)}>
@@ -622,10 +678,10 @@ const SingleLineDiagram = () => {
                     y1={y1}
                     x2={x2}
                     y2={y2}
-                    stroke={calcResults.isOverloaded ? '#ef4444' : '#00f0ff'}
+                    stroke={status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : calcResults.isOverloaded ? '#ef4444' : '#00f0ff'}
                     strokeWidth="4"
                     strokeDasharray={fromNode.type === 'solar' ? '6,6' : 'none'}
-                    style={{ filter: 'drop-shadow(0 0 6px rgba(0, 240, 255, 0.5))' }}
+                    style={{ filter: status.isCritical ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.9))' : 'drop-shadow(0 0 6px rgba(0, 240, 255, 0.5))' }}
                   />
 
                   {/* Junction Solid Dot for Parallel Tap Connections */}
@@ -642,13 +698,13 @@ const SingleLineDiagram = () => {
                       height="16"
                       rx="4"
                       fill="#0f172a"
-                      stroke="#00f0ff"
+                      stroke={status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : '#00f0ff'}
                       strokeWidth="1"
                     />
                     <text
                       x={(x1 + x2) / 2}
                       y={(y1 + y2) / 2 - 6}
-                      fill="#00f0ff"
+                      fill={status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : '#00f0ff'}
                       fontSize="9"
                       textAnchor="middle"
                       fontWeight="bold"
@@ -667,6 +723,7 @@ const SingleLineDiagram = () => {
             const isSelected = selectedNodeId === node.id;
             const isConnectTarget = connectStartId === node.id;
             const vd = getNodeVoltageDrop(node);
+            const status = getVoltageDropStatus(node, vd);
 
             return (
               <div
@@ -680,8 +737,8 @@ const SingleLineDiagram = () => {
                   padding: '0.6rem 0.8rem',
                   borderRadius: '10px',
                   background: isConnectTarget ? 'rgba(239, 68, 68, 0.25)' : isSelected ? 'rgba(15, 23, 42, 0.95)' : 'rgba(15, 23, 42, 0.85)',
-                  border: `2px solid ${isConnectTarget ? '#ef4444' : isSelected ? 'var(--accent-primary)' : compPreset.color}`,
-                  boxShadow: isSelected ? '0 0 18px rgba(255, 115, 0, 0.5)' : '0 4px 12px rgba(0,0,0,0.5)',
+                  border: status.isCritical ? '2px solid #ef4444' : status.isWarning ? '2px solid #f59e0b' : isConnectTarget ? '#ef4444' : isSelected ? 'var(--accent-primary)' : compPreset.color,
+                  boxShadow: status.isCritical ? '0 0 20px rgba(239, 68, 68, 0.9)' : status.isWarning ? '0 0 12px rgba(245, 158, 11, 0.7)' : isSelected ? '0 0 18px rgba(255, 115, 0, 0.5)' : '0 4px 12px rgba(0,0,0,0.5)',
                   cursor: isConnecting ? 'crosshair' : 'grab',
                   zIndex: 3,
                   transition: 'border 0.2s, box-shadow 0.2s',
@@ -699,9 +756,21 @@ const SingleLineDiagram = () => {
                   {node.kw > 0 && <span style={{ color: 'var(--accent-ac)', fontWeight: 'bold' }}>{node.kw} kW</span>}
                 </div>
 
+                {/* Multi-Threshold Voltage Drop Badge */}
                 {vd > 0 && (
-                  <div style={{ fontSize: '0.68rem', color: Number(vd) > 3.0 ? '#ef4444' : '#10b981', fontWeight: 'bold', marginTop: '0.2rem' }}>
-                    VD: {vd}% {Number(vd) > 3.0 ? '⚠️ (>3%)' : ''}
+                  <div style={{
+                    fontSize: '0.68rem',
+                    color: status.color,
+                    fontWeight: 'bold',
+                    marginTop: '0.3rem',
+                    padding: status.isWarning ? '0.2rem 0.35rem' : '0',
+                    borderRadius: '4px',
+                    background: status.bgColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <span>{status.badgeText}</span>
                   </div>
                 )}
               </div>
