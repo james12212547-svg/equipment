@@ -421,7 +421,7 @@ const SingleLineDiagram = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem', background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}>
             <div><strong>ชื่อตู้ไฟ (Panel Name):</strong> MDB-01 / Consumer Unit</div>
             <div><strong>พิกัดเมนเบรกเกอร์ (Main Breaker):</strong> {calcResults.actualMainBreaker}A ({calcResults.voltage}V)</div>
-            <div><strong>ขนาดสายเมน (Main Feeder):</strong> {calcResults.recommendedCable} ({calcResults.groundCable})</div>
+            <div><strong>ขนาดสายเมน (Main Feeder):</strong> {calcResults.recommendedCable} + G-{calcResults.groundCable}</div>
           </div>
 
           {/* Circuits Table */}
@@ -440,12 +440,14 @@ const SingleLineDiagram = () => {
               </tr>
             </thead>
             <tbody>
-              {nodes.map((n, i) => {
-                const vd = getNodeVoltageDrop(n);
-                const status = getVoltageDropStatus(n, vd);
-                const kw = Number(n.kw) || 0;
-                const df = Number(n.demandFactor) || 100;
-                const amps = systemPhase === '3P' ? (kw * 1000 * (df/100)) / (Math.sqrt(3)*400*0.85) : (kw * 1000 * (df/100)) / (230*0.85);
+              {nodes
+                .filter(n => !['grid', 'transformer', 'mccb', 'db', 'mdb'].includes(n.type))
+                .map((n, i) => {
+                  const vd = getNodeVoltageDrop(n);
+                  const status = getVoltageDropStatus(n, vd);
+                  const kw = Number(n.kw) || 0;
+                  const df = Number(n.demandFactor) || 100;
+                  const amps = systemPhase === '3P' ? (kw * 1000 * (df/100)) / (Math.sqrt(3)*400*0.85) : (kw * 1000 * (df/100)) / (230*0.85);
 
                 return (
                   <tr key={n.id} style={{ borderBottom: '1px solid #e2e8f0', background: i % 2 === 0 ? 'white' : '#f8fafc' }}>
