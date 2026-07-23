@@ -485,6 +485,21 @@ const SingleLineDiagram = () => {
             <div>กระแสรวมคำนวณ: <strong style={{ color: '#2563eb' }}>{calcResults.totalAmps} A</strong></div>
             <div>กำลังไฟฟ้า kVA: <strong>{calcResults.totalKva} kVA</strong></div>
           </div>
+
+          {/* Official Engineering Signature & Approval Block */}
+          <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '2px dashed #94a3b8', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', fontSize: '0.85rem' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ height: '40px', borderBottom: '1px solid #0f172a', marginBottom: '0.4rem' }}></div>
+              <p style={{ margin: 0, fontWeight: 'bold', color: '#0f172a' }}>ผู้เขียนแบบ / ผู้คำนวณ (Prepared By)</p>
+              <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.8rem' }}>วันที่: {new Date().toLocaleDateString('th-TH')}</p>
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ height: '40px', borderBottom: '1px solid #0f172a', marginBottom: '0.4rem' }}></div>
+              <p style={{ margin: 0, fontWeight: 'bold', color: '#0f172a' }}>วิศวกรไฟฟ้าผู้ตรวจทานและรับรอง (Approved By)</p>
+              <p style={{ margin: '0.2rem 0 0', color: '#64748b', fontSize: '0.8rem' }}>เลขที่ใบอนุญาต ภฟ./สฟ./ภก.: ...........................................</p>
+            </div>
+          </div>
         </div>
       </div>
     );
