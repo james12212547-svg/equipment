@@ -49,11 +49,19 @@ class ErrorBoundary extends React.Component {
         }}>
           <AlertTriangle size={64} color="#EF4444" style={{ marginBottom: '1.5rem' }} />
           <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: '#EF4444' }}>
-            พบการอัปเดตระบบหรือข้อผิดพลาดชั่วคราว
+            พบข้อผิดพลาดขณะโหลดหน้านี้
           </h2>
-          <p style={{ color: '#94A3B8', maxWidth: '500px', lineHeight: '1.6', marginBottom: '2rem' }}>
-            เกิดการอัปเดตเวอร์ชันใหม่ทำให้ไฟล์ในเบราว์เซอร์เก่าไม่ตรงกัน กรุณากดปุ่มด้านล่างเพื่อล้างแคชและโหลดข้อมูลเวอร์ชันล่าสุด
+          <p style={{ color: '#94A3B8', maxWidth: '500px', lineHeight: '1.6', marginBottom: '1rem' }}>
+            เกิดข้อผิดพลาดในการประมวลผลข้อมูล กรุณากดปุ่มด้านล่างเพื่อล้างแคชและโหลดใหม่
           </p>
+
+          {/* Show exact error for diagnostic */}
+          {this.state.error && (
+            <div style={{ background: '#1E293B', color: '#F87171', padding: '0.8rem 1.2rem', borderRadius: '6px', fontSize: '0.85rem', fontFamily: 'monospace', marginBottom: '1.5rem', maxWidth: '600px', wordBreak: 'break-word', textAlign: 'left' }}>
+              Error: {this.state.error.toString()}
+            </div>
+          )}
+
           <button
             onClick={this.handleHardReset}
             style={{

@@ -106,22 +106,27 @@ const componentsDetail = {
 const InteractiveSchematic = () => {
   const navigate = useNavigate();
   const [selectedRef, setSelectedRef] = useState('R32');
-  const [tEvap, setTEvap] = useState(5); // °C
-  const [tCond, setTCond] = useState(45); // °C
-  const [superheat, setSuperheat] = useState(5); // K
-  const [subcooling, setSubcooling] = useState(3); // K
-  const [activeTab, setActiveTab] = useState('schematic'); // 'schematic' | 'phDiagram'
+  const [tEvap, setTEvap] = useState(5);
+  const [tCond, setTCond] = useState(45);
+  const [superheat, setSuperheat] = useState(5);
+  const [subcooling, setSubcooling] = useState(3);
+  const [activeTab, setActiveTab] = useState('schematic');
   const [selectedComponent, setSelectedComponent] = useState('compressor');
 
-  // Calculations
-  const currentRef = refrigerantsData[selectedRef];
-  const pEvapBar = Math.max(1.2, currentRef.pevapCoeff(tEvap)).toFixed(2);
-  const pCondBar = Math.max(pEvapBar * 1.5, currentRef.pcondCoeff(tCond)).toFixed(2);
-  const pRatio = (pCondBar / pEvapBar).toFixed(2);
+  // Defensive calculations
+  const currentRef = refrigerantsData[selectedRef] || refrigerantsData.R32;
+  const targetComponent = componentsDetail[selectedComponent] || componentsDetail.compressor;
+
+  const pevap = typeof currentRef?.pevapCoeff === 'function' ? currentRef.pevapCoeff(tEvap) : 4.0;
+  const pcond = typeof currentRef?.pcondCoeff === 'function' ? currentRef.pcondCoeff(tCond) : 15.0;
+
+  const pEvapBar = Math.max(1.2, pevap).toFixed(2);
+  const pCondBar = Math.max(Number(pEvapBar) * 1.2, pcond).toFixed(2);
+  const pRatio = (Number(pCondBar) / Math.max(0.1, Number(pEvapBar))).toFixed(2);
   
-  // Dynamic COP calculation
-  const tempDiff = Math.max(15, tCond - tEvap);
-  const cop = (currentRef.copBase * (40 / tempDiff) * (1 - (superheat + subcooling) * 0.01)).toFixed(2);
+  const tempDiff = Math.max(10, tCond - tEvap);
+  const copBase = currentRef?.copBase || 4.0;
+  const cop = (copBase * (40 / tempDiff) * (1 - (superheat + subcooling) * 0.01)).toFixed(2);
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
@@ -134,6 +139,7 @@ const InteractiveSchematic = () => {
           to { stroke-dashoffset: 0; }
         }
       `}</style>
+      
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
@@ -161,9 +167,9 @@ const InteractiveSchematic = () => {
                   key={refKey}
                   onClick={() => setSelectedRef(refKey)}
                   style={{
-                    background: selectedRef === refKey ? refrigerantsData[refKey].color : 'var(--bg-primary)',
+                    background: selectedRef === refKey ? (refrigerantsData[refKey]?.color || '#0080FF') : 'var(--bg-primary)',
                     color: selectedRef === refKey ? 'white' : 'var(--text-primary)',
-                    border: `1px solid ${selectedRef === refKey ? refrigerantsData[refKey].color : 'var(--border-color)'}`,
+                    border: `1px solid ${selectedRef === refKey ? (refrigerantsData[refKey]?.color || '#0080FF') : 'var(--border-color)'}`,
                     padding: '0.4rem 0.9rem',
                     borderRadius: '20px',
                     fontWeight: 'bold',
@@ -225,7 +231,7 @@ const InteractiveSchematic = () => {
           {/* Slider 1: Evaporating Temp */}
           <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.85rem' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>อุณหภูมิเดือดคอยล์เย็น ($T_{evap}$):</span>
+              <span style={{ color: 'var(--text-secondary)' }}>อุณหภูมิเดือดคอยล์เย็น (T_evap):</span>
               <strong style={{ color: '#3B82F6' }}>{tEvap} °C</strong>
             </div>
             <input 
@@ -234,14 +240,14 @@ const InteractiveSchematic = () => {
               style={{ width: '100%', accentColor: '#3B82F6' }}
             />
             <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.3rem' }}>
-              แรงดัน $P_{evap}$: {pEvapBar} bar (abs)
+              แรงดัน P_evap: {pEvapBar} bar (abs)
             </div>
           </div>
 
           {/* Slider 2: Condensing Temp */}
           <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.85rem' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>อุณหภูมิควบแน่นคอยล์ร้อน ($T_{cond}$):</span>
+              <span style={{ color: 'var(--text-secondary)' }}>อุณหภูมิควบแน่นคอยล์ร้อน (T_cond):</span>
               <strong style={{ color: '#EF4444' }}>{tCond} °C</strong>
             </div>
             <input 
@@ -250,7 +256,7 @@ const InteractiveSchematic = () => {
               style={{ width: '100%', accentColor: '#EF4444' }}
             />
             <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.3rem' }}>
-              แรงดัน $P_{cond}$: {pCondBar} bar (abs)
+              แรงดัน P_cond: {pCondBar} bar (abs)
             </div>
           </div>
 
@@ -364,16 +370,9 @@ const InteractiveSchematic = () => {
                   <text x="620" y="200" fill="#94A3B8" fontSize="10">Superheated Vapor</text>
 
                   {/* Cycle Lines (State 1 -> 2 -> 3 -> 4 -> 1) */}
-                  {/* State 1 (Suction) to State 2 (Discharge Compressor Work) */}
                   <line x1="560" y1="230" x2="660" y2="100" stroke="#EF4444" strokeWidth="4" />
-                  
-                  {/* State 2 to State 3 (Condenser Heat Rejection) */}
                   <line x1="660" y1="100" x2="280" y2="100" stroke="#F59E0B" strokeWidth="4" />
-
-                  {/* State 3 to State 4 (Expansion Valve Isoenthalpic Drop) */}
                   <line x1="280" y1="100" x2="280" y2="230" stroke="#06B6D4" strokeWidth="4" />
-
-                  {/* State 4 to State 1 (Evaporator Heat Absorption) */}
                   <line x1="280" y1="230" x2="560" y2="230" stroke="#3B82F6" strokeWidth="4" />
 
                   {/* State Points Nodes */}
@@ -403,27 +402,27 @@ const InteractiveSchematic = () => {
         </div>
 
         {/* Selected Component Information Panel */}
-        {selectedComponent && (
-          <div className="equipment-card animate-fade-in" style={{ padding: '1.8rem', background: 'var(--bg-secondary)', borderLeft: `5px solid ${componentsDetail[selectedComponent].color}`, borderRadius: 'var(--radius-md)' }}>
-            <h3 style={{ fontSize: '1.3rem', color: componentsDetail[selectedComponent].color, marginBottom: '0.8rem' }}>
-              🔍 {componentsDetail[selectedComponent].name}
+        {targetComponent && (
+          <div className="equipment-card animate-fade-in" style={{ padding: '1.8rem', background: 'var(--bg-secondary)', borderLeft: `5px solid ${targetComponent.color || '#0080FF'}`, borderRadius: 'var(--radius-md)' }}>
+            <h3 style={{ fontSize: '1.3rem', color: targetComponent.color || '#0080FF', marginBottom: '0.8rem' }}>
+              🔍 {targetComponent.name}
             </h3>
 
             <p style={{ color: 'var(--text-primary)', lineHeight: '1.6', marginBottom: '1.2rem', fontSize: '1.05rem' }}>
-              {componentsDetail[selectedComponent].role}
+              {targetComponent.role}
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.2rem' }}>
               <div style={{ background: 'var(--bg-primary)', padding: '1rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
                 <span style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>สถานะสารทำความเย็นฝั่งเข้า (Entry State):</span>
                 <div style={{ color: 'var(--text-primary)', fontWeight: 'bold', marginTop: '0.2rem', fontSize: '0.95rem' }}>
-                  {componentsDetail[selectedComponent].entryState}
+                  {targetComponent.entryState}
                 </div>
               </div>
               <div style={{ background: 'var(--bg-primary)', padding: '1rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
                 <span style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>สถานะสารทำความเย็นฝั่งออก (Exit State):</span>
                 <div style={{ color: 'var(--text-primary)', fontWeight: 'bold', marginTop: '0.2rem', fontSize: '0.95rem' }}>
-                  {componentsDetail[selectedComponent].exitState}
+                  {targetComponent.exitState}
                 </div>
               </div>
             </div>
@@ -433,7 +432,7 @@ const InteractiveSchematic = () => {
                 <AlertTriangle size={16} /> การวิเคราะห์อาการเสียและการตรวจเช็คหน้างาน (Field Troubleshooting):
               </h4>
               <p style={{ color: 'var(--text-primary)', lineHeight: '1.5', margin: 0, fontSize: '0.9rem' }}>
-                {componentsDetail[selectedComponent].troubleshooting}
+                {targetComponent.troubleshooting}
               </p>
             </div>
           </div>
