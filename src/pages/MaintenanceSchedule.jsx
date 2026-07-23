@@ -668,7 +668,7 @@ const ScheduleCard = ({ schedule, onToggleStatus, onEdit, onDelete, onCheckIn })
             {schedule.notes}
           </div>
         )}
-        {schedule.cost && (
+        {userRole === 'admin' && schedule.cost && (
           <div style={{ background: 'var(--bg-primary)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.9rem', marginTop: '0.25rem', fontWeight: 'bold', borderLeft: `2px solid var(--accent-solar)`, display: 'flex', justifyContent: 'space-between' }}>
             <span>ประเมินราคา / ค่าใช้จ่าย:</span>
             <span style={{ color: 'var(--accent-solar)' }}>฿{Number(schedule.cost).toLocaleString()}</span>
