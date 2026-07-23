@@ -42,6 +42,8 @@ import MaintenanceReminders from './pages/MaintenanceReminders';
 import Notifications from './pages/Notifications';
 import AIDiagnostic from './pages/AIDiagnostic';
 import SingleLineDiagram from './pages/SingleLineDiagram';
+import Solar3DSimulator from './pages/Solar3DSimulator';
+import GamifiedSimulator from './pages/GamifiedSimulator';
 import ReloadPrompt from './components/ReloadPrompt';
 import { requestNotificationPermission, scheduleAppointmentReminders } from './utils/notifications';
 
@@ -127,6 +129,8 @@ function AppContent() {
             <Route path="/learning/conduit" element={<ProtectedRoute><ConduitSizing /></ProtectedRoute>} />
             <Route path="/learning/motor" element={<ProtectedRoute><MotorCalculator /></ProtectedRoute>} />
             <Route path="/learning/sld" element={<ProtectedRoute><SingleLineDiagram /></ProtectedRoute>} />
+            <Route path="/learning/solar-3d" element={<ProtectedRoute><Solar3DSimulator /></ProtectedRoute>} />
+            <Route path="/learning/game-sim" element={<ProtectedRoute><GamifiedSimulator /></ProtectedRoute>} />
             <Route path="/learning/3d" element={<ProtectedRoute><ModelViewer /></ProtectedRoute>} />
             <Route path="/work-log" element={<ProtectedRoute><WorkLog /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><ProjectDashboard /></ProtectedRoute>} />

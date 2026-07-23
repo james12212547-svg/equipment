@@ -53,6 +53,30 @@ const LearningHub = () => {
           </div>
         </Link>
 
+        <Link to="/learning/solar-3d" className="category-card" style={{ padding: '2rem', border: '1px solid var(--accent-solar)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+              <Zap size={48} />
+            </div>
+          </div>
+          <div className="category-card-content" style={{ textAlign: 'center' }}>
+            <h3 className="text-gradient-solar" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>จำลองหลังคาโซลาร์ & เงาแสงแดด 3D</h3>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem' }}>3D Roof & Sun Shadow Physics Simulator</p>
+          </div>
+        </Link>
+
+        <Link to="/learning/game-sim" className="category-card" style={{ padding: '2rem', border: '1px solid #f59e0b' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(245, 158, 11, 0.15)', padding: '1rem', borderRadius: '50%', color: '#f59e0b' }}>
+              <HelpCircle size={48} />
+            </div>
+          </div>
+          <div className="category-card-content" style={{ textAlign: 'center' }}>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#f59e0b' }}>เกมส์จำลองซ่อมวิศวกรรม & ออกใบประกาศ</h3>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem' }}>Gamified Simulator & PDF Certificate</p>
+          </div>
+        </Link>
+
         <Link to="/learning/schematic" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
             <div style={{ background: 'rgba(0, 240, 255, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-ac)' }}>
