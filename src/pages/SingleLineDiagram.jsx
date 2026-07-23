@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Zap, Plus, Trash2, Download, Printer, RefreshCw, AlertTriangle, ShieldCheck, FileText, CheckCircle2, ArrowLeft, Move, Layers, Cpu, Compass, Sliders, Table, HelpCircle } from 'lucide-react';
+import { Zap, Plus, Trash2, Download, Printer, RefreshCw, AlertTriangle, ShieldCheck, FileText, CheckCircle2, ArrowLeft, Move, Layers, Cpu, Compass, Sliders, Table, HelpCircle, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -39,14 +39,14 @@ const PRESET_TEMPLATES = {
   home_1p: {
     title: '🏠 บ้านพักอาศัย 1-Phase 15(45)A',
     nodes: [
-      { id: '1', type: 'grid', label: 'PEA Meter 15(45)A', x: 350, y: 40, kw: 0, demandFactor: 100, breakerAmp: 50, icRating: '10kA', tripCurve: 'C', cableSize: '2x16 sq.mm.', cableLength: 15, groundType: 'THW Green' },
-      { id: '2', type: 'mccb', label: 'Main Breaker 50A 1P', x: 350, y: 130, kw: 0, demandFactor: 100, breakerAmp: 50, icRating: '10kA', tripCurve: 'C', cableSize: '2x16 sq.mm.', cableLength: 5, groundType: 'THW Green' },
-      { id: '3', type: 'spd', label: 'SPD Type 2 (10kA)', x: 180, y: 220, kw: 0, demandFactor: 100, breakerAmp: 20, icRating: '10kA', tripCurve: 'C', cableSize: '1x6 sq.mm.', cableLength: 2, groundType: 'THW Green', isTapNode: true },
-      { id: '4', type: 'db', label: 'Consumer Unit 10 Channels', x: 350, y: 220, kw: 0, demandFactor: 100, breakerAmp: 50, icRating: '10kA', tripCurve: 'C', cableSize: '2x16 sq.mm.', cableLength: 10, groundType: 'THW Green' },
-      { id: '5', type: 'aircon', label: 'Air Con 18,000 BTU', x: 150, y: 340, kw: 2.0, demandFactor: 100, breakerAmp: 20, icRating: '6kA', tripCurve: 'C', cableSize: '2x2.5 sq.mm.', cableLength: 18, groundType: 'THW Green' },
-      { id: '6', type: 'aircon', label: 'Air Con 12,000 BTU', x: 290, y: 340, kw: 1.5, demandFactor: 100, breakerAmp: 16, icRating: '6kA', tripCurve: 'C', cableSize: '2x2.5 sq.mm.', cableLength: 12, groundType: 'THW Green' },
-      { id: '7', type: 'lighting', label: 'Lighting Circuit Fl.1-2', x: 430, y: 340, kw: 1.2, demandFactor: 80, breakerAmp: 10, icRating: '6kA', tripCurve: 'B', cableSize: '2x1.5 sq.mm.', cableLength: 25, groundType: 'THW Green' },
-      { id: '8', type: 'lighting', label: 'Power Receptacles Plugs', x: 570, y: 340, kw: 2.5, demandFactor: 80, breakerAmp: 20, icRating: '6kA', tripCurve: 'C', cableSize: '2x2.5 sq.mm.', cableLength: 20, groundType: 'THW Green' },
+      { id: '1', type: 'grid', label: 'PEA Meter 15(45)A', x: 320, y: 30, kw: 0, demandFactor: 100, breakerAmp: 50, icRating: '10kA', tripCurve: 'C', cableSize: '2x16 sq.mm.', cableLength: 15, groundType: 'THW Green' },
+      { id: '2', type: 'mccb', label: 'Main Breaker 50A 1P', x: 320, y: 120, kw: 0, demandFactor: 100, breakerAmp: 50, icRating: '10kA', tripCurve: 'C', cableSize: '2x16 sq.mm.', cableLength: 5, groundType: 'THW Green' },
+      { id: '3', type: 'spd', label: 'SPD Type 2 (10kA)', x: 150, y: 210, kw: 0, demandFactor: 100, breakerAmp: 20, icRating: '10kA', tripCurve: 'C', cableSize: '1x6 sq.mm.', cableLength: 2, groundType: 'THW Green', isTapNode: true },
+      { id: '4', type: 'db', label: 'Consumer Unit 10 Channels', x: 320, y: 210, kw: 0, demandFactor: 100, breakerAmp: 50, icRating: '10kA', tripCurve: 'C', cableSize: '2x16 sq.mm.', cableLength: 10, groundType: 'THW Green' },
+      { id: '5', type: 'aircon', label: 'Air Con 18,000 BTU', x: 40, y: 330, kw: 2.0, demandFactor: 100, breakerAmp: 20, icRating: '6kA', tripCurve: 'C', cableSize: '2x2.5 sq.mm.', cableLength: 18, groundType: 'THW Green' },
+      { id: '6', type: 'aircon', label: 'Air Con 12,000 BTU', x: 180, y: 330, kw: 1.5, demandFactor: 100, breakerAmp: 16, icRating: '6kA', tripCurve: 'C', cableSize: '2x2.5 sq.mm.', cableLength: 12, groundType: 'THW Green' },
+      { id: '7', type: 'lighting', label: 'Lighting Circuit Fl.1-2', x: 320, y: 330, kw: 1.2, demandFactor: 80, breakerAmp: 10, icRating: '6kA', tripCurve: 'B', cableSize: '2x1.5 sq.mm.', cableLength: 25, groundType: 'THW Green' },
+      { id: '8', type: 'lighting', label: 'Power Receptacles Plugs', x: 460, y: 330, kw: 2.5, demandFactor: 80, breakerAmp: 20, icRating: '6kA', tripCurve: 'C', cableSize: '2x2.5 sq.mm.', cableLength: 20, groundType: 'THW Green' },
     ],
     connections: [
       { from: '1', to: '2' },
@@ -61,13 +61,13 @@ const PRESET_TEMPLATES = {
   solar_3p: {
     title: '☀️ อาคารพาณิชย์ 3-Phase + Solar Rooftop 10kW',
     nodes: [
-      { id: '1', type: 'grid', label: 'PEA 3-Phase Meter 30(100)A', x: 350, y: 40, kw: 0, demandFactor: 100, breakerAmp: 100, icRating: '25kA', tripCurve: 'C', cableSize: '4x35 sq.mm.', cableLength: 30, groundType: 'Bare Copper' },
-      { id: '2', type: 'mccb', label: 'Main MCCB 100A 3P 25kA', x: 350, y: 130, kw: 0, demandFactor: 100, breakerAmp: 100, icRating: '25kA', tripCurve: 'C', cableSize: '4x35 sq.mm.', cableLength: 10, groundType: 'Bare Copper' },
-      { id: '3', type: 'mdb', label: 'MDB Main Busbar 400V', x: 350, y: 220, kw: 0, demandFactor: 100, breakerAmp: 100, icRating: '25kA', tripCurve: 'C', cableSize: 'Busbar 25x3mm', cableLength: 2, groundType: 'Bare Copper' },
-      { id: '4', type: 'solar', label: 'Solar On-Grid Inverter 10kW', x: 130, y: 330, kw: 10, demandFactor: 100, breakerAmp: 25, icRating: '10kA', tripCurve: 'C', cableSize: '4x6 sq.mm.', cableLength: 15, groundType: 'THW Green' },
-      { id: '5', type: 'motor', label: 'Chiller Pump Motor 7.5kW', x: 290, y: 330, kw: 7.5, demandFactor: 100, breakerAmp: 32, icRating: '10kA', tripCurve: 'D', cableSize: '4x6 sq.mm.', cableLength: 20, groundType: 'THW Green' },
-      { id: '6', type: 'aircon', label: 'VRV Air Con Central 15kW', x: 450, y: 330, kw: 15.0, demandFactor: 100, breakerAmp: 50, icRating: '15kA', tripCurve: 'C', cableSize: '4x16 sq.mm.', cableLength: 25, groundType: 'THW Green' },
-      { id: '7', type: 'lighting', label: 'Office Lighting & Sockets', x: 610, y: 330, kw: 5.0, demandFactor: 80, breakerAmp: 25, icRating: '10kA', tripCurve: 'B', cableSize: '4x4 sq.mm.', cableLength: 35, groundType: 'THW Green' },
+      { id: '1', type: 'grid', label: 'PEA 3-Phase Meter 30(100)A', x: 320, y: 30, kw: 0, demandFactor: 100, breakerAmp: 100, icRating: '25kA', tripCurve: 'C', cableSize: '4x35 sq.mm.', cableLength: 30, groundType: 'Bare Copper' },
+      { id: '2', type: 'mccb', label: 'Main MCCB 100A 3P 25kA', x: 320, y: 120, kw: 0, demandFactor: 100, breakerAmp: 100, icRating: '25kA', tripCurve: 'C', cableSize: '4x35 sq.mm.', cableLength: 10, groundType: 'Bare Copper' },
+      { id: '3', type: 'mdb', label: 'MDB Main Busbar 400V', x: 320, y: 210, kw: 0, demandFactor: 100, breakerAmp: 100, icRating: '25kA', tripCurve: 'C', cableSize: 'Busbar 25x3mm', cableLength: 2, groundType: 'Bare Copper' },
+      { id: '4', type: 'solar', label: 'Solar On-Grid Inverter 10kW', x: 40, y: 330, kw: 10, demandFactor: 100, breakerAmp: 25, icRating: '10kA', tripCurve: 'C', cableSize: '4x6 sq.mm.', cableLength: 15, groundType: 'THW Green' },
+      { id: '5', type: 'motor', label: 'Chiller Pump Motor 7.5kW', x: 180, y: 330, kw: 7.5, demandFactor: 100, breakerAmp: 32, icRating: '10kA', tripCurve: 'D', cableSize: '4x6 sq.mm.', cableLength: 20, groundType: 'THW Green' },
+      { id: '6', type: 'aircon', label: 'VRV Air Con Central 15kW', x: 320, y: 330, kw: 15.0, demandFactor: 100, breakerAmp: 50, icRating: '15kA', tripCurve: 'C', cableSize: '4x16 sq.mm.', cableLength: 25, groundType: 'THW Green' },
+      { id: '7', type: 'lighting', label: 'Office Lighting & Sockets', x: 460, y: 330, kw: 5.0, demandFactor: 80, breakerAmp: 25, icRating: '10kA', tripCurve: 'B', cableSize: '4x4 sq.mm.', cableLength: 35, groundType: 'THW Green' },
     ],
     connections: [
       { from: '1', to: '2' },
@@ -86,7 +86,7 @@ const SingleLineDiagram = () => {
   const [connections, setConnections] = useState(PRESET_TEMPLATES.home_1p.connections);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [systemPhase, setSystemPhase] = useState('1P'); // '1P' (230V) or '3P' (400V)
-  const [installationGroup, setInstallationGroup] = useState('group2'); // 'group2' (Conduit in air) | 'group5' (Free air) | 'group1' (Direct buried)
+  const [installationGroup, setInstallationGroup] = useState('group2'); // 'group2' | 'group5'
   const [showLoadScheduleView, setShowLoadScheduleView] = useState(false);
 
   // Dragging state
@@ -98,6 +98,19 @@ const SingleLineDiagram = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectStartId, setConnectStartId] = useState(null);
 
+  // Keyboard Esc Listener to Cancel Connection Mode
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsConnecting(false);
+        setConnectStartId(null);
+        toast('ยกเลิกโหมดเชื่อมสายไฟแล้ว', { icon: '✖️' });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Load Preset
   const handleLoadPreset = (key) => {
     const preset = PRESET_TEMPLATES[key];
@@ -106,7 +119,16 @@ const SingleLineDiagram = () => {
     setConnections(preset.connections);
     setSystemPhase(key.includes('3p') ? '3P' : '1P');
     setSelectedNodeId(null);
+    setIsConnecting(false);
+    setConnectStartId(null);
     toast.success(`โหลดแทมเพลต ${preset.title} สำเร็จ!`);
+  };
+
+  // Auto Align Layout
+  const handleAutoAlignLayout = () => {
+    const presetKey = systemPhase === '3P' ? 'solar_3p' : 'home_1p';
+    handleLoadPreset(presetKey);
+    toast.success('จัดระเบียบตำแหน่งอุปกรณ์ใหม่อัตโนมัติเรียบร้อย!');
   };
 
   // Add Component
@@ -117,8 +139,8 @@ const SingleLineDiagram = () => {
       id: newId,
       type: compType,
       label: `${preset.name.split(' ')[1]} #${nodes.length + 1}`,
-      x: 350 + (Math.random() * 40 - 20),
-      y: 250 + (Math.random() * 40 - 20),
+      x: 200 + (Math.random() * 100),
+      y: 200 + (Math.random() * 100),
       kw: preset.defaultKw,
       demandFactor: compType === 'lighting' ? 80 : 100,
       breakerAmp: compType === 'aircon' ? 20 : compType === 'motor' ? 32 : 16,
@@ -141,13 +163,22 @@ const SingleLineDiagram = () => {
     toast.success('ลบอุปกรณ์แล้ว');
   };
 
+  // Delete Specific Connection Wire
+  const handleDeleteConnection = (fromId, toId, e) => {
+    if (e) e.stopPropagation();
+    if (window.confirm('ต้องการลบสายเชื่อมต่อเส้นนี้ใช่หรือไม่?')) {
+      setConnections(prev => prev.filter(c => !(c.from === fromId && c.to === toId) && !(c.from === toId && c.to === fromId)));
+      toast.success('ลบสายเชื่อมต่อเรียบร้อย!');
+    }
+  };
+
   // Handle Node Mouse Events
   const handleNodeMouseDown = (id, e) => {
     e.stopPropagation();
     if (isConnecting) {
       if (!connectStartId) {
         setConnectStartId(id);
-        toast('เลือกจุดเชื่อมต่อจุดที่ 2...', { icon: '🔌' });
+        toast('คลิกเลือกอุปกรณ์จุดที่ 2 เพื่อต่อสาย...', { icon: '🔌' });
       } else if (connectStartId !== id) {
         const exists = connections.some(c => (c.from === connectStartId && c.to === id) || (c.from === id && c.to === connectStartId));
         if (!exists) {
@@ -168,12 +199,24 @@ const SingleLineDiagram = () => {
     }
   };
 
+  // Mouse Move with Bounding Constraints Clamping!
   const handleMouseMove = (e) => {
-    if (!draggingId) return;
+    if (!draggingId || !canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
     let newX = e.clientX - dragOffset.x;
     let newY = e.clientY - dragOffset.y;
+
+    // Strict Canvas Bounds Clamping so nodes NEVER get lost outside bounds!
+    const maxX = Math.max(50, rect.width - 170);
+    const maxY = Math.max(50, rect.height - 75);
+
+    newX = Math.max(10, Math.min(maxX, newX));
+    newY = Math.max(10, Math.min(maxY, newY));
+
+    // Snap to Grid 10px
     newX = Math.round(newX / 10) * 10;
     newY = Math.round(newY / 10) * 10;
+
     setNodes(prev => prev.map(n => n.id === draggingId ? { ...n, x: newX, y: newY } : n));
   };
 
@@ -181,7 +224,6 @@ const SingleLineDiagram = () => {
 
   // EIT Engineering Calculation Engine
   const calcResults = useMemo(() => {
-    // 1. Calculate Total Connected Load & Max Demand Load considering Demand Factor
     let totalConnectedKw = 0;
     let totalDemandKw = 0;
 
@@ -202,21 +244,17 @@ const SingleLineDiagram = () => {
       totalAmps = (totalDemandKw * 1000) / (voltage * pf);
     }
 
-    // Find Main Breaker Node
     const mainBreakerNode = nodes.find(n => n.type === 'mccb' || n.type === 'grid');
     const actualMainBreaker = mainBreakerNode ? Number(mainBreakerNode.breakerAmp) || 50 : 50;
 
-    // 2. CRITICAL ENGINEERING SAFETY RULE: Cable sizing MUST match the Breaker Amp rating (Iz >= In), NOT just calculated load!
+    // Engineering Cable Sizing Rule: Iz >= In
     const cableSizingAmps = Math.max(totalAmps * 1.25, actualMainBreaker);
-
-    // Recommended Main Breaker (1.25x Continuous Demand Load)
     const recommendedBreaker = Math.ceil(totalAmps * 1.25);
     
-    // EIT Table Selection Based on Installation Method & Breaker Protection Rating
     let recommendedCable = '2x2.5 sq.mm.';
     let groundCable = '1x2.5 sq.mm.';
 
-    if (installationGroup === 'group2') { // Conduit in Air
+    if (installationGroup === 'group2') {
       if (cableSizingAmps <= 16) { recommendedCable = '2x2.5 sq.mm.'; groundCable = '1x2.5 sq.mm.'; }
       else if (cableSizingAmps <= 22) { recommendedCable = '2x4 sq.mm.'; groundCable = '1x2.5 sq.mm.'; }
       else if (cableSizingAmps <= 31) { recommendedCable = '2x6 sq.mm.'; groundCable = '1x4 sq.mm.'; }
@@ -226,7 +264,7 @@ const SingleLineDiagram = () => {
       else if (cableSizingAmps <= 89) { recommendedCable = systemPhase === '3P' ? '4x35 sq.mm.' : '2x35 sq.mm.'; groundCable = '1x16 sq.mm.'; }
       else if (cableSizingAmps <= 110) { recommendedCable = systemPhase === '3P' ? '4x50 sq.mm.' : '2x50 sq.mm.'; groundCable = '1x25 sq.mm.'; }
       else { recommendedCable = systemPhase === '3P' ? '4x70 sq.mm.' : '2x70 sq.mm.'; groundCable = '1x25 sq.mm.'; }
-    } else { // Free Air / Cable Ladder
+    } else {
       if (cableSizingAmps <= 22) { recommendedCable = '2x2.5 sq.mm.'; groundCable = '1x2.5 sq.mm.'; }
       else if (cableSizingAmps <= 30) { recommendedCable = '2x4 sq.mm.'; groundCable = '1x2.5 sq.mm.'; }
       else if (cableSizingAmps <= 40) { recommendedCable = '2x6 sq.mm.'; groundCable = '1x4 sq.mm.'; }
@@ -260,7 +298,6 @@ const SingleLineDiagram = () => {
     setNodes(prev => prev.map(n => n.id === selectedNodeId ? { ...n, [field]: value } : n));
   };
 
-  // Voltage Drop Calculation per Node (%VD)
   const getNodeVoltageDrop = (node) => {
     if (!node.kw || node.kw <= 0 || !node.cableLength) return 0;
     const len = Number(node.cableLength) || 10;
@@ -275,7 +312,6 @@ const SingleLineDiagram = () => {
       current = (kw * 1000) / (v * pf);
     }
 
-    // Extract area sq.mm from cableSize string (e.g. "2x2.5 sq.mm." -> 2.5)
     const match = (node.cableSize || '2.5').match(/(\d+(\.\d+)?)/g);
     const sqmm = match && match.length > 1 ? parseFloat(match[1]) : 2.5;
     const resistance = CABLE_RESISTANCE_OHM_PER_KM[sqmm] || 8.91;
@@ -287,13 +323,10 @@ const SingleLineDiagram = () => {
       vdVolts = (2 * len * current * (resistance / 1000));
     }
 
-    const vdPercent = (vdVolts / v) * 100;
-    return vdPercent.toFixed(2);
+    return ((vdVolts / v) * 100).toFixed(2);
   };
 
-  const handlePrintDiagram = () => {
-    window.print();
-  };
+  const handlePrintDiagram = () => window.print();
 
   // ==================== PANELBOARD LOAD SCHEDULE VIEW ====================
   if (showLoadScheduleView) {
@@ -445,15 +478,19 @@ const SingleLineDiagram = () => {
         </div>
       </div>
 
-      {/* Presets & Installation Group Selector */}
+      {/* Presets, Align & Installation Group Selector */}
       <div className="no-print" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center', background: 'var(--bg-secondary)', padding: '0.85rem 1.25rem', borderRadius: '12px', border: '1px solid var(--border-color)', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', fontWeight: 'bold' }}>📁 โหลดแทมเพลต:</span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-tertiary)', fontWeight: 'bold' }}>📁 แทมเพลต:</span>
           <button onClick={() => handleLoadPreset('home_1p')} style={{ background: 'rgba(255, 115, 0, 0.1)', border: '1px solid var(--accent-solar)', color: 'var(--accent-solar)', padding: '0.4rem 0.85rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}>
             🏠 บ้านพัก 1-Phase
           </button>
           <button onClick={() => handleLoadPreset('solar_3p')} style={{ background: 'rgba(0, 240, 255, 0.1)', border: '1px solid var(--accent-ac)', color: 'var(--accent-ac)', padding: '0.4rem 0.85rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}>
             ☀️ อาคาร 3-Phase + โซลาร์ 10kW
+          </button>
+
+          <button onClick={handleAutoAlignLayout} style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', color: '#10b981', padding: '0.4rem 0.85rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <RefreshCw size={14} /> 🧹 จัดระเบียบผังอัตโนมัติ
           </button>
         </div>
 
@@ -513,9 +550,9 @@ const SingleLineDiagram = () => {
                 width: '100%',
                 padding: '0.75rem',
                 borderRadius: '8px',
-                border: isConnecting ? '2px solid #10b981' : '1px solid var(--border-color)',
-                background: isConnecting ? 'rgba(16,185,129,0.15)' : 'var(--bg-secondary)',
-                color: isConnecting ? '#10b981' : 'var(--text-primary)',
+                border: isConnecting ? '2px solid #ef4444' : '1px solid var(--border-color)',
+                background: isConnecting ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-secondary)',
+                color: isConnecting ? '#ef4444' : 'var(--text-primary)',
                 fontWeight: 'bold',
                 fontSize: '0.85rem',
                 cursor: 'pointer',
@@ -525,7 +562,7 @@ const SingleLineDiagram = () => {
                 gap: '0.4rem',
               }}
             >
-              <Zap size={16} /> {isConnecting ? '🟢 กำลังต่อสาย (คลิกเลือก 2 จุด)' : '🔌 โหมดเดินสายไฟ (Connect Lines)'}
+              <Zap size={16} /> {isConnecting ? '❌ ยกเลิกเชื่อมสายไฟ (Esc)' : '🔌 โหมดเดินสายไฟ (Connect Lines)'}
             </button>
           </div>
         </div>
@@ -553,8 +590,18 @@ const SingleLineDiagram = () => {
             </span>
           </div>
 
+          {/* Floating Connecting Overlay Badge with Cancel Option */}
+          {isConnecting && (
+            <div style={{ position: 'absolute', top: 12, right: 15, zIndex: 10, background: 'rgba(239, 68, 68, 0.95)', color: 'white', padding: '0.5rem 1rem', borderRadius: '50px', fontWeight: 'bold', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)' }}>
+              <span>🔌 กำลังเชื่อมสาย: {connectStartId ? 'เลือกจุดที่ 2...' : 'เลือกจุดเริ่มต้น...'}</span>
+              <button onClick={() => { setIsConnecting(false); setConnectStartId(null); }} style={{ background: 'white', color: '#ef4444', border: 'none', padding: '0.25rem 0.6rem', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                ❌ ยกเลิก (Esc)
+              </button>
+            </div>
+          )}
+
           {/* SVG Connection Lines & Junction Dots */}
-          <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 2 }}>
+          <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'all', zIndex: 2 }}>
             {connections.map((conn, idx) => {
               const fromNode = nodes.find(n => n.id === conn.from);
               const toNode = nodes.find(n => n.id === conn.to);
@@ -568,7 +615,7 @@ const SingleLineDiagram = () => {
               const isTap = toNode.type === 'spd' || toNode.isTapNode;
 
               return (
-                <g key={idx}>
+                <g key={idx} style={{ cursor: 'pointer' }} onClick={(e) => handleDeleteConnection(conn.from, conn.to, e)}>
                   {/* Thick Neon Connection Line */}
                   <line
                     x1={x1}
@@ -586,26 +633,39 @@ const SingleLineDiagram = () => {
                     <circle cx={x1} cy={y1} r="6" fill="#ff7300" stroke="#ffffff" strokeWidth="2" />
                   )}
 
-                  {/* Cable Size Badge */}
-                  <text
-                    x={(x1 + x2) / 2}
-                    y={(y1 + y2) / 2 - 8}
-                    fill="#00f0ff"
-                    fontSize="10"
-                    textAnchor="middle"
-                    fontWeight="bold"
-                  >
-                    {toNode.cableSize || '2x2.5 sq.mm.'}
-                  </text>
+                  {/* Cable Size Badge (Clickable to delete wire) */}
+                  <g>
+                    <rect
+                      x={(x1 + x2) / 2 - 40}
+                      y={(y1 + y2) / 2 - 18}
+                      width="80"
+                      height="16"
+                      rx="4"
+                      fill="#0f172a"
+                      stroke="#00f0ff"
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={(x1 + x2) / 2}
+                      y={(y1 + y2) / 2 - 6}
+                      fill="#00f0ff"
+                      fontSize="9"
+                      textAnchor="middle"
+                      fontWeight="bold"
+                    >
+                      {toNode.cableSize || '2x2.5 sq.mm.'}
+                    </text>
+                  </g>
                 </g>
               );
             })}
           </svg>
 
-          {/* Component Nodes */}
+          {/* Component Nodes (Bounded inside Canvas) */}
           {nodes.map(node => {
             const compPreset = COMPONENT_TYPES.find(c => c.type === node.type) || COMPONENT_TYPES[0];
             const isSelected = selectedNodeId === node.id;
+            const isConnectTarget = connectStartId === node.id;
             const vd = getNodeVoltageDrop(node);
 
             return (
@@ -619,10 +679,10 @@ const SingleLineDiagram = () => {
                   width: '160px',
                   padding: '0.6rem 0.8rem',
                   borderRadius: '10px',
-                  background: isSelected ? 'rgba(15, 23, 42, 0.95)' : 'rgba(15, 23, 42, 0.85)',
-                  border: `2px solid ${isSelected ? 'var(--accent-primary)' : compPreset.color}`,
+                  background: isConnectTarget ? 'rgba(239, 68, 68, 0.25)' : isSelected ? 'rgba(15, 23, 42, 0.95)' : 'rgba(15, 23, 42, 0.85)',
+                  border: `2px solid ${isConnectTarget ? '#ef4444' : isSelected ? 'var(--accent-primary)' : compPreset.color}`,
                   boxShadow: isSelected ? '0 0 18px rgba(255, 115, 0, 0.5)' : '0 4px 12px rgba(0,0,0,0.5)',
-                  cursor: 'grab',
+                  cursor: isConnecting ? 'crosshair' : 'grab',
                   zIndex: 3,
                   transition: 'border 0.2s, box-shadow 0.2s',
                 }}
