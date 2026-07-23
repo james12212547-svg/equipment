@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, FileText, Printer, Save, ChevronDown, ChevronUp, Edit3, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, FileText, Printer, Save, ChevronDown, ChevronUp, Edit3, CheckCircle, CreditCard } from 'lucide-react';
 import { saveQuotationDB, getAllQuotationsDB, deleteQuotationDB } from '../utils/db';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const defaultItem = () => ({ id: Date.now(), description: '', qty: 1, unit: 'ชิ้น', unitPrice: 0 });
@@ -26,6 +27,7 @@ const Quotation = () => {
   const [form, setForm] = useState(emptyForm());
   const [editingId, setEditingId] = useState(null);
   const printRef = useRef();
+  const navigate = useNavigate();
 
   // Load company info from localStorage
   const companyName = localStorage.getItem('companyName') || 'บริษัท/ร้านของคุณ';
@@ -139,6 +141,8 @@ const Quotation = () => {
                     <button onClick={() => handleMarkAsPaid(q)} title="ทำเครื่องหมายว่าชำระแล้ว"
                       style={{ background: 'rgba(16,185,129,0.1)', border: 'none', color: '#10b981', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}><CheckCircle size={18} /></button>
                   )}
+                  <button onClick={() => navigate('/invoice')} title="ออกเอกสารการเงิน (ใบวางบิล/ใบกำกับภาษี)"
+                    style={{ background: 'rgba(16,185,129,0.15)', border: 'none', color: '#10b981', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}><CreditCard size={18} /></button>
                   <button onClick={() => { setForm(q); setView('preview'); }} title="พิมพ์/ดูตัวอย่าง"
                     style={{ background: 'rgba(99,102,241,0.1)', border: 'none', color: '#6366f1', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}><Printer size={18} /></button>
                   <button onClick={() => handleEdit(q)} title="แก้ไข"

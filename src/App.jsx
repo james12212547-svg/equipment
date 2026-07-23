@@ -34,6 +34,7 @@ import Settings from './pages/Settings';
 import MaintenanceSchedule from './pages/MaintenanceSchedule';
 import CustomerHistory from './pages/CustomerHistory';
 import Quotation from './pages/Quotation';
+import Invoice from './pages/Invoice';
 import Inventory from './pages/Inventory';
 import RevenueDashboard from './pages/RevenueDashboard';
 import TeamChat from './pages/TeamChat';
@@ -138,6 +139,7 @@ function AppContent() {
             
             {/* Admin Only */}
             <Route path="/quotation" element={<ProtectedRoute allowedRoles={['admin']}><Quotation /></ProtectedRoute>} />
+            <Route path="/invoice" element={<ProtectedRoute allowedRoles={['admin']}><Invoice /></ProtectedRoute>} />
             <Route path="/customer-history" element={<ProtectedRoute allowedRoles={['admin']}><CustomerHistory /></ProtectedRoute>} />
             <Route path="/revenue" element={<ProtectedRoute allowedRoles={['admin']}><RevenueDashboard /></ProtectedRoute>} />
           </Routes>

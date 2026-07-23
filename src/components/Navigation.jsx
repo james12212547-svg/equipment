@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell, LogOut } from 'lucide-react';
+import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell, LogOut, CreditCard } from 'lucide-react';
 import useStore from '../store/useStore';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -55,6 +55,11 @@ const Navigation = () => {
           <NavLink to="/quotation" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <FileText size={24} />
             <span>ใบเสนอราคา</span>
+          </NavLink>
+
+          <NavLink to="/invoice" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <CreditCard size={24} />
+            <span>เอกสารการเงิน</span>
           </NavLink>
 
           <NavLink to="/customer-history" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>

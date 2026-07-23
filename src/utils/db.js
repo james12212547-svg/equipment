@@ -162,6 +162,11 @@ export const saveQuotationDB = (quotation) => fsSave('quotations', quotation);
 export const getAllQuotationsDB = () => fsGetAll('quotations');
 export const deleteQuotationDB = (id) => fsDelete('quotations', id);
 
+// Invoices & Receipts
+export const saveInvoiceDB = (invoice) => fsSave('invoices', invoice);
+export const getAllInvoicesDB = () => fsGetAll('invoices');
+export const deleteInvoiceDB = (id) => fsDelete('invoices', id);
+
 // Inventory
 export const saveInventoryItemDB = (item) => fsSave('inventory', item);
 export const getAllInventoryDB = () => fsGetAll('inventory');
