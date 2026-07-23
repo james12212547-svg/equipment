@@ -41,6 +41,7 @@ import TeamChat from './pages/TeamChat';
 import MaintenanceReminders from './pages/MaintenanceReminders';
 import Notifications from './pages/Notifications';
 import AIDiagnostic from './pages/AIDiagnostic';
+import SingleLineDiagram from './pages/SingleLineDiagram';
 import ReloadPrompt from './components/ReloadPrompt';
 import { requestNotificationPermission, scheduleAppointmentReminders } from './utils/notifications';
 
@@ -125,6 +126,7 @@ function AppContent() {
             <Route path="/learning/lighting" element={<ProtectedRoute><LightingCalculator /></ProtectedRoute>} />
             <Route path="/learning/conduit" element={<ProtectedRoute><ConduitSizing /></ProtectedRoute>} />
             <Route path="/learning/motor" element={<ProtectedRoute><MotorCalculator /></ProtectedRoute>} />
+            <Route path="/learning/sld" element={<ProtectedRoute><SingleLineDiagram /></ProtectedRoute>} />
             <Route path="/learning/3d" element={<ProtectedRoute><ModelViewer /></ProtectedRoute>} />
             <Route path="/work-log" element={<ProtectedRoute><WorkLog /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><ProjectDashboard /></ProtectedRoute>} />
