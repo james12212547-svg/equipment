@@ -14,7 +14,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Safety fallback timeout: Never stay in loading state forever if Firebase hangs
+    const fallbackTimer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      clearTimeout(fallbackTimer);
       if (user) {
         setCurrentUser(user);
         try {
@@ -47,7 +53,10 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      clearTimeout(fallbackTimer);
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email, password) => {
@@ -75,11 +84,35 @@ export const AuthProvider = ({ children }) => {
     userRole,
     login,
     logout,
+    loading
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {loading ? (
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--bg-primary, #0F172A)',
+          color: 'var(--text-primary, #F8FAFC)'
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid rgba(255,255,255,0.1)',
+            borderTop: '4px solid #0080FF',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          <p style={{ marginTop: '1rem', color: '#94A3B8', fontSize: '0.9rem' }}>กำลังโหลดระบบวิศวกรรม...</p>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

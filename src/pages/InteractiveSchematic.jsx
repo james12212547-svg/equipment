@@ -125,6 +125,15 @@ const InteractiveSchematic = () => {
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
+      <style>{`
+        .pipe-flow-hot { stroke-dasharray: 8; animation: flowFast 0.8s linear infinite; }
+        .pipe-flow-liquid { stroke-dasharray: 6; animation: flowFast 1.2s linear infinite; }
+        .pipe-flow-cold { stroke-dasharray: 8; animation: flowFast 1s linear infinite; }
+        @keyframes flowFast {
+          from { stroke-dashoffset: 32; }
+          to { stroke-dashoffset: 0; }
+        }
+      `}</style>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
@@ -273,19 +282,6 @@ const InteractiveSchematic = () => {
               <div style={{ position: 'relative', width: '100%', height: '420px', background: '#0F172A', borderRadius: '12px', border: '1px solid #1E293B', padding: '1rem' }}>
                 <svg width="100%" height="100%" viewBox="0 0 900 380" style={{ overflow: 'visible' }}>
                   
-                  <defs>
-                    {/* Animated Flow Pipelines */}
-                    <style>{`
-                      .pipe-flow-hot { stroke-dasharray: 8; animation: flowFast 0.8s linear infinite; }
-                      .pipe-flow-liquid { stroke-dasharray: 6; animation: flowFast 1.2s linear infinite; }
-                      .pipe-flow-cold { stroke-dasharray: 8; animation: flowFast 1s linear infinite; }
-                      @keyframes flowFast {
-                        from { stroke-dashoffset: 32; }
-                        to { stroke-dashoffset: 0; }
-                      }
-                    `}</style>
-                  </defs>
-
                   {/* Pipelines with animated flow */}
                   {/* 1. Compressor Discharge -> Condenser (Hot Superheated Gas - Red) */}
                   <path d="M 520 280 L 720 280 L 720 140" stroke="#EF4444" strokeWidth="6" fill="none" className="pipe-flow-hot" />
