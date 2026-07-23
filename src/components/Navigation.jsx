@@ -34,14 +34,6 @@ const Navigation = () => {
         <span>ความรู้</span>
       </NavLink>
 
-      <NavLink 
-        to="/ai-diagnostic" 
-        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-      >
-        <Sparkles size={24} color="var(--accent-primary)" />
-        <span>AI สแกน</span>
-      </NavLink>
-
       <NavLink to="/schedule" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <Calendar size={24} />
         <span>ตารางงาน</span>

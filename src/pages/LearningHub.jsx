@@ -27,8 +27,20 @@ const LearningHub = () => {
         </span>
       </Link>
 
-      <h2 style={{ fontSize: '1.5rem', margin: '2rem 0 1rem', color: 'var(--text-primary)' }}>1. หมวดการโต้ตอบ (Interactive)</h2>
+      <h2 style={{ fontSize: '1.5rem', margin: '2rem 0 1rem', color: 'var(--text-primary)' }}>1. หมวดการโต้ตอบ & AI วิเคราะห์ (Interactive & AI)</h2>
       <div className="grid-2">
+        <Link to="/ai-diagnostic" className="category-card" style={{ padding: '2rem', border: '1px solid var(--accent-primary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(255, 115, 0, 0.15)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-primary)' }}>
+              <Sparkles size={48} />
+            </div>
+          </div>
+          <div className="category-card-content" style={{ textAlign: 'center' }}>
+            <h3 className="text-gradient-solar" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>AI วิเคราะห์อาการเสีย & Error Code</h3>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem' }}>AI Visual & Compressor Audio Diagnostic</p>
+          </div>
+        </Link>
+
         <Link to="/learning/schematic" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
             <div style={{ background: 'rgba(0, 240, 255, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-ac)' }}>
