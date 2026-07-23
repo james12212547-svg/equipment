@@ -719,27 +719,16 @@ const SingleLineDiagram = () => {
 
             // Stagger position along the line to prevent any label overlapping!
             const t = 0.25 + ((idx % 4) * 0.18);
-            const midX = x1 + (x2 - x1) * t;
-            const midY = y1 + (y2 - y1) * t;
-
-            // Compute perpendicular unit vector to offset label slightly away from line
-            const dx = x2 - x1;
-            const dy = y2 - y1;
-            const len = Math.sqrt(dx * dx + dy * dy) || 1;
-            const side = idx % 2 === 0 ? 1 : -1;
-            const offsetDist = 18; // Reduced since t staggering handles most overlap
-            const perpX = (-dy / len) * offsetDist * side;
-            const perpY = (dx / len) * offsetDist * side;
-
-            const labelX = midX + perpX;
-            const labelY = midY + perpY;
+            const labelX = x1 + (x2 - x1) * t;
+            const labelY = y1 + (y2 - y1) * t;
 
             const vd = getNodeVoltageDrop(toNode);
             const status = getVoltageDropStatus(toNode, vd);
-            const labelText = toNode.cableSize || (systemPhase === '3P' ? '4x4 sq.mm.' : '2x2.5 sq.mm.');
+            const rawLabelText = toNode.cableSize || (systemPhase === '3P' ? '4x4 sq.mm.' : '2x2.5 sq.mm.');
+            // Remove ' sq.mm.' to save huge amount of space, standard SLD notation
+            const labelText = rawLabelText.replace(/ sq\.mm\./g, '');
 
-            const textColor = status.isCritical ? '#fca5a5' : status.isWarning ? '#fbbf24' : '#e2e8f0';
-            const borderColor = status.isCritical ? '#ef4444' : status.isWarning ? '#f59e0b' : '#00f0ff';
+            const textColor = status.isCritical ? '#fca5a5' : status.isWarning ? '#fbbf24' : '#00f0ff';
 
             return (
               <div
@@ -749,19 +738,18 @@ const SingleLineDiagram = () => {
                   left: labelX,
                   top: labelY,
                   transform: 'translate(-50%, -50%)',
-                  background: 'rgba(2, 6, 23, 0.96)',
-                  border: `1.5px solid ${borderColor}`,
-                  borderRadius: '6px',
-                  padding: '3px 8px',
-                  fontSize: '11px',
-                  fontWeight: 700,
+                  background: 'rgba(2, 6, 23, 0.75)',
+                  backdropFilter: 'blur(2px)',
+                  borderRadius: '4px',
+                  padding: '2px 5px',
+                  fontSize: '9.5px',
+                  fontWeight: 800,
                   color: textColor,
                   whiteSpace: 'nowrap',
                   pointerEvents: 'none',
                   zIndex: 5,
-                  boxShadow: `0 2px 10px rgba(0,0,0,0.9), 0 0 8px ${borderColor}55`,
-                  letterSpacing: '0.3px',
-                  fontFamily: 'monospace',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.5)',
+                  letterSpacing: '0.5px',
                 }}
               >
                 {labelText}
