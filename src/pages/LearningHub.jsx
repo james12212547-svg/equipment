@@ -142,17 +142,7 @@ const LearningHub = () => {
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem' }}>Glossary A-Z</p>
           </div>
         </Link>
-        <Link to="/learning/3d" className="category-card" style={{ padding: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(255, 165, 0, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
-              <Box size={48} />
-            </div>
-          </div>
-          <div className="category-card-content" style={{ textAlign: 'center' }}>
-            <h3 className="text-gradient-solar" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>โมเดลจำลอง 3 มิติ</h3>
-            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem' }}>3D Model Viewer</p>
-          </div>
-        </Link>
+
       </div>
 
       <h2 style={{ fontSize: '1.5rem', margin: '3rem 0 1rem', color: 'var(--text-primary)' }}>4. หมวดเครื่องมือเฉพาะทาง (Specialized Tools)</h2>
