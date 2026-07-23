@@ -127,8 +127,14 @@ const MaintenanceReminders = () => {
   }[status]);
 
   const sendLineMsg = (r) => {
-    const msg = encodeURIComponent(`สวัสดีครับ คุณ${r.customerName} 👋\nถึงเวลา ${r.type} แล้วครับ!\nกรุณาติดต่อนัดหมายได้ที่ ${localStorage.getItem('companyPhone') || 'บริษัทของเรา'}`);
+    const msg = encodeURIComponent(`สวัสดีครับ คุณ${r.customerName} 👋\nถึงเวลารอบบำรุงรักษา ${r.type} แล้วครับ!\nกรุณาติดต่อนัดหมายวันเข้าบริการได้ที่ ${localStorage.getItem('companyPhone') || 'บริษัทของเรา'}`);
     window.open(`https://line.me/R/msg/text/?${msg}`, '_blank');
+  };
+
+  const copySmsTemplate = (r) => {
+    const text = `สวัสดีครับ คุณ${r.customerName} จาก ${localStorage.getItem('companyName') || 'ศูนย์บริการวิศวกรรม'} ขอแจ้งเตือนถึงรอบบริการ ${r.type} ประจำปี/ประจำรอบครับ ติดต่อนัดหมายได้ที่ ${localStorage.getItem('companyPhone') || '02-123-4567'}`;
+    navigator.clipboard.writeText(text);
+    toast.success('ก๊อปปี้ข้อความแจ้งเตือนลง Clipboard แล้ว!');
   };
 
   return (
@@ -304,16 +310,33 @@ const MaintenanceReminders = () => {
                   {r.notes && <div style={{ marginTop: '0.5rem', color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>{r.notes}</div>}
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {/* Phone Call Button */}
+                  {r.customerPhone && (
+                    <a href={`tel:${r.customerPhone}`} title="โทรหาลูกค้า"
+                      style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', color: '#3b82f6', padding: '0.5rem 0.75rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      📞 โทร
+                    </a>
+                  )}
                   {/* Send LINE */}
                   {r.customerPhone && (
                     <button onClick={() => sendLineMsg(r)} title="แจ้งเตือนทาง Line"
-                      style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981', padding: '0.5rem 0.85rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                      style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981', padding: '0.5rem 0.75rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}>
                       📱 LINE
                     </button>
                   )}
+                  {/* Copy Template */}
+                  <button onClick={() => copySmsTemplate(r)} title="ก๊อปปี้ข้อความ SMS/แชท"
+                    style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.5rem 0.75rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    📋 ก๊อปปี้แชท
+                  </button>
+                  {/* Create Schedule */}
+                  <button onClick={() => navigate('/schedule')} title="ไปหน้าเปิดคิวงานซ่อม"
+                    style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', padding: '0.5rem 0.75rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                    📅 เปิดคิวงาน
+                  </button>
                   {/* Mark done */}
                   <button onClick={() => markNotified(r.id)} title="ทำบริการแล้ว รีเซ็ตวันนับใหม่"
-                    style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', color: '#3b82f6', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}>
+                    style={{ background: 'rgba(16,185,129,0.1)', border: 'none', color: '#10b981', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}>
                     <CheckCircle size={18} />
                   </button>
                   <button onClick={() => handleEdit(r)}
