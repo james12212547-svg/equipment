@@ -717,18 +717,17 @@ const SingleLineDiagram = () => {
             const x2 = toNode.x + 80;
             const y2 = toNode.y + 30;
 
-            // Place label at 40% along the line
-            const t = 0.4;
+            // Stagger position along the line to prevent any label overlapping!
+            const t = 0.25 + ((idx % 4) * 0.18);
             const midX = x1 + (x2 - x1) * t;
             const midY = y1 + (y2 - y1) * t;
 
-            // Compute perpendicular unit vector to offset label away from line
+            // Compute perpendicular unit vector to offset label slightly away from line
             const dx = x2 - x1;
             const dy = y2 - y1;
             const len = Math.sqrt(dx * dx + dy * dy) || 1;
-            // Alternate left/right offset per index to spread colliding labels
             const side = idx % 2 === 0 ? 1 : -1;
-            const offsetDist = 28;
+            const offsetDist = 18; // Reduced since t staggering handles most overlap
             const perpX = (-dy / len) * offsetDist * side;
             const perpY = (dx / len) * offsetDist * side;
 
