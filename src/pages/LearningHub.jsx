@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Calculator, HelpCircle, Activity, SplitSquareHorizontal, Zap, Thermometer, Book, Box, ShieldAlert, ListChecks, TestTube, Sparkles } from 'lucide-react';
+import { Calculator, HelpCircle, Activity, SplitSquareHorizontal, Zap, Thermometer, Book, Box, ShieldAlert, ListChecks, TestTube, Sparkles, Radio } from 'lucide-react';
 
 const LearningHub = () => {
   return (
@@ -156,6 +156,18 @@ const LearningHub = () => {
           <div className="category-card-content" style={{ textAlign: 'center' }}>
             <h3 className="text-gradient-ac" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>บันทึกผลการทดลอง</h3>
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem' }}>Lab Experiment Logger</p>
+          </div>
+        </Link>
+
+        <Link to="/learning/telemetry" className="category-card" style={{ padding: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '1rem', borderRadius: '50%', color: 'var(--accent-solar)' }}>
+              <Radio size={48} />
+            </div>
+          </div>
+          <div className="category-card-content" style={{ textAlign: 'center' }}>
+            <h3 className="text-gradient-solar" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>จำลองเซนเซอร์เรียลไทม์</h3>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem' }}>IoT & Modbus Telemetry Simulator</p>
           </div>
         </Link>
       </div>
