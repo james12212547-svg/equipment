@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, MessageCircle, X, Camera, Bell, BellOff } from 'lucide-react';
 import { rtdb } from '../utils/firebase';
 import { ref, push, onValue, remove, serverTimestamp, query, limitToLast } from 'firebase/database';
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const AVATARS = ['👷', '🔧', '⚡', '❄️', '☀️', '🛠️', '🔌', '🧰', '🏗️', '⚙️', '🔑', '💡', '🧲', '🌡️', '🔋', '🪛'];
@@ -249,21 +250,43 @@ const TeamChat = () => {
     </div>
   );
 
+  const { currentUser } = useAuth();
+
+  const handleSyncAccountName = () => {
+    if (currentUser?.email) {
+      const name = currentUser.displayName || currentUser.email.split('@')[0];
+      setSender(name);
+      localStorage.setItem('chatSender', name);
+      setSenderSet(true);
+      toast.success(`ซิงค์ชื่อแชทเป็น "${name}" แล้ว`);
+    }
+  };
+
   // Name setup screen
   if (!senderSet) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div className="equipment-card" style={{ padding: '2.5rem', maxWidth: '400px', width: '100%', border: '1px solid var(--accent-primary)', textAlign: 'center' }}>
+      <div className="equipment-card" style={{ padding: '2.5rem', maxWidth: '420px', width: '100%', border: '1px solid var(--accent-primary)', textAlign: 'center' }}>
         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>💬</div>
-        <h2 style={{ marginBottom: '0.5rem' }}>ยินดีต้อนรับสู่แชททีม</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>กรุณากรอกชื่อของคุณก่อนเข้าห้องแชท</p>
+        <h2 style={{ marginBottom: '0.5rem' }}>ตั้งค่าชื่อในแชททีม</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+          ชื่อแชทถูกบันทึกแยกไว้ในเครื่องนี้ หากเปลี่ยนบัญชีผู้ใช้ สามารถกดซิงค์ชื่อตามอีเมลใหม่ได้ทันที
+        </p>
         <form onSubmit={handleSetSender}>
-          <input value={sender} onChange={e => setSender(e.target.value)} placeholder="ชื่อช่างหรือชื่อเล่น..." autoFocus
+          <input value={sender} onChange={e => setSender(e.target.value)} placeholder={currentUser?.email ? currentUser.email.split('@')[0] : "ชื่อช่างหรือชื่อเล่น..."} autoFocus
             style={{ width: '100%', padding: '0.85rem 1rem', borderRadius: '10px', marginBottom: '1rem', fontSize: '1rem', textAlign: 'center' }} />
+          
           <button type="submit"
-            style={{ width: '100%', padding: '0.85rem', background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
-            เข้าสู่ห้องแชท →
+            style={{ width: '100%', padding: '0.85rem', background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem', marginBottom: '0.8rem' }}>
+            ยืนยันชื่อนี้ เข้าสู่ห้องแชท →
           </button>
         </form>
+
+        {currentUser?.email && (
+          <button onClick={handleSyncAccountName}
+            style={{ background: 'transparent', border: '1px dashed var(--accent-primary)', color: 'var(--accent-primary)', padding: '0.6rem 1rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', width: '100%', fontWeight: 'bold' }}>
+            ⚡ ซิงค์กับชื่อบัญชีปัจจุบัน ({currentUser.displayName || currentUser.email.split('@')[0]})
+          </button>
+        )}
       </div>
     </div>
   );
