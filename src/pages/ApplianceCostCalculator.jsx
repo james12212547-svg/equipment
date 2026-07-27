@@ -38,6 +38,7 @@ const ApplianceCostCalculator = ({ projectId, isReadOnly = false }) => {
   const [userTypeId, setUserTypeId] = useLocalStorage(keyPrefix + 'userTypeId', 2);
   const [rateType, setRateType] = useLocalStorage(keyPrefix + 'rateType', 'normal');
   const [hoursOnPeak, setHoursOnPeak] = useState(4);
+  const [hoursPartialPeak, setHoursPartialPeak] = useState(4);
   const [hoursOffPeak, setHoursOffPeak] = useState(4);
 
   const selectedTariff = TARIFF_TYPES.find(t => t.id === Number(userTypeId)) || TARIFF_TYPES[0];
@@ -99,6 +100,15 @@ const ApplianceCostCalculator = ({ projectId, isReadOnly = false }) => {
         const offPeakRatio = 1 - onPeakRatio;
         const avgRate = (selectedTariff.rates.tou.onPeak * onPeakRatio) + (selectedTariff.rates.tou.offPeak * offPeakRatio);
         estimatedCostMonthly = monthlyKwh * avgRate;
+      } else if (rateType === 'tod' && selectedTariff.rates.tod) {
+        const totalHours = Math.max(1, item.hours);
+        const onPeakRatio = Math.min(1, hoursOnPeak / totalHours);
+        const partialRatio = Math.min(1 - onPeakRatio, hoursPartialPeak / totalHours);
+        const offPeakRatio = Math.max(0, 1 - onPeakRatio - partialRatio);
+        const avgRate = (selectedTariff.rates.tod.onPeak * onPeakRatio) 
+                      + (selectedTariff.rates.tod.partialPeak * partialRatio) 
+                      + (selectedTariff.rates.tod.offPeak * offPeakRatio);
+        estimatedCostMonthly = monthlyKwh * avgRate;
       }
 
       return {
@@ -115,9 +125,18 @@ const ApplianceCostCalculator = ({ projectId, isReadOnly = false }) => {
     if (rateType === 'normal') {
       totalMonthlyCost = totalMonthlyKwh * (selectedTariff.rates.normal || 4.42);
     } else if (rateType === 'tou' && selectedTariff.rates.tou) {
-      const onPeakKwh = (totalMonthlyKwh * (hoursOnPeak / Math.max(1, hoursOnPeak + hoursOffPeak)));
-      const offPeakKwh = (totalMonthlyKwh * (hoursOffPeak / Math.max(1, hoursOnPeak + hoursOffPeak)));
+      const totalH = Math.max(1, hoursOnPeak + hoursOffPeak);
+      const onPeakKwh = totalMonthlyKwh * (hoursOnPeak / totalH);
+      const offPeakKwh = totalMonthlyKwh * (hoursOffPeak / totalH);
       totalMonthlyCost = (onPeakKwh * selectedTariff.rates.tou.onPeak) + (offPeakKwh * selectedTariff.rates.tou.offPeak);
+    } else if (rateType === 'tod' && selectedTariff.rates.tod) {
+      const totalH = Math.max(1, hoursOnPeak + hoursPartialPeak + hoursOffPeak);
+      const onPeakKwh = totalMonthlyKwh * (hoursOnPeak / totalH);
+      const partialKwh = totalMonthlyKwh * (hoursPartialPeak / totalH);
+      const offPeakKwh = totalMonthlyKwh * (hoursOffPeak / totalH);
+      totalMonthlyCost = (onPeakKwh * selectedTariff.rates.tod.onPeak) 
+                       + (partialKwh * selectedTariff.rates.tod.partialPeak) 
+                       + (offPeakKwh * selectedTariff.rates.tod.offPeak);
     }
 
     return {
@@ -127,7 +146,7 @@ const ApplianceCostCalculator = ({ projectId, isReadOnly = false }) => {
       totalYearlyCost: (totalMonthlyCost * 12).toFixed(2),
       itemBreakdown
     };
-  }, [items, selectedTariff, rateType, hoursOnPeak, hoursOffPeak]);
+  }, [items, selectedTariff, rateType, hoursOnPeak, hoursPartialPeak, hoursOffPeak]);
 
   const inputStyle = { width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' };
 
@@ -171,14 +190,49 @@ const ApplianceCostCalculator = ({ projectId, isReadOnly = false }) => {
             <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>ลักษณะมิเตอร์ (Meter Rate)</label>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button onClick={() => setRateType('normal')} style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: rateType === 'normal' ? '2px solid var(--accent-solar)' : '1px solid var(--border-color)', background: rateType === 'normal' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-primary)', color: rateType === 'normal' ? 'var(--accent-solar)' : 'var(--text-secondary)', fontWeight: 'bold', cursor: 'pointer' }}>
-                อัตราปกติ (~฿{selectedTariff.rates.normal}/หน่วย)
+                อัตราปกติ
               </button>
               {selectedTariff.rates.tou && (
                 <button onClick={() => setRateType('tou')} style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: rateType === 'tou' ? '2px solid var(--accent-solar)' : '1px solid var(--border-color)', background: rateType === 'tou' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-primary)', color: rateType === 'tou' ? 'var(--accent-solar)' : 'var(--text-secondary)', fontWeight: 'bold', cursor: 'pointer' }}>
                   อัตรา TOU
                 </button>
               )}
+              {selectedTariff.rates.tod && (
+                <button onClick={() => setRateType('tod')} style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: rateType === 'tod' ? '2px solid var(--accent-solar)' : '1px solid var(--border-color)', background: rateType === 'tod' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-primary)', color: rateType === 'tod' ? 'var(--accent-solar)' : 'var(--text-secondary)', fontWeight: 'bold', cursor: 'pointer' }}>
+                  อัตรา TOD
+                </button>
+              )}
             </div>
+
+            {rateType === 'tou' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>On-Peak (ชม.)</label>
+                  <input type="number" min="0" max="24" value={hoursOnPeak} onChange={(e) => setHoursOnPeak(Number(e.target.value))} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Off-Peak (ชม.)</label>
+                  <input type="number" min="0" max="24" value={hoursOffPeak} onChange={(e) => setHoursOffPeak(Number(e.target.value))} style={inputStyle} />
+                </div>
+              </div>
+            )}
+
+            {rateType === 'tod' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginTop: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>On-Peak (ชม.)</label>
+                  <input type="number" min="0" max="24" value={hoursOnPeak} onChange={(e) => setHoursOnPeak(Number(e.target.value))} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Partial (ชม.)</label>
+                  <input type="number" min="0" max="24" value={hoursPartialPeak} onChange={(e) => setHoursPartialPeak(Number(e.target.value))} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Off-Peak (ชม.)</label>
+                  <input type="number" min="0" max="24" value={hoursOffPeak} onChange={(e) => setHoursOffPeak(Number(e.target.value))} style={inputStyle} />
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginBottom: '1.25rem' }}>
