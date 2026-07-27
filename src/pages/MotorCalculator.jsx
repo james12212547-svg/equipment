@@ -253,7 +253,7 @@ const MotorCalculator = () => {
                   </select>
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)' }}>
-                  * พารามิเตอร์อัตโนมัติ: Power Factor $\cos\theta = {pf}$ | Efficiency $\eta = {(eff * 100).toFixed(0)}\%$
+                  * พารามิเตอร์อัตโนมัติ: Power Factor (PF) = {pf} | ประสิทธิภาพ (Eff) = {(eff * 100).toFixed(0)}%
                 </div>
               </div>
             )}
