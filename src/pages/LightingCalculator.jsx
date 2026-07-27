@@ -346,13 +346,45 @@ const LightingCalculator = () => {
               </div>
 
               <div style={{ 
-                background: 'rgba(0,0,0,0.3)', border: '2px dashed var(--border-color)', borderRadius: '10px',
-                padding: '1.5rem', aspectRatio: `${width} / ${length}`,
-                display: 'grid', gridTemplateColumns: `repeat(${result.grid.cols}, 1fr)`, gridTemplateRows: `repeat(${result.grid.rows}, 1fr)`,
-                gap: '0.75rem', alignItems: 'center', justifyItems: 'center', width: '100%', maxWidth: '280px', margin: '0 auto'
+                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%)', 
+                border: '2px solid rgba(245, 158, 11, 0.4)', 
+                borderRadius: '12px',
+                padding: '1.5rem', 
+                minHeight: '220px',
+                display: 'grid', 
+                gridTemplateColumns: `repeat(${result.grid.cols}, 1fr)`, 
+                gridTemplateRows: `repeat(${result.grid.rows}, 1fr)`,
+                gap: '0.85rem', 
+                alignItems: 'center', 
+                justifyItems: 'center', 
+                width: '100%', 
+                maxWidth: '320px', 
+                margin: '0 auto',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.4), inset 0 0 20px rgba(245, 158, 11, 0.08)'
               }}>
                 {Array.from({ length: result.lamps }).map((_, i) => (
-                  <div key={i} style={{ width: '14px', height: '14px', background: 'var(--accent-solar)', borderRadius: '50%', boxShadow: '0 0 12px var(--accent-solar)' }} />
+                  <div 
+                    key={i} 
+                    title={`โคมไฟตำแหน่งที่ ${i + 1}`}
+                    style={{ 
+                      width: '20px', 
+                      height: '20px', 
+                      background: 'radial-gradient(circle, #fff 20%, #fbbf24 60%, #f59e0b 100%)', 
+                      borderRadius: '50%',
+                      boxShadow: '0 0 12px #fbbf24, 0 0 24px rgba(245, 158, 11, 0.8), 0 0 36px rgba(245, 158, 11, 0.4)',
+                      border: '2px solid #ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      color: '#000',
+                      transition: 'transform 0.2s, boxShadow 0.2s',
+                      cursor: 'pointer'
+                    }} 
+                  >
+                    💡
+                  </div>
                 ))}
               </div>
 
