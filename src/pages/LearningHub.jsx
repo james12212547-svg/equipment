@@ -9,23 +9,7 @@ const LearningHub = () => {
         พื้นที่สำหรับการเรียนรู้และทดสอบความรู้ทางวิศวกรรมไฟฟ้าและเครื่องกล
       </p>
 
-      {/* AI Scanner Banner */}
-      <Link to="/ai-diagnostic" className="equipment-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 2rem', marginBottom: '2.5rem', border: '1px solid var(--accent-primary)', background: 'linear-gradient(135deg, rgba(255, 115, 0, 0.15) 0%, rgba(0, 240, 255, 0.1) 100%)', textDecoration: 'none' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ background: 'var(--accent-primary)', padding: '0.85rem', borderRadius: '12px', color: 'white' }}>
-            <Sparkles size={32} />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '1.3rem', color: 'var(--text-primary)' }}>🤖 AI Smart Diagnostic & Trouble Code Scanner</h3>
-            <p style={{ margin: '0.2rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-              วิเคราะห์อาการเสียและ Error Code ด้วย AI รูปภาพถ่าย และคลื่นเสียงคอมเพรสเซอร์
-            </p>
-          </div>
-        </div>
-        <span style={{ padding: '0.6rem 1.2rem', borderRadius: '50px', background: 'var(--accent-primary)', color: 'white', fontWeight: 'bold', fontSize: '0.9rem' }}>
-          ลองใช้งานเลย 🚀
-        </span>
-      </Link>
+
 
       <h2 style={{ fontSize: '1.5rem', margin: '2rem 0 1rem', color: 'var(--text-primary)' }}>1. หมวดการโต้ตอบ & AI วิเคราะห์ (Interactive & AI)</h2>
       <div className="grid-2">
