@@ -24,7 +24,7 @@ const drawIsoTree = (ctx, origin, options) => {
 
   // Tree Shadow on Ground
   const sp = toIso(x + shadowLen * shadowDir * 0.5, y + 15, 0, origin.x, origin.y);
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
   ctx.beginPath();
   ctx.ellipse(sp.x, sp.y, 20, 10, Math.PI / 4, 0, Math.PI * 2);
   ctx.fill();
@@ -77,7 +77,7 @@ const drawIsoTree = (ctx, origin, options) => {
 };
 
 // -------------------------------------------------------------
-// 3. Clean Isometric House + Gable Roof + Solar Panels Engine
+// 3. Clean Isometric House + Gable Roof + Solar Panels Engine + Real Roof Shadow
 // -------------------------------------------------------------
 const drawIsometricHouse = (ctx, origin, options) => {
   const { W = 100, D = 120, H_wall = 60, H_roof = 40, sunTime = 12, panelCount = 16, obstacleType = 'tree' } = options;
@@ -196,7 +196,7 @@ const drawIsometricHouse = (ctx, origin, options) => {
       const pc2 = toIso(px1, py1, pz1, origin.x, origin.y);
       const pc3 = toIso(px0, py1, pz0, origin.x, origin.y);
 
-      // Solar Panel Metallic Blue
+      // Solar Panel Metallic Blue (Dark Grey if shaded)
       ctx.fillStyle = isShaded ? '#0f172a' : '#1d4ed8';
       ctx.beginPath();
       ctx.moveTo(pc0.x, pc0.y); ctx.lineTo(pc1.x, pc1.y);
@@ -223,6 +223,55 @@ const drawIsometricHouse = (ctx, origin, options) => {
         ctx.closePath();
         ctx.fill();
       }
+    }
+  }
+
+  // --- F. REAL PROJECTED OBSTACLE SHADOW ONTO ROOF & SOLAR PANELS ---
+  if (obstacleType !== 'none') {
+    const isMorning = sunTime < 9.5;
+    const isEvening = sunTime > 15.5;
+
+    if (isMorning || isEvening) {
+      ctx.save();
+      // Clip to right sun-facing roof slope polygon so shadow stays neatly on roof!
+      ctx.beginPath();
+      ctx.moveTo(r0.x, r0.y);
+      ctx.lineTo(w1.x, w1.y);
+      ctx.lineTo(w2.x, w2.y);
+      ctx.lineTo(r1.x, r1.y);
+      ctx.closePath();
+      ctx.clip();
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'; // Dynamic Dark Shadow Polygon on Roof
+      ctx.beginPath();
+
+      if (isEvening) {
+        // Sun in West (Left) -> Obstacle in West casts shadow over roof from left-center to right!
+        const shadowStart = toIso(0, y0 + 10, H_wall + H_roof, origin.x, origin.y);
+        const shadowEdge1 = toIso(W / 2, y0 + 5, H_wall, origin.x, origin.y);
+        const shadowEdge2 = toIso(W / 2, y1 - 10, H_wall, origin.x, origin.y);
+        const shadowTip = toIso(0, y1 - 10, H_wall + H_roof, origin.x, origin.y);
+
+        ctx.moveTo(shadowStart.x, shadowStart.y);
+        ctx.lineTo(shadowEdge1.x, shadowEdge1.y);
+        ctx.lineTo(shadowEdge2.x, shadowEdge2.y);
+        ctx.lineTo(shadowTip.x, shadowTip.y);
+      } else {
+        // Sun in East (Right) -> Obstacle in East casts shadow over roof from right to left!
+        const shadowStart = toIso(W / 2, y0 + 10, H_wall, origin.x, origin.y);
+        const shadowEdge1 = toIso(0, y0 + 5, H_wall + H_roof, origin.x, origin.y);
+        const shadowEdge2 = toIso(0, y1 - 10, H_wall + H_roof, origin.x, origin.y);
+        const shadowTip = toIso(W / 2, y1 - 10, H_wall, origin.x, origin.y);
+
+        ctx.moveTo(shadowStart.x, shadowStart.y);
+        ctx.lineTo(shadowEdge1.x, shadowEdge1.y);
+        ctx.lineTo(shadowEdge2.x, shadowEdge2.y);
+        ctx.lineTo(shadowTip.x, shadowTip.y);
+      }
+
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
     }
   }
 };
@@ -376,7 +425,7 @@ const Solar3DSimulator = () => {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // 5. Render House Base + Roof + Panels (Clean Render Order!)
+    // 5. Render House Base + Roof + Panels + Projected Roof Shadow!
     const pitchH = (roofPitch / 45) * 45;
     drawIsometricHouse(ctx, origin, {
       W: 100, D: 120, H_wall: 60, H_roof: pitchH,
