@@ -7,63 +7,63 @@ import { useNavigate } from 'react-router-dom';
 
 const refTables = {
   R32: [
-    { t: -20, p: 4.02 },
-    { t: -10, p: 5.81 },
-    { t: 0, p: 8.13 },
-    { t: 5, p: 9.48 },
-    { t: 10, p: 11.01 },
-    { t: 20, p: 14.75 },
-    { t: 30, p: 19.28 },
-    { t: 40, p: 24.78 },
-    { t: 45, p: 27.94 },
-    { t: 50, p: 31.41 },
-    { t: 60, p: 39.34 }
+    { t: -20, p: 4.02, h_liquid: 175.4, h_vapor: 506.1 },
+    { t: -10, p: 5.81, h_liquid: 191.2, h_vapor: 511.8 },
+    { t: 0, p: 8.13, h_liquid: 207.8, h_vapor: 516.4 },
+    { t: 5, p: 9.48, h_liquid: 216.5, h_vapor: 518.2 },
+    { t: 10, p: 11.01, h_liquid: 225.4, h_vapor: 519.8 },
+    { t: 20, p: 14.75, h_liquid: 244.2, h_vapor: 522.0 },
+    { t: 30, p: 19.28, h_liquid: 264.4, h_vapor: 522.6 },
+    { t: 40, p: 24.78, h_liquid: 286.7, h_vapor: 520.8 },
+    { t: 45, p: 27.94, h_liquid: 298.8, h_vapor: 518.7 },
+    { t: 50, p: 31.41, h_liquid: 311.9, h_vapor: 515.6 },
+    { t: 60, p: 39.34, h_liquid: 342.1, h_vapor: 504.2 }
   ],
   R410A: [
-    { t: -20, p: 3.98 },
-    { t: -10, p: 5.73 },
-    { t: 0, p: 7.99 },
-    { t: 5, p: 9.34 },
-    { t: 10, p: 10.86 },
-    { t: 20, p: 14.44 },
-    { t: 30, p: 18.83 },
-    { t: 40, p: 24.13 },
-    { t: 45, p: 27.15 },
-    { t: 50, p: 30.45 },
-    { t: 60, p: 37.95 }
+    { t: -20, p: 3.98, h_liquid: 168.2, h_vapor: 416.5 },
+    { t: -10, p: 5.73, h_liquid: 183.5, h_vapor: 421.1 },
+    { t: 0, p: 7.99, h_liquid: 199.6, h_vapor: 424.8 },
+    { t: 5, p: 9.34, h_liquid: 208.1, h_vapor: 426.3 },
+    { t: 10, p: 10.86, h_liquid: 217.0, h_vapor: 427.3 },
+    { t: 20, p: 14.44, h_liquid: 236.2, h_vapor: 428.1 },
+    { t: 30, p: 18.83, h_liquid: 257.4, h_vapor: 426.8 },
+    { t: 40, p: 24.13, h_liquid: 281.8, h_vapor: 422.5 },
+    { t: 45, p: 27.15, h_liquid: 295.6, h_vapor: 418.8 },
+    { t: 50, p: 30.45, h_liquid: 311.2, h_vapor: 413.6 },
+    { t: 60, p: 37.95, h_liquid: 351.4, h_vapor: 397.0 }
   ],
   R134a: [
-    { t: -20, p: 1.33 },
-    { t: -10, p: 2.01 },
-    { t: 0, p: 2.93 },
-    { t: 5, p: 3.50 },
-    { t: 10, p: 4.15 },
-    { t: 20, p: 5.72 },
-    { t: 30, p: 7.70 },
-    { t: 40, p: 10.17 },
-    { t: 45, p: 11.60 },
-    { t: 50, p: 13.18 },
-    { t: 60, p: 16.82 }
+    { t: -20, p: 1.33, h_liquid: 173.7, h_vapor: 386.1 },
+    { t: -10, p: 2.01, h_liquid: 186.7, h_vapor: 392.3 },
+    { t: 0, p: 2.93, h_liquid: 200.0, h_vapor: 398.6 },
+    { t: 5, p: 3.50, h_liquid: 206.8, h_vapor: 401.6 },
+    { t: 10, p: 4.15, h_liquid: 213.8, h_vapor: 404.6 },
+    { t: 20, p: 5.72, h_liquid: 227.5, h_vapor: 410.2 },
+    { t: 30, p: 7.70, h_liquid: 241.8, h_vapor: 415.4 },
+    { t: 40, p: 10.17, h_liquid: 256.4, h_vapor: 419.8 },
+    { t: 45, p: 11.60, h_liquid: 264.0, h_vapor: 421.7 },
+    { t: 50, p: 13.18, h_liquid: 271.9, h_vapor: 423.4 },
+    { t: 60, p: 16.82, h_liquid: 288.6, h_vapor: 425.8 }
   ],
   R290: [
-    { t: -20, p: 2.44 },
-    { t: -10, p: 3.45 },
-    { t: 0, p: 4.74 },
-    { t: 5, p: 5.51 },
-    { t: 10, p: 6.36 },
-    { t: 20, p: 8.36 },
-    { t: 30, p: 10.79 },
-    { t: 40, p: 13.69 },
-    { t: 45, p: 15.34 },
-    { t: 50, p: 17.13 },
-    { t: 60, p: 21.17 }
+    { t: -20, p: 2.44, h_liquid: 153.2, h_vapor: 556.1 },
+    { t: -10, p: 3.45, h_liquid: 176.4, h_vapor: 566.2 },
+    { t: 0, p: 4.74, h_liquid: 200.5, h_vapor: 575.6 },
+    { t: 5, p: 5.51, h_liquid: 212.8, h_vapor: 579.9 },
+    { t: 10, p: 6.36, h_liquid: 225.4, h_vapor: 583.9 },
+    { t: 20, p: 8.36, h_liquid: 251.3, h_vapor: 591.0 },
+    { t: 30, p: 10.79, h_liquid: 278.4, h_vapor: 596.7 },
+    { t: 40, p: 13.69, h_liquid: 307.0, h_vapor: 600.3 },
+    { t: 45, p: 15.34, h_liquid: 322.0, h_vapor: 601.2 },
+    { t: 50, p: 17.13, h_liquid: 337.6, h_vapor: 601.3 },
+    { t: 60, p: 21.17, h_liquid: 371.2, h_vapor: 598.0 }
   ]
 };
 
 function interpolate(t_target, table) {
-  if (!table || table.length === 0) return 4.0;
-  if (t_target <= table[0].t) return table[0].p;
-  if (t_target >= table[table.length - 1].t) return table[table.length - 1].p;
+  if (!table || table.length === 0) return { p: 4.0, h_liquid: 200, h_vapor: 500 };
+  if (t_target <= table[0].t) return table[0];
+  if (t_target >= table[table.length - 1].t) return table[table.length - 1];
 
   for (let i = 0; i < table.length - 1; i++) {
     const lower = table[i];
@@ -71,15 +71,23 @@ function interpolate(t_target, table) {
 
     if (t_target >= lower.t && t_target <= upper.t) {
       const fraction = (t_target - lower.t) / (upper.t - lower.t);
-      return lower.p + (fraction * (upper.p - lower.p));
+      return {
+        p: lower.p + (fraction * (upper.p - lower.p)),
+        h_liquid: lower.h_liquid + (fraction * (upper.h_liquid - lower.h_liquid)),
+        h_vapor: lower.h_vapor + (fraction * (upper.h_vapor - lower.h_vapor))
+      };
     }
   }
-  return table[0].p;
+  return table[0];
+}
+
+function getRefrigerantProperties(refrigerant, temp) {
+  const table = refTables[refrigerant] || refTables.R32;
+  return interpolate(temp, table);
 }
 
 function getSaturationPressure(refrigerant, temp) {
-  const table = refTables[refrigerant] || refTables.R32;
-  return interpolate(temp, table);
+  return getRefrigerantProperties(refrigerant, temp).p;
 }
 
 const refrigerantsData = {
@@ -186,16 +194,25 @@ const InteractiveSchematic = () => {
   const currentRef = refrigerantsData[selectedRef] || refrigerantsData.R32;
   const targetComponent = componentsDetail[selectedComponent] || componentsDetail.compressor;
 
-  const pevap = getSaturationPressure(selectedRef, tEvap);
-  const pcond = getSaturationPressure(selectedRef, tCond);
+  const evapProp = getRefrigerantProperties(selectedRef, tEvap);
+  const condProp = getRefrigerantProperties(selectedRef, tCond);
+
+  const pevap = evapProp.p;
+  const pcond = condProp.p;
 
   const pEvapBar = Number(pevap).toFixed(2);
   const pCondBar = Number(pcond).toFixed(2);
   const pRatio = (Number(pCondBar) / Math.max(0.1, Number(pEvapBar))).toFixed(2);
-  
-  const tempDiff = Math.max(10, tCond - tEvap);
-  const copBase = currentRef?.copBase || 4.0;
-  const cop = (copBase * (40 / tempDiff) * (1 - (superheat + subcooling) * 0.01)).toFixed(2);
+
+  // Exact Enthalpy Calculations (kJ/kg)
+  const h1 = evapProp.h_vapor + (superheat * 1.8);
+  const h3 = condProp.h_liquid - (subcooling * 1.4);
+  const h4 = h3; // Isoenthalpic expansion across TXV
+  const h2 = condProp.h_vapor + (superheat * 2.0) + (Number(pRatio) * 6.5);
+
+  const qEvap = (h1 - h4); // Refrigeration Effect (kJ/kg)
+  const wComp = (h2 - h1); // Compressor Work (kJ/kg)
+  const cop = Math.max(1.0, (qEvap / Math.max(1.0, wComp))).toFixed(2);
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
