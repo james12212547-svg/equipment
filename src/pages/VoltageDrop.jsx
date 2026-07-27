@@ -203,7 +203,7 @@ const VoltageDrop = () => {
               
               {/* Voltage Drop % */}
               <div style={{ background: 'var(--bg-tertiary)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.4rem' }}>เปอร์เซ็นต์แรงดันตก (%$V_{drop}$)</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.4rem' }}>เปอร์เซ็นต์แรงดันตก (% Voltage Drop)</p>
                 <p style={{ fontSize: '2.4rem', fontWeight: 'bold', color: result.isPass ? '#10b981' : '#ef4444', margin: 0 }}>
                   {result.percent} <span style={{ fontSize: '1.2rem', fontWeight: 'normal' }}>%</span>
                 </p>
@@ -212,7 +212,7 @@ const VoltageDrop = () => {
 
               {/* Voltage Drop Volts */}
               <div style={{ background: 'var(--bg-tertiary)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.4rem' }}>แรงดันตกคร่อมสาย ($V_{drop}$)</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.4rem' }}>แรงดันตกคร่อมสาย (V_drop)</p>
                 <p style={{ fontSize: '2.2rem', fontWeight: 'bold', color: 'var(--accent-solar)', margin: 0 }}>
                   {result.dropV} <span style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 'normal' }}>Volts</span>
                 </p>
