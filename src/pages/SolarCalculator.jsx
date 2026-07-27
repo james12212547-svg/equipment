@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { ArrowLeft, Calculator, TrendingUp, Printer } from 'lucide-react';
+import { ArrowLeft, Calculator, TrendingUp, Printer, Sun, Zap, Sliders, ShieldAlert, CheckCircle, Leaf, Trees } from 'lucide-react';
 import { AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { calculateSolarRoi } from '../utils/engineering/solarRoi';
 
@@ -29,7 +29,7 @@ const InfoTooltip = ({ text }) => {
           background: '#1a1d24', border: '1px solid rgba(255,165,0,0.3)',
           color: 'var(--text-primary)', padding: '0.6rem 0.8rem',
           borderRadius: '8px', fontSize: '0.8rem', lineHeight: '1.5',
-          whiteSpace: 'pre-wrap', width: '220px', zIndex: 9999,
+          whiteSpace: 'pre-wrap', width: '240px', zIndex: 9999,
           boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
           pointerEvents: 'none'
         }}>
@@ -86,10 +86,9 @@ const PROVINCE_PSH = [
 ];
 
 const InvestmentChart = ({ result }) => {
-  const [returnRate, setReturnRate] = useState(5); // Default 5%
-  const [years, setYears] = useState(20);
+  const [returnRate, setReturnRate] = useState(5);
+  const [years, setYears] = useState(25);
 
-  // Generate Data
   const data = useMemo(() => {
     const arr = [];
     let compounded = 0;
@@ -99,21 +98,15 @@ const InvestmentChart = ({ result }) => {
       if (y === 0) {
         arr.push({ year: y, "กำไรทบต้น (โซลาร์ + DCA)": 0, "ค่าเสียโอกาส (ลงทุนเงินก้อน)": result.estimatedCost, "เงินลงทุนเริ่มแรก": result.estimatedCost });
       } else {
-        // True savings considering panel degradation and inflation
         const inflationMultiplier = Math.pow(1 + result.elecInflation, y - 1);
         const degradationMultiplier = Math.pow(1 - result.degradationRate, y - 1);
         const currentYearSavings = (result.actualSavingsPerMonth * 12) * inflationMultiplier * degradationMultiplier;
         
-        // Operation & Maintenance Costs
         let currentYearCost = result.annualCleaningCost;
-        if (y === 10) currentYearCost += result.inverterReplacementCost; // Replace inverter at year 10
+        if (y === 10) currentYearCost += result.inverterReplacementCost;
         
         const netCashFlow = currentYearSavings - currentYearCost;
-
-        // Scenario A: Solar + DCA savings
         compounded = (compounded + netCashFlow) * (1 + rate);
-        
-        // Scenario B: Opportunity Cost (investing the system cost upfront instead)
         const opportunityCost = result.estimatedCost * Math.pow(1 + rate, y);
         
         arr.push({ 
@@ -144,14 +137,14 @@ const InvestmentChart = ({ result }) => {
   };
 
   return (
-    <div style={{ marginTop: '2rem', padding: '2rem', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+    <div style={{ marginTop: '1.5rem', padding: '1.75rem', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h3 style={{ margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <TrendingUp size={20} color="var(--accent-solar)" /> เปรียบเทียบกลยุทธ์การลงทุน (Opportunity Cost)
+            <TrendingUp size={20} color="var(--accent-solar)" /> กราฟกระแสเงินสด & จุดคุ้มทุน 25 ปี (Opportunity Cost)
           </h3>
-          <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            เปรียบเทียบ "ติดโซลาร์แล้วเอาค่าไฟไป DCA" VS "ไม่ติดโซลาร์ เอาเงินก้อนไปลงทุน"
+          <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+            เปรียบเทียบระหว่าง "ติดโซลาร์เซลล์แล้วเอาค่าไฟประหยัดไป DCA" VS "ไม่ติดโซลาร์"
           </p>
         </div>
         
@@ -162,24 +155,15 @@ const InvestmentChart = ({ result }) => {
               type="number" 
               value={returnRate} 
               onChange={e => setReturnRate(Number(e.target.value))}
-              style={{ width: '90px', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.2)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', outline: 'none' }}
-            />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>ระยะเวลา (ปี)</label>
-            <input 
-              type="number" 
-              value={years} 
-              onChange={e => setYears(Number(e.target.value))}
-              style={{ width: '90px', padding: '0.5rem', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.2)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', outline: 'none' }}
+              style={{ width: '85px', padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
             />
           </div>
         </div>
       </div>
       
-      <div style={{ width: '100%', height: '350px' }}>
+      <div style={{ width: '100%', height: '320px' }}>
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="colorCompounded" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -192,7 +176,7 @@ const InvestmentChart = ({ result }) => {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
             <XAxis dataKey="year" stroke="var(--text-tertiary)" tick={{ fill: 'var(--text-tertiary)' }} />
-            <YAxis stroke="var(--text-tertiary)" tick={{ fill: 'var(--text-tertiary)' }} tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`} width={60} />
+            <YAxis stroke="var(--text-tertiary)" tick={{ fill: 'var(--text-tertiary)' }} tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`} width={50} />
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ paddingBottom: '1rem' }} />
             <Area type="monotone" dataKey="ค่าเสียโอกาส (ลงทุนเงินก้อน)" stroke="#f59e0b" fillOpacity={1} fill="url(#colorOppCost)" strokeWidth={2} />
@@ -200,22 +184,6 @@ const InvestmentChart = ({ result }) => {
             <Line type="monotone" dataKey="เงินลงทุนเริ่มแรก" stroke="#ef4444" strokeWidth={2} strokeDasharray="5 5" dot={false} />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
-      
-      <div style={{ marginTop: '2rem', padding: '1.25rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-        <div style={{ background: '#10b981', color: 'white', padding: '0.75rem', borderRadius: '50%', display: 'flex', flexShrink: 0 }}>
-          <TrendingUp size={24} />
-        </div>
-        <div>
-          <h4 style={{ margin: 0, color: '#10b981', fontSize: '1.1rem' }}>วิสัยทัศน์ทางธุรกิจและการลงทุน</h4>
-          <p style={{ margin: '0.5rem 0 0', color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
-            หากคุณไม่ติดโซลาร์เซลล์แล้วนำเงิน <strong>{(result.estimatedCost).toLocaleString()} บาท</strong> ไปลงทุนที่ {returnRate}% ต่อปี จะได้เงิน <strong>{data[data.length - 1]["ค่าเสียโอกาส (ลงทุนเงินก้อน)"].toLocaleString()} บาท</strong> ใน {years} ปี
-            <br />
-            แต่ถ้าลงทุนติดโซลาร์เซลล์ และนำค่าไฟที่ประหยัดได้ไป <strong>DCA (ถัวเฉลี่ยรายเดือน)</strong> ที่ผลตอบแทนเดียวกัน 
-            รวมผลประโยชน์จากอัตราเงินเฟ้อค่าไฟที่เพิ่มขึ้นทุกปี ({(result.elecInflation * 100).toFixed(1)}%/ปี) 
-            คุณจะสร้างความมั่งคั่งได้ถึง <strong>{data[data.length - 1]["กำไรทบต้น (โซลาร์ + DCA)"].toLocaleString()} บาท</strong>!
-          </p>
-        </div>
       </div>
     </div>
   );
@@ -227,15 +195,35 @@ const SolarCalculator = ({ projectId, isReadOnly = false }) => {
 
   const [calcMode, setCalcMode] = useLocalStorage(keyPrefix + 'calcMode', 'bill');
   const [inputValue, setInputValue] = useLocalStorage(keyPrefix + 'inputValue', '');
-  const [inflationRate, setInflationRate] = useLocalStorage(keyPrefix + 'inflationRate', 3);
   const [province, setProvince] = useLocalStorage(keyPrefix + 'province', 'กรุงเทพมหานคร');
+  const [dayUsageRatio, setDayUsageRatio] = useLocalStorage(keyPrefix + 'dayUsageRatio', 60);
+  const [systemType, setSystemType] = useLocalStorage(keyPrefix + 'systemType', 'on_grid');
+  
+  // Advanced Settings State
+  const [isAdvanced, setIsAdvanced] = useState(false);
+  const [inflationRate, setInflationRate] = useLocalStorage(keyPrefix + 'inflationRate', 3);
+  const [customCost, setCustomCost] = useLocalStorage(keyPrefix + 'customCost', '');
+  const [enableFit, setEnableFit] = useLocalStorage(keyPrefix + 'enableFit', true);
+  const [fitRate, setFitRate] = useLocalStorage(keyPrefix + 'fitRate', 2.20);
+  const [prRate, setPrRate] = useLocalStorage(keyPrefix + 'prRate', 0.80);
+
   const [result, setResult] = useLocalStorage(keyPrefix + 'result', null);
 
   const selectedPSH = PROVINCE_PSH.find(p => p.label === province)?.psh ?? 4.5;
 
   const calculateROI = (e) => {
     e.preventDefault();
-    const calculationResult = calculateSolarRoi(calcMode, inputValue, inflationRate, selectedPSH);
+    const calculationResult = calculateSolarRoi(calcMode, inputValue, {
+      inflationRate,
+      psh: selectedPSH,
+      dayUsageRatio,
+      systemType,
+      customCost,
+      enableFit,
+      fitRate,
+      prRate
+    });
+
     if (!calculationResult) {
       toast.error('กรุณากรอกตัวเลขให้ถูกต้อง (มากกว่า 0)');
       return;
@@ -243,211 +231,277 @@ const SolarCalculator = ({ projectId, isReadOnly = false }) => {
     setResult(calculationResult);
   };
 
+  const inputStyle = { width: '100%', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', outline: 'none', fontSize: '1rem' };
+
   return (
     <div className={`animate-fade-in ${isReadOnly ? 'print-only' : ''}`} style={{ paddingBottom: isReadOnly ? '0' : '2rem' }}>
       
       {!isReadOnly && (
         <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-          <button 
-            onClick={() => navigate(-1)} 
-            className="no-print"
-            style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}
-          >
+          <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.5rem' }}>
             <ArrowLeft size={24} />
           </button>
           <div style={{ flex: 1 }}>
-            <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>ประเมินจุดคุ้มทุนโซลาร์เซลล์</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>Solar ROI & System Sizing Calculator</p>
+            <h1 className="text-gradient-solar" style={{ marginBottom: 0, fontSize: '2rem' }}>ประเมินจุดคุ้มทุนโซลาร์เซลล์ (Advanced Solar ROI)</h1>
+            <p style={{ color: 'var(--text-secondary)' }}>Solar ROI & System Sizing Calculator with Day/Night Load & ESG Carbon Offset</p>
           </div>
-          <button 
-            className="no-print"
-            onClick={() => window.print()} 
-            style={{ 
-              background: 'var(--accent-secondary)', 
-              color: 'white', 
-              border: 'none', 
-              padding: '0.75rem 1.5rem', 
-              borderRadius: '8px', 
-              fontWeight: 'bold', 
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
+          <button onClick={() => window.print()} style={{ background: 'var(--accent-secondary)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Printer size={20} /> พิมพ์เป็น PDF
           </button>
         </div>
       )}
 
-      {!isReadOnly && (
-        <div className="print-only" style={{ marginBottom: '2rem', textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '1rem', display: 'none' }}>
-          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>เอกสารแสดงรายการคำนวณ (Solar ROI)</h2>
-          <p style={{ margin: '0.5rem 0 0', color: '#666' }}>คำนวณโดยระบบ Engineering Toolkit (สร้างเมื่อ {new Date().toLocaleDateString('th-TH')})</p>
-        </div>
-      )}
-
       <div className={`print-block ${isReadOnly ? "" : "grid-2"}`} style={{ alignItems: 'flex-start', display: isReadOnly ? 'block' : 'grid' }}>
         
+        {/* INPUT CONTROLS */}
         {!isReadOnly && (
           <div className="equipment-card no-print" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-            <button 
-              onClick={() => { setCalcMode('bill'); setResult(null); setInputValue(''); }}
-              style={{ flex: 1, minHeight: '90px', padding: '0.75rem', borderRadius: '8px', border: calcMode === 'bill' ? '2px solid var(--accent-solar)' : '1px solid var(--border-color)', background: calcMode === 'bill' ? 'rgba(255,165,0,0.1)' : 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', transition: 'all 0.2s', textAlign: 'center' }}
-            >
-              <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>⚡</span>
-              <span style={{ fontSize: '0.85rem', lineHeight: '1.4' }}>คำนวณจากค่าไฟ<br/><span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>(บาท/เดือน)</span></span>
-            </button>
-            <button 
-              onClick={() => { setCalcMode('load'); setResult(null); setInputValue(''); }}
-              style={{ flex: 1, minHeight: '90px', padding: '0.75rem', borderRadius: '8px', border: calcMode === 'load' ? '2px solid var(--accent-solar)' : '1px solid var(--border-color)', background: calcMode === 'load' ? 'rgba(255,165,0,0.1)' : 'var(--bg-tertiary)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', transition: 'all 0.2s', textAlign: 'center' }}
-            >
-              <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>☀️</span>
-              <span style={{ fontSize: '0.85rem', lineHeight: '1.4' }}>คำนวณจากโหลด<br/><span style={{ fontSize: '0.8em', color: 'var(--text-secondary)' }}>(kWh/วัน)</span></span>
-            </button>
-          </div>
-          
-          <form onSubmit={calculateROI} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'end' }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{ display: 'flex', alignItems: 'flex-end', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem', minHeight: '2.8rem' }}>
-                  {calcMode === 'bill' ? 'ค่าไฟเฉลี่ยต่อเดือน (บาท)' : 'การใช้พลังงานเป้าหมาย (kWh/วัน)'}
-                </label>
+            
+            {/* Mode Switcher Tabs (High-Contrast Active State) */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <button 
+                onClick={() => { setCalcMode('bill'); setResult(null); setInputValue(''); }}
+                style={{
+                  flex: 1, minHeight: '85px', padding: '0.75rem', borderRadius: '10px',
+                  border: calcMode === 'bill' ? '2px solid #f59e0b' : '1px solid var(--border-color)',
+                  background: calcMode === 'bill' ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.1) 100%)' : 'var(--bg-tertiary)',
+                  color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
+                  boxShadow: calcMode === 'bill' ? '0 0 15px rgba(245, 158, 11, 0.3)' : 'none',
+                  fontWeight: calcMode === 'bill' ? 'bold' : 'normal', transition: 'all 0.2s'
+                }}
+              >
+                <span style={{ fontSize: '1.5rem' }}>⚡</span>
+                <span style={{ fontSize: '0.9rem' }}>คำนวณจากค่าไฟ<br/><span style={{ fontSize: '0.8em', color: calcMode === 'bill' ? '#f59e0b' : 'var(--text-secondary)' }}>(บาท/เดือน)</span></span>
+              </button>
+
+              <button 
+                onClick={() => { setCalcMode('load'); setResult(null); setInputValue(''); }}
+                style={{
+                  flex: 1, minHeight: '85px', padding: '0.75rem', borderRadius: '10px',
+                  border: calcMode === 'load' ? '2px solid #f59e0b' : '1px solid var(--border-color)',
+                  background: calcMode === 'load' ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.1) 100%)' : 'var(--bg-tertiary)',
+                  color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
+                  boxShadow: calcMode === 'load' ? '0 0 15px rgba(245, 158, 11, 0.3)' : 'none',
+                  fontWeight: calcMode === 'load' ? 'bold' : 'normal', transition: 'all 0.2s'
+                }}
+              >
+                <span style={{ fontSize: '1.5rem' }}>☀️</span>
+                <span style={{ fontSize: '0.9rem' }}>คำนวณจากโหลด<br/><span style={{ fontSize: '0.8em', color: calcMode === 'load' ? '#f59e0b' : 'var(--text-secondary)' }}>(kWh/วัน)</span></span>
+              </button>
+            </div>
+
+            <form onSubmit={calculateROI} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                  <label style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                    {calcMode === 'bill' ? 'ค่าไฟเฉลี่ยต่อเดือน (บาท)' : 'การใช้พลังงานเป้าหมาย (kWh/วัน)'}
+                  </label>
+                  <Link to="/learning/appliance-cost" style={{ fontSize: '0.8rem', color: 'var(--accent-solar)', textDecoration: 'none', fontWeight: 'bold' }}>
+                    ⚡ ช่วยคำนวณโหลดจากอุปกรณ์ →
+                  </Link>
+                </div>
                 <input 
                   type="number" 
                   step={calcMode === 'load' ? '0.01' : '1'}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder={calcMode === 'bill' ? 'เช่น 3500' : 'เช่น 53.92'}
-                  style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.2)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', fontSize: '1.1rem', boxSizing: 'border-box', outline: 'none' }}
+                  style={inputStyle}
                   required
                 />
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{ display: 'flex', alignItems: 'flex-end', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem', minHeight: '2.8rem' }}>
-                  เงินเฟ้อค่าไฟ (% / ปี)
-                  <InfoTooltip text={'ค่าเฉลี่ยที่ไฟฟ้าแพงขึ้นทุกปี\nไทยเฉลี่ยอยู่ที่ ~3%/ปี\nยิ่งเยอะ ยิ่งคุ้มทุนเร็วขึ้น'} />
-                </label>
-                <input 
-                  type="number" 
-                  step="0.1"
-                  value={inflationRate}
-                  onChange={(e) => setInflationRate(Number(e.target.value))}
-                  style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.2)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', fontSize: '1.1rem', boxSizing: 'border-box', outline: 'none' }}
-                  required
-                />
-              </div>
-            </div>
 
-            {/* Province / PSH Selector */}
-            <div>
-              <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                📍 จังหวัด / ชั่วโมงแดด (Peak Sun Hours)
-                <InfoTooltip text={'Peak Sun Hours (PSH) คือจำนวนชั่วโมง\nที่แสงแดดมีความเข้มเพียงพอต่อการผลิตไฟฟ้า\nภาคอีสาน/กลาง ได้ PSH สูงกว่าภาคใต้\nค่ายิ่งสูง = แผงผลิตไฟได้มากกว่า'} />
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', alignItems: 'center' }}>
-                <select
-                  value={province}
-                  onChange={(e) => setProvince(e.target.value)}
-                  style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.2)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', fontSize: '1rem', cursor: 'pointer', outline: 'none' }}
-                >
-                  {PROVINCE_PSH.map((item, i) =>
-                    item.disabled
-                      ? <option key={i} disabled style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>{item.region}</option>
-                      : <option key={i} value={item.label}>{item.label}</option>
-                  )}
-                </select>
-                <div style={{ background: 'rgba(255,165,0,0.1)', border: '1px solid rgba(255,165,0,0.4)', borderRadius: '8px', padding: '0.6rem 1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>PSH</p>
-                  <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--accent-solar)', margin: 0 }}>{selectedPSH}</p>
-                  <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', margin: 0 }}>ชม./วัน</p>
+              {/* Day / Night Ratio Slider */}
+              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>
+                    สัดส่วนการใช้ไฟ กลางวัน vs กลางคืน
+                    <InfoTooltip text={'ระบบ On-Grid ผลิตไฟได้เฉพาะกลางวัน\nสัดส่วนไฟกลางวันที่ใช้จริงส่งผลต่อผลประหยัด\n- ออฟฟิศ: กลางวัน 80% / กลางคืน 20%\n- บ้านทั่วไป: กลางวัน 50% / กลางคืน 50%'} />
+                  </label>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--accent-solar)', fontWeight: 'bold' }}>
+                    ☀️ กลางวัน {dayUsageRatio}% | 🌙 กลางคืน {100 - dayUsageRatio}%
+                  </span>
+                </div>
+                <input 
+                  type="range" min="20" max="100" step="5" 
+                  value={dayUsageRatio} onChange={(e) => setDayUsageRatio(Number(e.target.value))}
+                  style={{ width: '100%', accentColor: 'var(--accent-solar)', cursor: 'pointer' }} 
+                />
+                <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.6rem' }}>
+                  <button type="button" onClick={() => setDayUsageRatio(80)} style={{ flex: 1, padding: '0.3rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: dayUsageRatio === 80 ? 'rgba(245, 158, 11, 0.2)' : 'transparent', color: dayUsageRatio === 80 ? 'var(--accent-solar)' : 'var(--text-secondary)', fontSize: '0.75rem', cursor: 'pointer' }}>🏢 ออฟฟิศ (80/20)</button>
+                  <button type="button" onClick={() => setDayUsageRatio(50)} style={{ flex: 1, padding: '0.3rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: dayUsageRatio === 50 ? 'rgba(245, 158, 11, 0.2)' : 'transparent', color: dayUsageRatio === 50 ? 'var(--accent-solar)' : 'var(--text-secondary)', fontSize: '0.75rem', cursor: 'pointer' }}>🏠 บ้านพัก (50/50)</button>
+                  <button type="button" onClick={() => setDayUsageRatio(70)} style={{ flex: 1, padding: '0.3rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: dayUsageRatio === 70 ? 'rgba(245, 158, 11, 0.2)' : 'transparent', color: dayUsageRatio === 70 ? 'var(--accent-solar)' : 'var(--text-secondary)', fontSize: '0.75rem', cursor: 'pointer' }}>❄️ ร้านค้า/แอร์ (70/30)</button>
                 </div>
               </div>
-            </div>
-            
-            <button 
-              type="submit" 
-              style={{ 
-                background: 'linear-gradient(135deg, #FFB75E 0%, #ED8F03 100%)', 
-                color: 'white', 
-                padding: '1rem', 
-                borderRadius: '8px', 
-                border: 'none', 
-                fontSize: '1.1rem', 
-                fontWeight: 'bold', 
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <Calculator size={20} /> ประเมินระบบ & คำนวณความคุ้มค่า
-            </button>
-          </form>
-        </div>
-        )}
 
-        {result && (
-          <div className="equipment-card animate-fade-in" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255, 165, 0, 0.05)', border: '1px solid rgba(255, 165, 0, 0.2)' }}>
-            <h3 className="text-gradient-solar">ผลการประเมินออกแบบระบบ</h3>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'stretch' }}>
-              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>ขนาดระบบที่แนะนำ</p>
-                <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--accent-solar)' }}>{result.recommendedKW} <span style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>kW</span></p>
-              </div>
-              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>ขนาดอินเวอร์เตอร์ (ขั้นต่ำ)</p>
-                <p style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{result.inverterSize} <span style={{ fontSize: '1rem' }}>kW</span></p>
-                <p style={{ fontSize: '0.85rem', color: 'var(--accent-solar)', marginTop: 'auto', fontWeight: 'bold' }}>ระบบ {result.inverterPhase}</p>
+              {/* Province / PSH Selector */}
+              <div>
+                <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  📍 จังหวัด / ชั่วโมงแดด (Peak Sun Hours)
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', alignItems: 'center' }}>
+                  <select
+                    value={province}
+                    onChange={(e) => setProvince(e.target.value)}
+                    style={inputStyle}
+                  >
+                    {PROVINCE_PSH.map((item, i) =>
+                      item.disabled
+                        ? <option key={i} disabled style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>{item.region}</option>
+                        : <option key={i} value={item.label}>{item.label}</option>
+                    )}
+                  </select>
+                  <div style={{ background: 'rgba(255,165,0,0.1)', border: '1px solid rgba(255,165,0,0.4)', borderRadius: '8px', padding: '0.5rem 0.8rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', margin: 0 }}>PSH</p>
+                    <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent-solar)', margin: 0 }}>{selectedPSH}</p>
+                  </div>
+                </div>
               </div>
 
-              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>จำนวนแผงโซลาร์ ({result.panelWattage}W)</p>
-                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', marginTop: 'auto' }}>{result.numberOfPanels} <span style={{ fontSize: '1rem' }}>แผง</span></p>
+              {/* System Type Selection */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>รูปแบบระบบ (System Type)</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button type="button" onClick={() => setSystemType('on_grid')} style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: systemType === 'on_grid' ? '2px solid var(--accent-solar)' : '1px solid var(--border-color)', background: systemType === 'on_grid' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-primary)', color: systemType === 'on_grid' ? 'var(--accent-solar)' : 'var(--text-secondary)', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.82rem' }}>
+                    ☀️ On-Grid (ไม่มีแบต)
+                  </button>
+                  <button type="button" onClick={() => setSystemType('hybrid')} style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: systemType === 'hybrid' ? '2px solid var(--accent-solar)' : '1px solid var(--border-color)', background: systemType === 'hybrid' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-primary)', color: systemType === 'hybrid' ? 'var(--accent-solar)' : 'var(--text-secondary)', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.82rem' }}>
+                    🔋 Hybrid (มีแบตเตอรี่)
+                  </button>
+                </div>
               </div>
-              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>พื้นที่หลังคาที่ต้องใช้</p>
-                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', marginTop: 'auto' }}>{result.requiredArea} <span style={{ fontSize: '1rem' }}>ตร.ม.</span></p>
+
+              {/* Advanced Settings Expandable Toggle */}
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setIsAdvanced(!isAdvanced)} 
+                  style={{ background: 'none', border: 'none', color: 'var(--accent-solar)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: 0 }}
+                >
+                  <Sliders size={16} /> {isAdvanced ? '▲ ซ่อนตั้งค่าขั้นสูง (Advanced Settings)' : '▼ เปิดตั้งค่าขั้นสูง (PR, FIT, งบประมาณเฉพาะ)'}
+                </button>
+
+                {isAdvanced && (
+                  <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>งบประมาณ/ราคาติดตั้งจริง (บาท) [เว้นว่างเพื่อประเมินอัตโนมัติ]</label>
+                      <input type="number" value={customCost} onChange={(e) => setCustomCost(e.target.value)} placeholder="เช่น 140000" style={inputStyle} />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div>
+                        <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>ประสิทธิภาพระบบ PR (%)</label>
+                        <input type="number" step="0.01" value={prRate} onChange={(e) => setPrRate(e.target.value)} placeholder="0.80" style={inputStyle} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>เงินเฟ้อค่าไฟ (%/ปี)</label>
+                        <input type="number" step="0.1" value={inflationRate} onChange={(e) => setInflationRate(Number(e.target.value))} style={inputStyle} />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--bg-primary)', borderRadius: '8px' }}>
+                      <div>
+                        <strong style={{ fontSize: '0.85rem', display: 'block' }}>ขายไฟคืน (Feed-in Tariff)</strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>รับซื้อไฟส่วนเกิน 2.20 บาท/หน่วย</span>
+                      </div>
+                      <input type="checkbox" checked={enableFit} onChange={(e) => setEnableFit(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                    </div>
+                  </div>
+                )}
               </div>
               
-              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', textAlign: 'center', alignItems: 'center' }}>
-                <div style={{ padding: '0.5rem 0' }}>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.25rem' }}>งบประมาณเบื้องต้น</p>
-                  <p style={{ fontSize: '1rem', fontWeight: 'bold', lineHeight: '1.3' }}>{(result.estimatedCost).toLocaleString()}</p>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>บาท</p>
+              <button 
+                type="submit" 
+                style={{ 
+                  background: 'linear-gradient(135deg, #FFB75E 0%, #ED8F03 100%)', 
+                  color: 'white', padding: '1rem', borderRadius: '8px', border: 'none', 
+                  fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
+                }}
+              >
+                <Calculator size={20} /> ประเมินระบบ & คำนวณความคุ้มค่า
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* RESULTS SECTION */}
+        {result && (
+          <div className="equipment-card animate-fade-in" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255, 165, 0, 0.03)', border: '1px solid rgba(255, 165, 0, 0.2)' }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="text-gradient-solar" style={{ margin: 0, fontSize: '1.5rem' }}>ผลการประเมินออกแบบระบบโซลาร์เซลล์</h3>
+              <span style={{ padding: '0.3rem 0.8rem', borderRadius: '50px', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                คืนทุนใน {result.paybackYears} ปี 🚀
+              </span>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+              <div style={{ background: 'var(--bg-tertiary)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.4rem' }}>ขนาดระบบที่แนะนำ</p>
+                <p style={{ fontSize: '2.2rem', fontWeight: 'bold', color: 'var(--accent-solar)', margin: 0 }}>
+                  {result.recommendedKW} <span style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>kWp</span>
+                </p>
+              </div>
+
+              <div style={{ background: 'var(--bg-tertiary)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 0.4rem' }}>งบประมาณติดตั้งเบื้องต้น</p>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6', margin: 0 }}>
+                  ฿{result.estimatedCost.toLocaleString()}
+                </p>
+              </div>
+
+              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0 }}>จำนวนแผง ({result.panelWattage}W)</p>
+                <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0.2rem 0 0' }}>{result.numberOfPanels} <span style={{ fontSize: '0.9rem' }}>แผง</span></p>
+              </div>
+
+              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0 }}>พื้นที่หลังคาที่ต้องใช้</p>
+                <p style={{ fontSize: '1.4rem', fontWeight: 'bold', margin: '0.2rem 0 0' }}>{result.requiredArea} <span style={{ fontSize: '0.9rem' }}>ตร.ม.</span></p>
+              </div>
+
+              <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px', gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', textAlign: 'center' }}>
+                <div>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0 }}>ประหยัดไฟโดยตรง (กลางวัน)</p>
+                  <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#10b981', margin: '0.2rem 0 0' }}>฿{result.selfConsumedMonthlySavings.toLocaleString()}/เดือน</p>
                 </div>
-                <div style={{ borderLeft: '1px solid var(--border-color)', borderRight: '1px solid var(--border-color)', padding: '0.5rem 0' }}>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.25rem' }}>ประหยัดไฟได้</p>
-                  <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4CAF50', lineHeight: '1.3' }}>{(result.actualSavingsPerMonth).toLocaleString()}</p>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>บาท/เดือน</p>
-                </div>
-                <div style={{ padding: '0.5rem 0' }}>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.25rem' }}>ระยะเวลาคืนทุน</p>
-                  <p style={{ fontSize: '1rem', fontWeight: 'bold', lineHeight: '1.3' }}>{result.paybackYears}</p>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>ปี</p>
+                <div>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0 }}>รายได้ขายไฟคืนส่วนเกิน (FIT)</p>
+                  <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#f59e0b', margin: '0.2rem 0 0' }}>฿{result.fitMonthlyRevenue.toLocaleString()}/เดือน</p>
                 </div>
               </div>
             </div>
-            
-            <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-tertiary)', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>
-                * อ้างอิง Peak Sun Hours (PSH)
-                <InfoTooltip text={'PSH = ชั่วโมงที่แดดเต็มที่ต่อวัน\nใช้คำนวณว่าแผงโซลาร์ขนาด 1 kW\nจะผลิตไฟฟ้าได้กี่ kWh ต่อวัน\n(1 kW × PSH = kWh/วัน)'} />
-                {' '}: <strong style={{ color: 'var(--accent-solar)' }}>{result?.psh ?? selectedPSH} ชม./วัน</strong>
-                {' '}| ประสิทธิภาพระบบ (PR) 0.8 | แผง 550W | ราคาอาจเปลี่ยนแปลงตามหน้างาน
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                อินเวอร์เตอร์
-                <InfoTooltip text={'อินเวอร์เตอร์ (Inverter) คืออุปกรณ์\nที่แปลงไฟฟ้ากระแสตรง (DC) จากแผงโซลาร์\nให้เป็นไฟฟ้ากระแสสลับ (AC)\nที่บ้านและอุปกรณ์ไฟฟ้าทั่วไปใช้ได้'} />
-                {' '}| 3-Phase ใช้สำหรับระบบ {'>'} 5 kW
-              </span>
+
+            {/* 🌱 ESG & Environmental Carbon Offset Card */}
+            <div style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '12px', padding: '1.25rem' }}>
+              <h4 style={{ margin: '0 0 0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+                <Leaf size={22} /> ผลกระทบด้านสิ่งแวดล้อม & คาร์บอนเครดิต (ESG Impact)
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--bg-primary)', padding: '0.85rem', borderRadius: '8px' }}>
+                  <div style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '0.6rem', borderRadius: '50%', color: '#10b981' }}>
+                    <Leaf size={24} />
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-secondary)' }}>ลดการปล่อยก๊าซ CO₂</p>
+                    <p style={{ margin: '0.2rem 0 0', fontSize: '1.25rem', fontWeight: 'bold', color: '#10b981' }}>{result.co2ReducedTonsPerYear} <span style={{ fontSize: '0.85rem' }}>ตัน/ปี</span></p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--bg-primary)', padding: '0.85rem', borderRadius: '8px' }}>
+                  <div style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '0.6rem', borderRadius: '50%', color: '#10b981' }}>
+                    <Trees size={24} />
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-secondary)' }}>เทียบเท่าปลูกต้นไม้</p>
+                    <p style={{ margin: '0.2rem 0 0', fontSize: '1.25rem', fontWeight: 'bold', color: '#10b981' }}>{result.treesPlantedEquivalent} <span style={{ fontSize: '0.85rem' }}>ต้น/ปี</span></p>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            {/* 📈 WOW Factor: Investment Chart */}
+
+            {/* Investment Opportunity Cost Chart */}
             <InvestmentChart result={result} />
           </div>
         )}
