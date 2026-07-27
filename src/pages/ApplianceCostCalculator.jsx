@@ -27,9 +27,11 @@ const ApplianceCostCalculator = ({ projectId, isReadOnly = false }) => {
     { id: 2, name: 'หลอดไฟ LED ส่องสว่าง', watts: 18, qty: 10, hours: 10, presetId: 'bulb_led' }
   ]);
 
+  const [addMode, setAddMode] = useState('preset'); // 'preset' or 'custom'
   const [selectedPreset, setSelectedPreset] = useState('water_pump_agri');
-  const [customName, setCustomName] = useState('อุปกรณ์ไฟฟ้า');
+  const [customName, setCustomName] = useState('');
   const [customWatts, setCustomWatts] = useState(1000);
+  const [powerUnit, setPowerUnit] = useState('W');
   const [customQty, setCustomQty] = useState(1);
   const [customHours, setCustomHours] = useState(8);
 
@@ -41,19 +43,34 @@ const ApplianceCostCalculator = ({ projectId, isReadOnly = false }) => {
   const selectedTariff = TARIFF_TYPES.find(t => t.id === Number(userTypeId)) || TARIFF_TYPES[0];
 
   const handleAddPreset = () => {
-    const preset = APPLIANCE_PRESETS.find(p => p.id === selectedPreset);
-    if (!preset) return;
-
-    const newItem = {
-      id: Date.now(),
-      name: preset.id === 'custom' ? customName : preset.name,
-      watts: preset.id === 'custom' ? Number(customWatts) || 100 : preset.watts,
-      qty: Number(customQty) || 1,
-      hours: Number(customHours) || 1,
-      presetId: preset.id
-    };
+    let newItem;
+    if (addMode === 'custom') {
+      const w = powerUnit === 'kW' ? (Number(customWatts) || 1) * 1000 : (Number(customWatts) || 100);
+      newItem = {
+        id: Date.now(),
+        name: customName.trim() || 'อุปกรณ์ไฟฟ้าทั่วไป',
+        watts: Math.round(w),
+        qty: Math.max(1, Number(customQty) || 1),
+        hours: Math.max(0.1, Number(customHours) || 1),
+        presetId: 'custom'
+      };
+    } else {
+      const preset = APPLIANCE_PRESETS.find(p => p.id === selectedPreset);
+      if (!preset) return;
+      newItem = {
+        id: Date.now(),
+        name: preset.name,
+        watts: preset.watts,
+        qty: Math.max(1, Number(customQty) || 1),
+        hours: Math.max(0.1, Number(customHours) || 1),
+        presetId: preset.id
+      };
+    }
 
     setItems([...items, newItem]);
+    if (addMode === 'custom') {
+      setCustomName('');
+    }
   };
 
   const handleRemoveItem = (id) => {
@@ -169,41 +186,87 @@ const ApplianceCostCalculator = ({ projectId, isReadOnly = false }) => {
               <Plus size={18} className="text-solar" /> เพิ่มอุปกรณ์ไฟฟ้าเข้าตารางคำนวณ
             </h4>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>เลือกสำเร็จรูป (Preset)</label>
-              <select value={selectedPreset} onChange={(e) => setSelectedPreset(e.target.value)} style={inputStyle}>
-                {APPLIANCE_PRESETS.map(p => (
-                  <option key={p.id} value={p.id}>{p.icon} {p.name}</option>
-                ))}
-              </select>
+            {/* Mode Switcher Buttons */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
+              <button 
+                onClick={() => setAddMode('preset')} 
+                style={{ 
+                  flex: 1, 
+                  padding: '0.6rem 0.5rem', 
+                  borderRadius: '8px', 
+                  border: addMode === 'preset' ? '2px solid var(--accent-solar)' : '1px solid var(--border-color)', 
+                  background: addMode === 'preset' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-primary)', 
+                  color: addMode === 'preset' ? 'var(--accent-solar)' : 'var(--text-secondary)', 
+                  fontWeight: addMode === 'preset' ? 'bold' : 'normal', 
+                  cursor: 'pointer',
+                  fontSize: '0.85rem'
+                }}
+              >
+                📦 เลือกจากสำเร็จรูป
+              </button>
+              <button 
+                onClick={() => setAddMode('custom')} 
+                style={{ 
+                  flex: 1, 
+                  padding: '0.6rem 0.5rem', 
+                  borderRadius: '8px', 
+                  border: addMode === 'custom' ? '2px solid var(--accent-solar)' : '1px solid var(--border-color)', 
+                  background: addMode === 'custom' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-primary)', 
+                  color: addMode === 'custom' ? 'var(--accent-solar)' : 'var(--text-secondary)', 
+                  fontWeight: addMode === 'custom' ? 'bold' : 'normal', 
+                  cursor: 'pointer',
+                  fontSize: '0.85rem'
+                }}
+              >
+                ✍️ กรอกอุปกรณ์ใหม่เอง
+              </button>
             </div>
 
-            {selectedPreset === 'custom' && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>ชื่ออุปกรณ์</label>
-                  <input value={customName} onChange={(e) => setCustomName(e.target.value)} placeholder="เช่น เครื่องเชื่อมไฟฟ้า" style={inputStyle} />
+            {addMode === 'preset' ? (
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>เลือกรายการอุปกรณ์สำเร็จรูป</label>
+                <select value={selectedPreset} onChange={(e) => setSelectedPreset(e.target.value)} style={inputStyle}>
+                  {APPLIANCE_PRESETS.filter(p => p.id !== 'custom').map(p => (
+                    <option key={p.id} value={p.id}>{p.icon} {p.name}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ marginBottom: '0.85rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>ชื่ออุปกรณ์ไฟฟ้าที่คุณต้องการเพิ่ม</label>
+                  <input value={customName} onChange={(e) => setCustomName(e.target.value)} placeholder="เช่น เครื่องปั่นผลไม้, มอเตอร์ 5 แรง, ตู้เชื่อม" style={inputStyle} />
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>กำลังไฟ (Watts)</label>
-                  <input type="number" value={customWatts} onChange={(e) => setCustomWatts(e.target.value)} placeholder="1000" style={inputStyle} />
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '0.5rem', marginBottom: '0.85rem' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>กำลังไฟฟ้า</label>
+                    <input type="number" min="1" value={customWatts} onChange={(e) => setCustomWatts(e.target.value)} placeholder="เช่น 1500" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>หน่วยกำลังไฟ</label>
+                    <select value={powerUnit} onChange={(e) => setPowerUnit(e.target.value)} style={inputStyle}>
+                      <option value="W">วัตต์ (W)</option>
+                      <option value="kW">กิโลวัตต์ (kW)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>จำนวน (เครื่อง/ดวง)</label>
+                <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>จำนวน (เครื่อง/ดวง)</label>
                 <input type="number" min="1" value={customQty} onChange={(e) => setCustomQty(e.target.value)} style={inputStyle} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>เปิดใช้งาน (ชม./วัน)</label>
+                <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>เปิดใช้งาน (ชม./วัน)</label>
                 <input type="number" min="0.5" max="24" step="0.5" value={customHours} onChange={(e) => setCustomHours(e.target.value)} style={inputStyle} />
               </div>
             </div>
 
             <button onClick={handleAddPreset} style={{ width: '100%', padding: '0.8rem', background: 'var(--accent-solar)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
-              <Plus size={18} /> เพิ่มเข้าตารางคำนวณ
+              <Plus size={18} /> {addMode === 'preset' ? 'เพิ่มอุปกรณ์เข้าตาราง' : '➕ เพิ่มอุปกรณ์ใหม่เข้าตารางคำนวณ'}
             </button>
           </div>
         </div>
