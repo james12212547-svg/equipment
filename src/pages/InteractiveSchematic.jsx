@@ -204,15 +204,27 @@ const InteractiveSchematic = () => {
   const pCondBar = Number(pcond).toFixed(2);
   const pRatio = (Number(pCondBar) / Math.max(0.1, Number(pEvapBar))).toFixed(2);
 
-  // Exact Enthalpy Calculations (kJ/kg)
+  // 1. Enthalpy at State 1, State 3, and State 4 (Isoenthalpic)
   const h1 = evapProp.h_vapor + (superheat * 1.8);
   const h3 = condProp.h_liquid - (subcooling * 1.4);
-  const h4 = h3; // Isoenthalpic expansion across TXV
-  const h2 = condProp.h_vapor + (superheat * 2.0) + (Number(pRatio) * 6.5);
+  const h4 = h3; 
 
-  const qEvap = (h1 - h4); // Refrigeration Effect (kJ/kg)
-  const wComp = (h2 - h1); // Compressor Work (kJ/kg)
-  const cop = Math.max(1.0, (qEvap / Math.max(1.0, wComp))).toFixed(2);
+  const qEvap = Math.max(10, h1 - h4); // Refrigeration Effect (kJ/kg)
+
+  // 2. Carnot COP limit calculation (2nd Law of Thermodynamics)
+  const tEvapK = tEvap + 273.15;
+  const tCondK = tCond + 273.15;
+  const deltaT = Math.max(5, tCondK - tEvapK);
+  const copCarnot = tEvapK / deltaT; // Theoretical maximum limit
+
+  // 3. Real COP bounded by Carnot Second-Law Efficiency (Exergy Efficiency ~0.55)
+  const exergyEfficiency = 0.55; 
+  const realCopValue = Math.min(copCarnot * exergyEfficiency, (currentRef?.copBase || 4.0) * (38 / deltaT));
+  const cop = Math.max(1.0, realCopValue).toFixed(2);
+
+  // 4. Derive actual Compressor Work (wComp) and Discharge Enthalpy (h2) from real COP
+  const wComp = qEvap / Number(cop); // Actual Compressor Work (kJ/kg)
+  const h2 = h1 + wComp; // State 2: Superheated Discharge Vapor Enthalpy (kJ/kg)
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
