@@ -5,10 +5,10 @@ import { TARIFF_TYPES } from '../constants/tariffRates';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const ROOM_TYPES = {
-  bedroom: { name: 'ห้องนอน (ปกติ)', btuPerSqm: 750 },
-  living: { name: 'ห้องนั่งเล่น', btuPerSqm: 850 },
-  office: { name: 'ออฟฟิศ/สำนักงาน', btuPerSqm: 950 },
-  restaurant: { name: 'ร้านอาหาร/ร้านค้า', btuPerSqm: 1100 }
+  bedroom: { name: 'ห้องนอน (ปกติ)', btuPerSqm: 750, defaultTariffId: 1, recommendedTariffName: 'ประเภทที่ 1: บ้านอยู่อาศัย' },
+  living: { name: 'ห้องนั่งเล่น', btuPerSqm: 850, defaultTariffId: 1, recommendedTariffName: 'ประเภทที่ 1: บ้านอยู่อาศัย' },
+  office: { name: 'ออฟฟิศ/สำนักงาน', btuPerSqm: 950, defaultTariffId: 2, recommendedTariffName: 'ประเภทที่ 2: กิจการขนาดเล็ก' },
+  restaurant: { name: 'ร้านอาหาร/ร้านค้า', btuPerSqm: 1100, defaultTariffId: 2, recommendedTariffName: 'ประเภทที่ 2: กิจการขนาดเล็ก' }
 };
 
 const AC_SIZES = [9000, 12000, 15000, 18000, 24000, 30000, 36000, 42000, 48000, 60000];
@@ -126,7 +126,14 @@ const AirConCalculator = ({ projectId, isReadOnly = false }) => {
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>ประเภทห้อง</label>
-              <select value={roomType} onChange={(e) => setRoomType(e.target.value)} style={inputStyle}>
+              <select value={roomType} onChange={(e) => {
+                const selected = e.target.value;
+                setRoomType(selected);
+                const targetConfig = ROOM_TYPES[selected];
+                if (targetConfig && (selected === 'restaurant' || selected === 'office') && (Number(userTypeId) === 7 || Number(userTypeId) === 1)) {
+                  setUserTypeId(targetConfig.defaultTariffId);
+                }
+              }} style={inputStyle}>
                 {Object.keys(ROOM_TYPES).map(key => (
                   <option key={key} value={key}>{ROOM_TYPES[key].name}</option>
                 ))}
@@ -178,6 +185,19 @@ const AirConCalculator = ({ projectId, isReadOnly = false }) => {
                   <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
+
+              {/* Incompatibility Warning Banner */}
+              {(roomType === 'restaurant' || roomType === 'office') && (Number(userTypeId) === 7 || Number(userTypeId) === 1) && (
+                <div style={{ marginTop: '0.75rem', padding: '0.85rem 1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '8px', fontSize: '0.85rem', color: '#f87171' }}>
+                  <strong>⚠️ ข้อสังเกตระเบียบการไฟฟ้า (PEA/MEA):</strong>
+                  <p style={{ margin: '0.3rem 0 0.6rem', color: 'rgba(255,255,255,0.85)' }}>
+                    ประเภทห้อง <strong>"{ROOM_TYPES[roomType]?.name}"</strong> ในทางกฎหมายไม่สามารถใช้อัตราผู้ใช้ไฟฟ้า <strong>"{selectedTariff?.name}"</strong> ได้ (เนื่องจากเป็นอัตราอุดหนุนเพื่อเกษตรกรรม/บ้านเรือน) ซึ่งจะทำให้ผลประเมินค่าไฟต่ำกว่าความเป็นจริง
+                  </p>
+                  <button onClick={() => setUserTypeId(2)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.45rem 0.85rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                    ⚡ ปรับเป็น "ประเภทที่ 2: กิจการขนาดเล็ก" ตามที่แนะนำ
+                  </button>
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
