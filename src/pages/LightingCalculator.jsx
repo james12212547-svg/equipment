@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import Tooltip from '../components/Tooltip';
 
 const ROOM_TYPES = [
-  { name: 'ห้องนั่งเล่น / ทางเดิน (150 Lux)', lux: 150, becLpd: 10 },
-  { name: 'ห้องนอน (150 Lux)', lux: 150, becLpd: 10 },
-  { name: 'ห้องน้ำ (200 Lux)', lux: 200, becLpd: 10 },
+  { name: 'ห้องนั่งเล่น / ทางเดิน (150 Lux)', lux: 150, becLpd: 5 },
+  { name: 'ห้องนอน (150 Lux)', lux: 150, becLpd: 8 },
+  { name: 'ห้องน้ำ / สุขา (200 Lux)', lux: 200, becLpd: 5 },
   { name: 'ห้องครัว (300 Lux)', lux: 300, becLpd: 12 },
   { name: 'ห้องเรียน / สำนักงาน (500 Lux)', lux: 500, becLpd: 10 },
   { name: 'ห้องทำงาน / อ่านหนังสือ (500 Lux)', lux: 500, becLpd: 10 },
@@ -16,12 +16,14 @@ const ROOM_TYPES = [
 ];
 
 const LAMP_TYPES = [
-  { id: 'led_panel_60x60', name: 'โคมพาเนล LED 60x60 cm (36W / 3,600 lm)', watts: 36, lumen: 3600 },
+  { id: 'led_panel_60x60', name: 'โคมพาเนล LED 60x60 cm (36W / 3,600 lm - 100 lm/W)', watts: 36, lumen: 3600 },
+  { id: 'led_tube_14w_he', name: '⚡ หลอด LED Tube High-Efficacy 14W (2,100 lm - 150 lm/W)', watts: 14, lumen: 2100 },
+  { id: 'led_tube_16w_he', name: '⚡ หลอด LED Tube High-Efficacy 16W (2,400 lm - 150 lm/W)', watts: 16, lumen: 2400 },
+  { id: 'led_tube_18w', name: 'หลอดยาว LED Tube 18W Standard (1,800 lm - 100 lm/W)', watts: 18, lumen: 1800 },
   { id: 'downlight_12w', name: 'โคมดาวน์ไลท์ LED 12W (1,000 lm)', watts: 12, lumen: 1000 },
   { id: 'downlight_15w', name: 'โคมดาวน์ไลท์ LED 15W (1,300 lm)', watts: 15, lumen: 1300 },
   { id: 'led_bulb_9w', name: 'หลอด LED Bulb 9W (800 lm)', watts: 9, lumen: 800 },
   { id: 'led_bulb_12w', name: 'หลอด LED Bulb 12W (1,050 lm)', watts: 12, lumen: 1050 },
-  { id: 'led_tube_18w', name: 'หลอดยาว LED Tube 18W (1,800 lm)', watts: 18, lumen: 1800 },
   { id: 'highbay_100w', name: 'โคมไฮเบย์โรงงาน LED 100W (12,000 lm)', watts: 100, lumen: 12000 },
   { id: 'custom', name: '⚙️ กำหนดเอง (Custom)', watts: 10, lumen: 1000 }
 ];
@@ -93,7 +95,7 @@ const LightingCalculator = () => {
     const totalWatts = activeLamps * lampWatts;
     const lpd = totalWatts / area; // W / sq.m
 
-    // BEC Target Benchmark
+    // BEC Target Benchmark (Dynamic per room type)
     const currentRoomObj = ROOM_TYPES.find(r => r.lux === targetLux) || ROOM_TYPES[4];
     const maxBecLpd = currentRoomObj.becLpd;
     const isLpdPassed = lpd <= maxBecLpd;
@@ -320,6 +322,34 @@ const LightingCalculator = () => {
                 </span>
               </div>
             </div>
+
+            {/* Smart Quick-Fix Suggestion Box if LPD fails */}
+            {!result.isLpdPassed && (
+              <div style={{ padding: '0.85rem 1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#ef4444', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <AlertTriangle size={16} /> 💡 แนะนำการปรับปรุงให้ผ่านเกณฑ์ BEC (LPD &le; {result.maxBecLpd} W/m²):
+                </p>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: '1.4' }}>
+                  เปลี่ยนไปใช้หลอด LED Efficacy สูงขึ้น (&ge; 140 lm/W) หรือโคม LED Panel 60x60 เพื่อลดวัตต์รวมและผ่านเกณฑ์ทันที:
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => handleLampSelect('led_tube_14w_he')} 
+                    style={{ flex: 1, padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #10b981', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontSize: '0.78rem', fontWeight: 'bold', cursor: 'pointer' }}
+                  >
+                    ⚡ สลับใช้ LED Tube 14W High-Efficacy (2,100 lm)
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => handleLampSelect('led_panel_60x60')} 
+                    style={{ flex: 1, padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #3b82f6', background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', fontSize: '0.78rem', fontWeight: 'bold', cursor: 'pointer' }}
+                  >
+                    ✨ สลับใช้ โคม LED Panel 60x60 cm (36W / 3,600 lm)
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Ceiling Grid Spacing Breakdown Card */}
             <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
