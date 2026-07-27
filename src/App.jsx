@@ -45,6 +45,7 @@ import SingleLineDiagram from './pages/SingleLineDiagram';
 import Solar3DSimulator from './pages/Solar3DSimulator';
 import GamifiedSimulator from './pages/GamifiedSimulator';
 import TelemetrySimulator from './pages/TelemetrySimulator';
+import ApplianceCostCalculator from './pages/ApplianceCostCalculator';
 import ReloadPrompt from './components/ReloadPrompt';
 import ErrorBoundary from './components/ErrorBoundary';
 import { requestNotificationPermission, scheduleAppointmentReminders } from './utils/notifications';
@@ -134,6 +135,7 @@ function AppContent() {
             <Route path="/learning/solar-3d" element={<ProtectedRoute><Solar3DSimulator /></ProtectedRoute>} />
             <Route path="/learning/game-sim" element={<ProtectedRoute><GamifiedSimulator /></ProtectedRoute>} />
             <Route path="/learning/telemetry" element={<ProtectedRoute><TelemetrySimulator /></ProtectedRoute>} />
+            <Route path="/learning/appliance-cost" element={<ProtectedRoute><ApplianceCostCalculator /></ProtectedRoute>} />
             <Route path="/learning/3d" element={<ProtectedRoute><ModelViewer /></ProtectedRoute>} />
             <Route path="/work-log" element={<ProtectedRoute><WorkLog /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><ProjectDashboard /></ProtectedRoute>} />

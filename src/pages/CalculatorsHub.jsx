@@ -23,6 +23,19 @@ const CalculatorsHub = () => {
           </div>
         </Link>
 
+        {/* General Appliance Cost - Solar Yellow */}
+        <Link to="/learning/appliance-cost" className="category-card" style={{ padding: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(245, 158, 11, 0.15)', padding: '1rem', borderRadius: '50%', color: '#f59e0b' }}>
+              <Zap size={48} />
+            </div>
+          </div>
+          <div className="category-card-content" style={{ textAlign: 'center' }}>
+            <h3 className="text-gradient-solar" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>คำนวณค่าไฟอุปกรณ์ทุกชนิด</h3>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>คำนวณค่าไฟปั๊มน้ำ, EV, เครื่องทำน้ำอุ่น, ตู้เย็น และอุปกรณ์รวมในบ้าน</p>
+          </div>
+        </Link>
+
         {/* Solar ROI - Orange */}
         <Link to="/learning/calculator" className="category-card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
