@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Plus, Trash2, ShieldAlert, CheckCircle, GripHorizontal, Printer, AlertTriangle, Layers, Info } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Trash2, ShieldAlert, CheckCircle, GripHorizontal, Printer, AlertTriangle, Layers, Info, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CONDUIT_SPECS, WIRE_AREAS } from '../constants/engineeringConstants';
 import Tooltip from '../components/Tooltip';
@@ -21,9 +21,18 @@ const ConduitSizing = () => {
     { id: 2, type: 'THW', size: '10', qty: 1 } // Ground
   ]);
 
+  // Add Wire & Auto-Merge if duplicate exists
   const handleAddWire = () => {
-    const newId = wires.length > 0 ? Math.max(...wires.map(w => w.id)) + 1 : 1;
-    setWires([...wires, { id: newId, type: 'THW', size: '2.5', qty: 1 }]);
+    const defaultType = 'THW';
+    const defaultSize = '2.5';
+
+    const existingIndex = wires.findIndex(w => w.type === defaultType && w.size === defaultSize);
+    if (existingIndex !== -1) {
+      setWires(wires.map((w, idx) => idx === existingIndex ? { ...w, qty: w.qty + 1 } : w));
+    } else {
+      const newId = wires.length > 0 ? Math.max(...wires.map(w => w.id)) + 1 : 1;
+      setWires([...wires, { id: newId, type: defaultType, size: defaultSize, qty: 1 }]);
+    }
   };
 
   const handleRemoveWire = (id) => {
@@ -34,10 +43,40 @@ const ConduitSizing = () => {
     setWires(wires.map(w => w.id === id ? { ...w, [field]: value } : w));
   };
 
+  const handleQtyChange = (id, delta) => {
+    setWires(wires.map(w => {
+      if (w.id === id) {
+        const newQty = Math.max(1, (parseInt(w.qty) || 0) + delta);
+        return { ...w, qty: newQty };
+      }
+      return w;
+    }));
+  };
+
+  // Helper to merge all duplicate (type + size) rows into single rows
+  const handleMergeDuplicateRows = () => {
+    const mergedMap = {};
+    wires.forEach(w => {
+      const key = `${w.type}_${w.size}`;
+      if (mergedMap[key]) {
+        mergedMap[key].qty += (parseInt(w.qty) || 0);
+      } else {
+        mergedMap[key] = { ...w, qty: parseInt(w.qty) || 0 };
+      }
+    });
+    setWires(Object.values(mergedMap));
+  };
+
+  // Check if there are any duplicate rows present
+  const hasDuplicates = useMemo(() => {
+    const keys = wires.map(w => `${w.type}_${w.size}`);
+    return new Set(keys).size < keys.length;
+  }, [wires]);
+
   // Calculation Engine
   const result = useMemo(() => {
     if (wires.length === 0) {
-      return { totalArea: 0, totalWireCount: 0, allowedFillPercent: 40, recommendedConduit: null, fillPercentage: 0, deratingFactor: 1.0 };
+      return { totalArea: 0, totalWireCount: 0, allowedFillPercent: 40, recommendedConduit: null, fillPercentage: 0, deratingFactor: 1.0, practicalConduitSize: null };
     }
 
     // 1. Calculate Total Wire Area & Total Wire Count
@@ -90,11 +129,19 @@ const ConduitSizing = () => {
     else if (totalWireCount >= 10 && totalWireCount <= 20) deratingFactor = 0.50;
     else if (totalWireCount > 20) deratingFactor = 0.45;
 
+    // 5. Minimum Practical Conduit Size (งานช่าง PVC เริ่มขายที่ 1/2" หรือ 4 หุน)
+    const is38Size = recommended.size.includes('3/8');
+    let practicalConduit = null;
+    if (is38Size && conduitType === 'PVC') {
+      practicalConduit = conduitList.find(c => c.size.includes('1/2')) || recommended;
+    }
+
     return {
       totalArea,
       totalWireCount,
       allowedFillPercent,
       recommendedConduit: recommended,
+      practicalConduit,
       fillPercentage,
       deratingFactor
     };
@@ -105,7 +152,7 @@ const ConduitSizing = () => {
   // Generate Proportional Wire Dots for Cross Section Visualizer
   const visualizerDots = useMemo(() => {
     const dots = [];
-    const conduitArea = result.recommendedConduit?.area || 615;
+    const conduitArea = result.practicalConduit?.area || result.recommendedConduit?.area || 615;
     const conduitDiameter = 2 * Math.sqrt(conduitArea / Math.PI); // inner mm
 
     wires.forEach(w => {
@@ -127,7 +174,7 @@ const ConduitSizing = () => {
       }
     });
     return dots;
-  }, [wires, result.recommendedConduit]);
+  }, [wires, result.recommendedConduit, result.practicalConduit]);
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
@@ -163,6 +210,17 @@ const ConduitSizing = () => {
               ))}
             </select>
           </div>
+
+          {/* Auto-Merge Duplicate Button Banner */}
+          {hasDuplicates && (
+            <button 
+              type="button" 
+              onClick={handleMergeDuplicateRows}
+              style={{ marginBottom: '1rem', padding: '0.5rem 0.85rem', borderRadius: '8px', border: '1px solid var(--accent-solar)', background: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-solar)', fontSize: '0.82rem', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+            >
+              <Sparkles size={16} /> ⚡ กดรวมแถวสายไฟชนิดเดียวกันอัตโนมัติ (Auto-Merge Duplicates)
+            </button>
+          )}
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             {wires.map((wire) => (
@@ -180,7 +238,7 @@ const ConduitSizing = () => {
                   </select>
                 </div>
 
-                <div style={{ flex: 1.5 }}>
+                <div style={{ flex: 1.4 }}>
                   <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>ขนาด (ตร.มม.)</label>
                   <select 
                     value={wire.size} 
@@ -193,13 +251,30 @@ const ConduitSizing = () => {
                   </select>
                 </div>
 
-                <div style={{ width: '70px' }}>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>จำนวน</label>
-                  <input 
-                    type="number" min="1" value={wire.qty} 
-                    onChange={(e) => handleChangeWire(wire.id, 'qty', parseInt(e.target.value) || 1)}
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '6px', background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', textAlign: 'center', outline: 'none' }}
-                  />
+                {/* Quantity Controls with +/- buttons */}
+                <div style={{ width: '110px' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.2rem', textAlign: 'center' }}>จำนวน</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => handleQtyChange(wire.id, -1)}
+                      style={{ padding: '0.35rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer' }}
+                    >
+                      <Minus size={12} />
+                    </button>
+                    <input 
+                      type="number" min="1" value={wire.qty} 
+                      onChange={(e) => handleChangeWire(wire.id, 'qty', parseInt(e.target.value) || 1)}
+                      style={{ width: '100%', padding: '0.35rem 0.2rem', borderRadius: '4px', background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', textAlign: 'center', outline: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => handleQtyChange(wire.id, 1)}
+                      style={{ padding: '0.35rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer' }}
+                    >
+                      <Plus size={12} />
+                    </button>
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'flex-end', paddingTop: '1rem' }}>
@@ -247,12 +322,22 @@ const ConduitSizing = () => {
             </div>
 
             <div style={{ fontSize: '3.2rem', fontWeight: 'bold', color: 'white', lineHeight: 1, marginBottom: '0.4rem' }}>
-              {result.recommendedConduit?.size || '-'}
+              {result.practicalConduit ? result.practicalConduit.size : (result.recommendedConduit?.size || '-')}
             </div>
             
             <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-              พื้นที่ภายในท่อรวม {result.recommendedConduit?.area} sq.mm (เกณฑ์ {result.allowedFillPercent}% = {result.recommendedConduit?.maxFillArea?.toFixed(0)} sq.mm)
+              พื้นที่ภายในท่อรวม {result.practicalConduit ? result.practicalConduit.area : result.recommendedConduit?.area} sq.mm (เกณฑ์ {result.allowedFillPercent}% = {(result.practicalConduit || result.recommendedConduit)?.maxFillArea?.toFixed(0)} sq.mm)
             </p>
+
+            {/* Practical Size Warning Banner if 3/8 size recommended */}
+            {result.practicalConduit && (
+              <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid #3b82f6', borderRadius: '8px', fontSize: '0.8rem', color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Info size={18} style={{ flexShrink: 0 }} />
+                <span>
+                  💡 <strong>คำแนะนำงานติดตั้งจริง:</strong> แม้ทางทฤษฎีใช้ท่อ 3/8" ได้ แต่ท่อ PVC แข็งเกรดไฟฟ้าในท้องตลาดประเทศไทยเริ่มต้นขายที่ <strong>1/2" (4 หุน / 18mm)</strong> แนะนำใช้ขนาด 1/2" ขึ้นไป
+                </span>
+              </div>
+            )}
 
             {/* Area & Fill Percentage Bar */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
