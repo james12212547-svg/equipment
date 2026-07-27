@@ -5,13 +5,88 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const refTables = {
+  R32: [
+    { t: -20, p: 4.02 },
+    { t: -10, p: 5.81 },
+    { t: 0, p: 8.13 },
+    { t: 5, p: 9.48 },
+    { t: 10, p: 11.01 },
+    { t: 20, p: 14.75 },
+    { t: 30, p: 19.28 },
+    { t: 40, p: 24.78 },
+    { t: 45, p: 27.94 },
+    { t: 50, p: 31.41 },
+    { t: 60, p: 39.34 }
+  ],
+  R410A: [
+    { t: -20, p: 3.98 },
+    { t: -10, p: 5.73 },
+    { t: 0, p: 7.99 },
+    { t: 5, p: 9.34 },
+    { t: 10, p: 10.86 },
+    { t: 20, p: 14.44 },
+    { t: 30, p: 18.83 },
+    { t: 40, p: 24.13 },
+    { t: 45, p: 27.15 },
+    { t: 50, p: 30.45 },
+    { t: 60, p: 37.95 }
+  ],
+  R134a: [
+    { t: -20, p: 1.33 },
+    { t: -10, p: 2.01 },
+    { t: 0, p: 2.93 },
+    { t: 5, p: 3.50 },
+    { t: 10, p: 4.15 },
+    { t: 20, p: 5.72 },
+    { t: 30, p: 7.70 },
+    { t: 40, p: 10.17 },
+    { t: 45, p: 11.60 },
+    { t: 50, p: 13.18 },
+    { t: 60, p: 16.82 }
+  ],
+  R290: [
+    { t: -20, p: 2.44 },
+    { t: -10, p: 3.45 },
+    { t: 0, p: 4.74 },
+    { t: 5, p: 5.51 },
+    { t: 10, p: 6.36 },
+    { t: 20, p: 8.36 },
+    { t: 30, p: 10.79 },
+    { t: 40, p: 13.69 },
+    { t: 45, p: 15.34 },
+    { t: 50, p: 17.13 },
+    { t: 60, p: 21.17 }
+  ]
+};
+
+function interpolate(t_target, table) {
+  if (!table || table.length === 0) return 4.0;
+  if (t_target <= table[0].t) return table[0].p;
+  if (t_target >= table[table.length - 1].t) return table[table.length - 1].p;
+
+  for (let i = 0; i < table.length - 1; i++) {
+    const lower = table[i];
+    const upper = table[i + 1];
+
+    if (t_target >= lower.t && t_target <= upper.t) {
+      const fraction = (t_target - lower.t) / (upper.t - lower.t);
+      return lower.p + (fraction * (upper.p - lower.p));
+    }
+  }
+  return table[0].p;
+}
+
+function getSaturationPressure(refrigerant, temp) {
+  const table = refTables[refrigerant] || refTables.R32;
+  return interpolate(temp, table);
+}
+
 const refrigerantsData = {
   R32: {
     name: 'R-32 (Difluoromethane)',
     gwp: 675,
     safetyClass: 'A2L (Mildly Flammable)',
-    pevapCoeff: (te) => (te + 40) * 0.21 + 3.2,
-    pcondCoeff: (tc) => (tc + 40) * 0.45 + 5.0,
     copBase: 4.4,
     color: '#0080FF'
   },
@@ -19,8 +94,6 @@ const refrigerantsData = {
     name: 'R-410A (Near-Azeotropic Blend)',
     gwp: 2088,
     safetyClass: 'A1 (Non-Flammable)',
-    pevapCoeff: (te) => (te + 40) * 0.22 + 3.5,
-    pcondCoeff: (tc) => (tc + 40) * 0.48 + 5.5,
     copBase: 4.1,
     color: '#9333EA'
   },
@@ -28,8 +101,6 @@ const refrigerantsData = {
     name: 'R-134a (Tetrafluoroethane)',
     gwp: 1430,
     safetyClass: 'A1 (Non-Flammable)',
-    pevapCoeff: (te) => (te + 40) * 0.11 + 1.2,
-    pcondCoeff: (tc) => (tc + 40) * 0.26 + 2.1,
     copBase: 3.8,
     color: '#10B981'
   },
@@ -37,8 +108,6 @@ const refrigerantsData = {
     name: 'R-290 (Propane - Hydrocarbon)',
     gwp: 3,
     safetyClass: 'A3 (Highly Flammable)',
-    pevapCoeff: (te) => (te + 40) * 0.14 + 1.8,
-    pcondCoeff: (tc) => (tc + 40) * 0.32 + 3.0,
     copBase: 4.6,
     color: '#F59E0B'
   }
@@ -117,11 +186,11 @@ const InteractiveSchematic = () => {
   const currentRef = refrigerantsData[selectedRef] || refrigerantsData.R32;
   const targetComponent = componentsDetail[selectedComponent] || componentsDetail.compressor;
 
-  const pevap = typeof currentRef?.pevapCoeff === 'function' ? currentRef.pevapCoeff(tEvap) : 4.0;
-  const pcond = typeof currentRef?.pcondCoeff === 'function' ? currentRef.pcondCoeff(tCond) : 15.0;
+  const pevap = getSaturationPressure(selectedRef, tEvap);
+  const pcond = getSaturationPressure(selectedRef, tCond);
 
-  const pEvapBar = Math.max(1.2, pevap).toFixed(2);
-  const pCondBar = Math.max(Number(pEvapBar) * 1.2, pcond).toFixed(2);
+  const pEvapBar = Number(pevap).toFixed(2);
+  const pCondBar = Number(pcond).toFixed(2);
   const pRatio = (Number(pCondBar) / Math.max(0.1, Number(pEvapBar))).toFixed(2);
   
   const tempDiff = Math.max(10, tCond - tEvap);
