@@ -90,8 +90,9 @@ const AMPACITY_TABLES = {
 };
 
 export const calculateCableSizingAdvanced = (inputLoad, options = {}) => {
-  const load = parseFloat(inputLoad);
-  if (isNaN(load) || load <= 0) return null;
+  const opts = options || {};
+  const loadVal = parseFloat(inputLoad);
+  if (isNaN(loadVal) || loadVal <= 0) return null;
 
   const {
     inputUnit = 'A',       // 'A', 'kW', 'W', 'HP'
@@ -101,22 +102,22 @@ export const calculateCableSizingAdvanced = (inputLoad, options = {}) => {
     lengthMeters = 20,     // Length in meters
     pf = 0.85,             // Power factor
     loadName = ''
-  } = options;
+  } = opts;
 
   // 1. Calculate Load Current in Amperes
-  let currentAmps = load;
+  let currentAmps = loadVal;
   const voltage = systemPhase === '3P' ? 380 : 220;
 
   if (inputUnit === 'kW') {
     currentAmps = systemPhase === '3P' 
-      ? (load * 1000) / (Math.sqrt(3) * voltage * pf)
-      : (load * 1000) / (voltage * pf);
+      ? (loadVal * 1000) / (Math.sqrt(3) * voltage * pf)
+      : (loadVal * 1000) / (voltage * pf);
   } else if (inputUnit === 'W') {
     currentAmps = systemPhase === '3P' 
-      ? load / (Math.sqrt(3) * voltage * pf)
-      : load / (voltage * pf);
+      ? loadVal / (Math.sqrt(3) * voltage * pf)
+      : loadVal / (voltage * pf);
   } else if (inputUnit === 'HP') {
-    const watts = load * 746;
+    const watts = loadVal * 746;
     currentAmps = systemPhase === '3P' 
       ? watts / (Math.sqrt(3) * voltage * 0.85 * 0.85)
       : watts / (voltage * 0.85 * 0.85);
@@ -128,7 +129,8 @@ export const calculateCableSizingAdvanced = (inputLoad, options = {}) => {
   let designAmps = currentAmps * 1.25;
 
   // Receptacle minimum rule
-  if (loadName.includes('เต้ารับ') && designAmps < 16) {
+  const safeLoadName = String(loadName || '');
+  if (safeLoadName.includes('เต้ารับ') && designAmps < 16) {
     designAmps = 16;
   }
 

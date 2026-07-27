@@ -267,7 +267,7 @@ const CableSizing = () => {
             {/* Voltage Drop & System Summary */}
             <div style={{ background: 'var(--bg-tertiary)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>กระแสโหลดคำนวณจริง ($I_{load}$):</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>กระแสโหลดคำนวณจริง (I_load):</span>
                 <strong style={{ color: 'var(--text-primary)' }}>{result.currentAmps} A</strong>
               </div>
 
