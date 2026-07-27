@@ -8,7 +8,10 @@ const ROOM_TYPES = {
   bedroom: { name: 'ห้องนอน (ปกติ)', btuPerSqm: 750, defaultTariffId: 1, recommendedTariffName: 'ประเภทที่ 1: บ้านอยู่อาศัย' },
   living: { name: 'ห้องนั่งเล่น', btuPerSqm: 850, defaultTariffId: 1, recommendedTariffName: 'ประเภทที่ 1: บ้านอยู่อาศัย' },
   office: { name: 'ออฟฟิศ/สำนักงาน', btuPerSqm: 950, defaultTariffId: 2, recommendedTariffName: 'ประเภทที่ 2: กิจการขนาดเล็ก' },
-  restaurant: { name: 'ร้านอาหาร/ร้านค้า', btuPerSqm: 1100, defaultTariffId: 2, recommendedTariffName: 'ประเภทที่ 2: กิจการขนาดเล็ก' }
+  restaurant: { name: 'ร้านอาหาร/ร้านค้า', btuPerSqm: 1100, defaultTariffId: 2, recommendedTariffName: 'ประเภทที่ 2: กิจการขนาดเล็ก' },
+  pump_station: { name: 'โรงสูบน้ำ/อาคารเครื่องสูบน้ำการเกษตร 🌾', btuPerSqm: 900, defaultTariffId: 7, recommendedTariffName: 'ประเภทที่ 7: กิจการสูบน้ำเพื่อการเกษตร' },
+  greenhouse: { name: 'โรงเรือน/ฟาร์มเกษตรกรรม 🚜', btuPerSqm: 1000, defaultTariffId: 7, recommendedTariffName: 'ประเภทที่ 7: กิจการสูบน้ำเพื่อการเกษตร' },
+  hotel: { name: 'โรงแรม/บริการห้องพัก 🏨', btuPerSqm: 900, defaultTariffId: 5, recommendedTariffName: 'ประเภทที่ 5: กิจการเฉพาะอย่าง' }
 };
 
 const AC_SIZES = [9000, 12000, 15000, 18000, 24000, 30000, 36000, 42000, 48000, 60000];
@@ -125,12 +128,12 @@ const AirConCalculator = ({ projectId, isReadOnly = false }) => {
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>ประเภทห้อง</label>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>ประเภทห้อง / สถานที่ใช้งาน</label>
               <select value={roomType} onChange={(e) => {
                 const selected = e.target.value;
                 setRoomType(selected);
                 const targetConfig = ROOM_TYPES[selected];
-                if (targetConfig && (selected === 'restaurant' || selected === 'office') && (Number(userTypeId) === 7 || Number(userTypeId) === 1)) {
+                if (targetConfig && targetConfig.defaultTariffId) {
                   setUserTypeId(targetConfig.defaultTariffId);
                 }
               }} style={inputStyle}>
