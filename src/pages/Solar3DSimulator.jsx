@@ -3,7 +3,7 @@ import { Sun, ShieldCheck, Zap, Compass, RefreshCw, Printer, ArrowLeft, Sliders,
 import { useNavigate } from 'react-router-dom';
 
 // -------------------------------------------------------------
-// Isometric 3D Projection Math Engine (30° Projection)
+// 1. Isometric 3D Projection Math Engine (30° Projection)
 // -------------------------------------------------------------
 const toIso = (x, y, z, originX, originY) => {
   // cos(30°) ≈ 0.866, sin(30°) = 0.5
@@ -12,91 +12,226 @@ const toIso = (x, y, z, originX, originY) => {
   return { x: isoX, y: isoY };
 };
 
-const drawIsoBox = (ctx, x, y, z, w, d, h, colors, origin) => {
-  const p0 = toIso(x, y, z, origin.x, origin.y);
-  const p1 = toIso(x + w, y, z, origin.x, origin.y);
-  const p2 = toIso(x + w, y + d, z, origin.x, origin.y);
-  const p3 = toIso(x, y + d, z, origin.x, origin.y);
+// -------------------------------------------------------------
+// 2. Low-Poly 3D Isometric Tree Renderer (Cylindrical Trunk + Pyramid Canopy)
+// -------------------------------------------------------------
+const drawIsoTree = (ctx, origin, options) => {
+  const { x = 0, y = 0, sunTime = 12 } = options;
 
-  const p0_top = toIso(x, y, z + h, origin.x, origin.y);
-  const p1_top = toIso(x + w, y, z + h, origin.x, origin.y);
-  const p2_top = toIso(x + w, y + d, z + h, origin.x, origin.y);
-  const p3_top = toIso(x, y + d, z + h, origin.x, origin.y);
+  const shadowAngle = ((sunTime - 6) / 12) * Math.PI;
+  const shadowLen = Math.abs(Math.cos(shadowAngle)) * 80;
+  const shadowDir = sunTime < 12 ? -1 : 1;
 
-  // 1. Top Face (Brightest)
-  ctx.fillStyle = colors.top;
+  // Tree Shadow on Ground
+  const sp = toIso(x + shadowLen * shadowDir * 0.5, y + 15, 0, origin.x, origin.y);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
   ctx.beginPath();
-  ctx.moveTo(p0_top.x, p0_top.y);
-  ctx.lineTo(p1_top.x, p1_top.y);
-  ctx.lineTo(p2_top.x, p2_top.y);
-  ctx.lineTo(p3_top.x, p3_top.y);
-  ctx.closePath();
+  ctx.ellipse(sp.x, sp.y, 20, 10, Math.PI / 4, 0, Math.PI * 2);
   ctx.fill();
 
-  // 2. Left Face (Medium)
-  ctx.fillStyle = colors.left;
+  // Trunk Base (3D Box)
+  const tw = 8, td = 8, th = 24;
+  const p0 = toIso(x - tw / 2, y - td / 2, 0, origin.x, origin.y);
+  const p1 = toIso(x + tw / 2, y - td / 2, 0, origin.x, origin.y);
+  const p2 = toIso(x + tw / 2, y + td / 2, 0, origin.x, origin.y);
+  const p3 = toIso(x - tw / 2, y + td / 2, 0, origin.x, origin.y);
+
+  const t0 = toIso(x - tw / 2, y - td / 2, th, origin.x, origin.y);
+  const t2 = toIso(x + tw / 2, y + td / 2, th, origin.x, origin.y);
+  const t3 = toIso(x - tw / 2, y + td / 2, th, origin.x, origin.y);
+
+  ctx.fillStyle = '#451a03';
   ctx.beginPath();
-  ctx.moveTo(p0.x, p0.y);
-  ctx.lineTo(p3.x, p3.y);
-  ctx.lineTo(p3_top.x, p3_top.y);
-  ctx.lineTo(p0_top.x, p0_top.y);
-  ctx.closePath();
+  ctx.moveTo(p0.x, p0.y); ctx.lineTo(p3.x, p3.y);
+  ctx.lineTo(t3.x, t3.y); ctx.lineTo(t0.x, t0.y);
   ctx.fill();
 
-  // 3. Right Face (Darker Shadow)
-  ctx.fillStyle = colors.right;
+  ctx.fillStyle = '#290e02';
   ctx.beginPath();
-  ctx.moveTo(p3.x, p3.y);
-  ctx.lineTo(p2.x, p2.y);
-  ctx.lineTo(p2_top.x, p2_top.y);
-  ctx.lineTo(p3_top.x, p3_top.y);
-  ctx.closePath();
+  ctx.moveTo(p3.x, p3.y); ctx.lineTo(p2.x, p2.y);
+  ctx.lineTo(t2.x, t2.y); ctx.lineTo(t3.x, t3.y);
   ctx.fill();
+
+  // Foliage Layers (Green Pyramids)
+  const drawCanopyPyramid = (cz, cw, ch, colLeft, colRight) => {
+    const cp0 = toIso(x - cw / 2, y - cw / 2, cz, origin.x, origin.y);
+    const cp1 = toIso(x + cw / 2, y - cw / 2, cz, origin.x, origin.y);
+    const cp2 = toIso(x + cw / 2, y + cw / 2, cz, origin.x, origin.y);
+    const cp3 = toIso(x - cw / 2, y + cw / 2, cz, origin.x, origin.y);
+    const cpApex = toIso(x, y, cz + ch, origin.x, origin.y);
+
+    ctx.fillStyle = colLeft;
+    ctx.beginPath();
+    ctx.moveTo(cp0.x, cp0.y); ctx.lineTo(cp3.x, cp3.y); ctx.lineTo(cpApex.x, cpApex.y);
+    ctx.fill();
+
+    ctx.fillStyle = colRight;
+    ctx.beginPath();
+    ctx.moveTo(cp3.x, cp3.y); ctx.lineTo(cp2.x, cp2.y); ctx.lineTo(cpApex.x, cpApex.y);
+    ctx.fill();
+  };
+
+  drawCanopyPyramid(th, 36, 22, '#14532d', '#0f3923');
+  drawCanopyPyramid(th + 16, 28, 20, '#16a34a', '#15803d');
+  drawCanopyPyramid(th + 32, 20, 18, '#22c55e', '#16a34a');
 };
 
-// Low-Poly 3D Isometric Pyramid (for realistic pine trees)
-const drawIsoPyramid = (ctx, x, y, z, w, d, h, colors, origin) => {
-  const p0 = toIso(x, y, z, origin.x, origin.y);
-  const p1 = toIso(x + w, y, z, origin.x, origin.y);
-  const p2 = toIso(x + w, y + d, z, origin.x, origin.y);
-  const p3 = toIso(x, y + d, z, origin.x, origin.y);
-  const pApex = toIso(x + w / 2, y + d / 2, z + h, origin.x, origin.y);
+// -------------------------------------------------------------
+// 3. Clean Isometric House + Gable Roof + Solar Panels Engine
+// -------------------------------------------------------------
+const drawIsometricHouse = (ctx, origin, options) => {
+  const { W = 100, D = 120, H_wall = 60, H_roof = 40, sunTime = 12, panelCount = 16, obstacleType = 'tree' } = options;
 
-  // Left Slope
-  ctx.fillStyle = colors.left;
+  // --- A. Draw Shadow on Ground FIRST (BEFORE House!) ---
+  const shadowAngle = ((sunTime - 6) / 12) * Math.PI; // Sun angle according to time
+  const shadowLen = Math.abs(Math.cos(shadowAngle)) * 110;
+  const shadowDir = sunTime < 12 ? -1 : 1;
+
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
   ctx.beginPath();
-  ctx.moveTo(p0.x, p0.y);
-  ctx.lineTo(p3.x, p3.y);
-  ctx.lineTo(pApex.x, pApex.y);
+
+  const x0 = -W / 2;
+  const x1 = W / 2;
+  const y0 = -D / 2;
+  const y1 = D / 2;
+
+  const b0 = toIso(x0, y0, 0, origin.x, origin.y);
+  const b1 = toIso(x1, y0, 0, origin.x, origin.y);
+  const b2 = toIso(x1, y1, 0, origin.x, origin.y);
+  const b3 = toIso(x0, y1, 0, origin.x, origin.y);
+
+  const shadowOffX = shadowLen * shadowDir;
+  const shadowOffY = (1 - Math.sin(shadowAngle)) * 40;
+
+  const s0 = toIso(x0 + shadowOffX, y0 + shadowOffY, 0, origin.x, origin.y);
+  const s1 = toIso(x1 + shadowOffX, y0 + shadowOffY, 0, origin.x, origin.y);
+  const s2 = toIso(x1 + shadowOffX, y1 + shadowOffY, 0, origin.x, origin.y);
+  const s3 = toIso(x0 + shadowOffX, y1 + shadowOffY, 0, origin.x, origin.y);
+
+  ctx.moveTo(b0.x, b0.y);
+  ctx.lineTo(s0.x, s0.y);
+  ctx.lineTo(s1.x, s1.y);
+  ctx.lineTo(s2.x, s2.y);
+  ctx.lineTo(s3.x, s3.y);
+  ctx.lineTo(b2.x, b2.y);
   ctx.closePath();
   ctx.fill();
 
-  // Right Slope
-  ctx.fillStyle = colors.right;
+  // --- B. House Vertices (Centered at origin) ---
+  const w0 = toIso(x0, y0, H_wall, origin.x, origin.y);
+  const w1 = toIso(x1, y0, H_wall, origin.x, origin.y);
+  const w2 = toIso(x1, y1, H_wall, origin.x, origin.y);
+  const w3 = toIso(x0, y1, H_wall, origin.x, origin.y);
+
+  // Gable Ridge 2 points (centered along X)
+  const r0 = toIso(0, y0, H_wall + H_roof, origin.x, origin.y);
+  const r1 = toIso(0, y1, H_wall + H_roof, origin.x, origin.y);
+
+  // --- C. Draw House Base Walls ---
+  // Front-Left Wall (Slate Gray)
+  ctx.fillStyle = '#334155';
   ctx.beginPath();
-  ctx.moveTo(p3.x, p3.y);
-  ctx.lineTo(p2.x, p2.y);
-  ctx.lineTo(pApex.x, pApex.y);
+  ctx.moveTo(b0.x, b0.y); ctx.lineTo(b3.x, b3.y);
+  ctx.lineTo(w3.x, w3.y); ctx.lineTo(w0.x, w0.y);
   ctx.closePath();
   ctx.fill();
 
-  // Top/Back Slope
-  ctx.fillStyle = colors.top;
+  // Front-Right Wall with Triangular Gable Peak
+  ctx.fillStyle = '#1e293b';
   ctx.beginPath();
-  ctx.moveTo(p0.x, p0.y);
-  ctx.lineTo(p1.x, p1.y);
-  ctx.lineTo(pApex.x, pApex.y);
+  ctx.moveTo(b3.x, b3.y); ctx.lineTo(b2.x, b2.y);
+  ctx.lineTo(w2.x, w2.y); ctx.lineTo(r1.x, r1.y); ctx.lineTo(w3.x, w3.y);
   ctx.closePath();
   ctx.fill();
+
+  // --- D. Draw Gable Roof 2 Slopes ---
+  // Left Roof Slope (Dark Slate Shadow Side)
+  ctx.fillStyle = '#475569';
+  ctx.beginPath();
+  ctx.moveTo(w0.x, w0.y); ctx.lineTo(r0.x, r0.y);
+  ctx.lineTo(r1.x, r1.y); ctx.lineTo(w3.x, w3.y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Right Roof Slope (Sun-Facing Side)
+  ctx.fillStyle = '#64748b';
+  ctx.beginPath();
+  ctx.moveTo(r0.x, r0.y); ctx.lineTo(w1.x, w1.y);
+  ctx.lineTo(w2.x, w2.y); ctx.lineTo(r1.x, r1.y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Ridge Line Accent
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(r0.x, r0.y); ctx.lineTo(r1.x, r1.y);
+  ctx.stroke();
+
+  // --- E. Solar Panels Grid on Sun-Facing Right Roof Slope ---
+  const panelRows = 2;
+  const panelCols = Math.min(8, Math.ceil(panelCount / 2));
+  const isMorningShade = sunTime < 9.5 && obstacleType !== 'none';
+  const isEveningShade = sunTime > 15.5 && obstacleType !== 'none';
+
+  for (let r = 0; r < panelRows; r++) {
+    for (let c = 0; c < panelCols; c++) {
+      const xSpan = (W / 2 - 12) / panelCols;
+      const ySpan = (D - 20) / panelRows;
+
+      const px0 = 4 + c * xSpan;
+      const px1 = px0 + xSpan - 2;
+
+      const py0 = y0 + 10 + r * ySpan;
+      const py1 = py0 + ySpan - 4;
+
+      // Z height along roof pitch
+      const pz0 = H_wall + H_roof * (1 - px0 / (W / 2)) + 2;
+      const pz1 = H_wall + H_roof * (1 - px1 / (W / 2)) + 2;
+
+      const isShaded = (isMorningShade && c >= panelCols / 2) || (isEveningShade && c < panelCols / 2);
+
+      const pc0 = toIso(px0, py0, pz0, origin.x, origin.y);
+      const pc1 = toIso(px1, py0, pz1, origin.x, origin.y);
+      const pc2 = toIso(px1, py1, pz1, origin.x, origin.y);
+      const pc3 = toIso(px0, py1, pz0, origin.x, origin.y);
+
+      // Solar Panel Metallic Blue
+      ctx.fillStyle = isShaded ? '#0f172a' : '#1d4ed8';
+      ctx.beginPath();
+      ctx.moveTo(pc0.x, pc0.y); ctx.lineTo(pc1.x, pc1.y);
+      ctx.lineTo(pc2.x, pc2.y); ctx.lineTo(pc3.x, pc3.y);
+      ctx.closePath();
+      ctx.fill();
+
+      // Glowing Cyan Frame Line
+      ctx.strokeStyle = isShaded ? '#334155' : '#93c5fd';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Specular Glass Reflection Overlay
+      if (!isShaded) {
+        const reflectGrad = ctx.createLinearGradient(pc0.x, pc0.y, pc2.x, pc2.y);
+        reflectGrad.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+        reflectGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.05)');
+        reflectGrad.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
+
+        ctx.fillStyle = reflectGrad;
+        ctx.beginPath();
+        ctx.moveTo(pc0.x, pc0.y); ctx.lineTo(pc1.x, pc1.y);
+        ctx.lineTo(pc2.x, pc2.y); ctx.lineTo(pc3.x, pc3.y);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  }
 };
 
 // Solar Physics Calculation Helpers (Thailand Latitude ~13.75° N)
 const calculateSunPosition = (timeHour) => {
   const normTime = (timeHour - 6) / 12; // 0 to 1
-  const elevationRad = Math.sin(normTime * Math.PI) * (Math.PI / 2); // 0° -> 90° -> 0°
+  const elevationRad = Math.sin(normTime * Math.PI) * (Math.PI / 2);
   const elevationDeg = (elevationRad * 180) / Math.PI;
-
-  // Sun Azimuth: East (90°) -> South (180°) -> West (270°)
   const azimuthDeg = 90 + normTime * 180;
 
   return { elevationDeg, azimuthDeg, normTime };
@@ -159,7 +294,7 @@ const Solar3DSimulator = () => {
     };
   }, [timeOfDay, roofPitch, roofOrientation, panelCount, obstacleType, obstacleDistance]);
 
-  // Render Refined Isometric 3D Engine Canvas
+  // Render Pipeline
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -172,7 +307,7 @@ const Solar3DSimulator = () => {
 
     const normTime = (timeOfDay - 6) / 12;
 
-    // 1. Architectural Dark Mode Sky Background Gradient
+    // 1. Sky Background Gradient
     const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
     if (timeOfDay < 7 || timeOfDay > 17) {
       skyGrad.addColorStop(0, '#030712');
@@ -187,10 +322,10 @@ const Solar3DSimulator = () => {
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // 2. Isometric Grid Center Origin
+    // 2. Isometric Center Origin
     const origin = { x: width / 2, y: height / 2 + 55 };
 
-    // 3. Draw Isometric Ground Plane Grid (Architectural Olive / Dark Slate)
+    // 3. Ground Plane Grid
     const gridSize = 320;
     const gridStep = 32;
 
@@ -199,52 +334,40 @@ const Solar3DSimulator = () => {
     const g2 = toIso(gridSize / 2, gridSize / 2, 0, origin.x, origin.y);
     const g3 = toIso(-gridSize / 2, gridSize / 2, 0, origin.x, origin.y);
 
-    // Ground Plane Surface
-    ctx.fillStyle = '#0f2318'; // Deep Olive Slate Ground
+    ctx.fillStyle = '#0f2318';
     ctx.beginPath();
-    ctx.moveTo(g0.x, g0.y);
-    ctx.lineTo(g1.x, g1.y);
-    ctx.lineTo(g2.x, g2.y);
-    ctx.lineTo(g3.x, g3.y);
+    ctx.moveTo(g0.x, g0.y); ctx.lineTo(g1.x, g1.y);
+    ctx.lineTo(g2.x, g2.y); ctx.lineTo(g3.x, g3.y);
     ctx.closePath();
     ctx.fill();
 
-    // Subtle Ground Grid Lines
+    // Ground Grid Lines
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.lineWidth = 1;
     for (let x = -gridSize / 2; x <= gridSize / 2; x += gridStep) {
       const pStart = toIso(x, -gridSize / 2, 0, origin.x, origin.y);
       const pEnd = toIso(x, gridSize / 2, 0, origin.x, origin.y);
-      ctx.beginPath();
-      ctx.moveTo(pStart.x, pStart.y);
-      ctx.lineTo(pEnd.x, pEnd.y);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y); ctx.stroke();
     }
     for (let y = -gridSize / 2; y <= gridSize / 2; y += gridStep) {
       const pStart = toIso(-gridSize / 2, y, 0, origin.x, origin.y);
       const pEnd = toIso(gridSize / 2, y, 0, origin.x, origin.y);
-      ctx.beginPath();
-      ctx.moveTo(pStart.x, pStart.y);
-      ctx.lineTo(pEnd.x, pEnd.y);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y); ctx.stroke();
     }
 
-    // 4. Sun position calculation & Glowing Sun Arc
+    // 4. Sun & Rays
     const sunAngleRad = normTime * Math.PI;
     const sunX = width - (normTime * (width - 120));
     const sunY = height - 130 - Math.sin(sunAngleRad) * (height - 180);
 
-    // Sun Rays
     ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([6, 6]);
     ctx.beginPath();
-    ctx.moveTo(sunX, sunY);
-    ctx.lineTo(origin.x, origin.y - 70);
+    ctx.moveTo(sunX, sunY); ctx.lineTo(origin.x, origin.y - 70);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Glowing Sun Circle
     ctx.shadowBlur = 30;
     ctx.shadowColor = '#f59e0b';
     ctx.fillStyle = '#fbbf24';
@@ -253,188 +376,17 @@ const Solar3DSimulator = () => {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // 5. Dynamic Sun Shadow Vectors (06:00 Sunrise -> 18:00 Sunset)
-    // Morning (06:00): Sun in East -> Shadow extends long to West (Far Left)
-    // Evening (18:00): Sun in West -> Shadow extends long to East (Far Right)
-    const shadowAngle = (normTime - 0.5) * Math.PI; // -PI/2 at 06:00, +PI/2 at 18:00
-    const shadowDist = Math.max(40, 220 * Math.abs(Math.cos(sunAngleRad)) + 30);
-    const shadowDirX = Math.sin(shadowAngle) * shadowDist;
-    const shadowDirY = (1 - Math.sin(sunAngleRad)) * 50 + 20;
-
-    // House Shadow Polygon on Ground
-    const hW = 100;
-    const hD = 100;
-    const hH = 60;
-    const hX = -hW / 2;
-    const hY = -hD / 2;
-
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Dynamic Semi-transparent Ground Shadow
-    ctx.beginPath();
-    const sp0 = toIso(hX + shadowDirX, hY + shadowDirY, 0, origin.x, origin.y);
-    const sp1 = toIso(hX + hW + shadowDirX, hY + shadowDirY, 0, origin.x, origin.y);
-    const sp2 = toIso(hX + hW + shadowDirX, hY + hD + shadowDirY, 0, origin.x, origin.y);
-    const sp3 = toIso(hX + shadowDirX, hY + hD + shadowDirY, 0, origin.x, origin.y);
-
-    const bp0 = toIso(hX, hY, 0, origin.x, origin.y);
-    const bp2 = toIso(hX + hW, hY + hD, 0, origin.x, origin.y);
-
-    ctx.moveTo(bp0.x, bp0.y);
-    ctx.lineTo(sp0.x, sp0.y);
-    ctx.lineTo(sp1.x, sp1.y);
-    ctx.lineTo(sp2.x, sp2.y);
-    ctx.lineTo(sp3.x, sp3.y);
-    ctx.lineTo(bp2.x, bp2.y);
-    ctx.closePath();
-    ctx.fill();
-
-    // 6. Refined Tree Geometry (3D Low-Poly Pine Cones)
-    if (obstacleType !== 'none') {
-      const drawTreeIsoPine = (tx, ty) => {
-        // Tree Ground Shadow
-        const tsp = toIso(tx + shadowDirX * 0.7, ty + shadowDirY * 0.7, 0, origin.x, origin.y);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-        ctx.beginPath();
-        ctx.ellipse(tsp.x, tsp.y, 22, 12, Math.PI / 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 3D Trunk (Square Column)
-        drawIsoBox(ctx, tx - 4, ty - 4, 0, 8, 8, 25, {
-          top: '#78350f', left: '#451a03', right: '#290e02'
-        }, origin);
-
-        // Tier 1 (Bottom Broad Cone Pyramid)
-        drawIsoPyramid(ctx, tx - 22, ty - 22, 22, 44, 44, 25, {
-          top: '#166534', left: '#14532d', right: '#0f3923'
-        }, origin);
-
-        // Tier 2 (Middle Cone Pyramid)
-        drawIsoPyramid(ctx, tx - 17, ty - 17, 42, 34, 34, 22, {
-          top: '#22c55e', left: '#16a34a', right: '#15803d'
-        }, origin);
-
-        // Tier 3 (Top Tip Pyramid)
-        drawIsoPyramid(ctx, tx - 12, ty - 12, 60, 24, 24, 20, {
-          top: '#4ade80', left: '#22c55e', right: '#16a34a'
-        }, origin);
-      };
-
-      // Draw East Obstacle (+110, -80) & West Obstacle (-110, 80)
-      drawTreeIsoPine(110, -80);
-      drawTreeIsoPine(-110, 80);
-    }
-
-    // 7. Draw House Building Base Walls (Architectural Slate Colors)
-    drawIsoBox(ctx, hX, hY, 0, hW, hD, hH, {
-      top: '#475569',   // Slate Top Rim
-      left: '#334155',  // Slate Left Wall
-      right: '#1e293b'  // Darker Slate Right Wall
-    }, origin);
-
-    // 8. Refined Roof Palette (Charcoal / Dark Slate Industrial Theme)
+    // 5. Render House Base + Roof + Panels (Clean Render Order!)
     const pitchH = (roofPitch / 45) * 45;
-    const rZ = hH;
+    drawIsometricHouse(ctx, origin, {
+      W: 100, D: 120, H_wall: 60, H_roof: pitchH,
+      sunTime: timeOfDay, panelCount, obstacleType
+    });
 
-    const ridgeP1 = toIso(hX, hY + hD / 2, rZ + pitchH, origin.x, origin.y);
-    const ridgeP2 = toIso(hX + hW, hY + hD / 2, rZ + pitchH, origin.x, origin.y);
-
-    const cornerP0 = toIso(hX, hY, rZ, origin.x, origin.y);
-    const cornerP1 = toIso(hX + hW, hY, rZ, origin.x, origin.y);
-    const cornerP2 = toIso(hX + hW, hY + hD, rZ, origin.x, origin.y);
-    const cornerP3 = toIso(hX, hY + hD, rZ, origin.x, origin.y);
-
-    if (roofType === 'gable') {
-      // South Roof Slope (Front) - Charcoal / Industrial Dark Slate
-      ctx.fillStyle = '#1e293b';
-      ctx.beginPath();
-      ctx.moveTo(cornerP3.x, cornerP3.y);
-      ctx.lineTo(cornerP2.x, cornerP2.y);
-      ctx.lineTo(ridgeP2.x, ridgeP2.y);
-      ctx.lineTo(ridgeP1.x, ridgeP1.y);
-      ctx.closePath();
-      ctx.fill();
-
-      // Ridge Line Accent
-      ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // North Roof Slope (Back) - Darker Charcoal
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.moveTo(cornerP0.x, cornerP0.y);
-      ctx.lineTo(cornerP1.x, cornerP1.y);
-      ctx.lineTo(ridgeP2.x, ridgeP2.y);
-      ctx.lineTo(ridgeP1.x, ridgeP1.y);
-      ctx.closePath();
-      ctx.fill();
-    } else { // Flat / Hip
-      drawIsoBox(ctx, hX, hY, rZ, hW, hD, Math.max(5, pitchH), {
-        top: '#1e293b', left: '#0f172a', right: '#020617'
-      }, origin);
-    }
-
-    // 9. Solar Panels Aligned Flush to Roof Pitch Slope
-    const panelRows = 2;
-    const panelCols = Math.min(8, Math.ceil(panelCount / 2));
-    const pWidth = (hW - 20) / panelCols;
-    const pDepth = 28;
-
-    const isMorningShade = timeOfDay < 9.5 && obstacleType !== 'none';
-    const isEveningShade = timeOfDay > 15.5 && obstacleType !== 'none';
-
-    for (let r = 0; r < panelRows; r++) {
-      for (let c = 0; c < panelCols; c++) {
-        const px = hX + 10 + c * pWidth;
-        const pyTop = hY + hD / 2 + 10 + r * (pDepth + 4);
-        const pyBottom = pyTop + pDepth;
-
-        // Calculate z along the actual pitch slope line of roof
-        const slopeRatioTop = 1 - (10 + r * (pDepth + 4)) / (hD / 2);
-        const slopeRatioBottom = 1 - (10 + r * (pDepth + 4) + pDepth) / (hD / 2);
-
-        const pzTop = rZ + pitchH * Math.max(0, slopeRatioTop) + 2;
-        const pzBottom = rZ + pitchH * Math.max(0, slopeRatioBottom) + 2;
-
-        const isShaded = (isMorningShade && c >= panelCols / 2) || (isEveningShade && c < panelCols / 2);
-
-        // Solar Panel Quad aligned flush on roof slope
-        const pc0 = toIso(px, pyTop, pzTop, origin.x, origin.y);
-        const pc1 = toIso(px + pWidth - 3, pyTop, pzTop, origin.x, origin.y);
-        const pc2 = toIso(px + pWidth - 3, pyBottom, pzBottom, origin.x, origin.y);
-        const pc3 = toIso(px, pyBottom, pzBottom, origin.x, origin.y);
-
-        // Metallic Glossy Blue (Dark Slate if shaded)
-        ctx.fillStyle = isShaded ? '#0f172a' : '#1d4ed8';
-        ctx.beginPath();
-        ctx.moveTo(pc0.x, pc0.y);
-        ctx.lineTo(pc1.x, pc1.y);
-        ctx.lineTo(pc2.x, pc2.y);
-        ctx.lineTo(pc3.x, pc3.y);
-        ctx.closePath();
-        ctx.fill();
-
-        // Glowing Cyan Frame Border
-        ctx.strokeStyle = isShaded ? '#334155' : '#38bdf8';
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-
-        // Specular Glass Highlight Overlay
-        if (!isShaded) {
-          const reflectGrad = ctx.createLinearGradient(pc0.x, pc0.y, pc2.x, pc2.y);
-          reflectGrad.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
-          reflectGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.05)');
-          reflectGrad.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
-
-          ctx.fillStyle = reflectGrad;
-          ctx.beginPath();
-          ctx.moveTo(pc0.x, pc0.y);
-          ctx.lineTo(pc1.x, pc1.y);
-          ctx.lineTo(pc2.x, pc2.y);
-          ctx.lineTo(pc3.x, pc3.y);
-          ctx.closePath();
-          ctx.fill();
-        }
-      }
+    // 6. Render Trees ON THE SIDES (never hiding house)
+    if (obstacleType !== 'none') {
+      drawIsoTree(ctx, origin, { x: 120, y: -80, sunTime: timeOfDay });
+      drawIsoTree(ctx, origin, { x: -120, y: 80, sunTime: timeOfDay });
     }
 
   }, [timeOfDay, roofType, roofPitch, panelCount, obstacleType]);
