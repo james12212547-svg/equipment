@@ -47,54 +47,53 @@ const drawIsoBox = (ctx, x, y, z, w, d, h, colors, origin) => {
 };
 
 // -------------------------------------------------------------
-// 2. Obstacle Renderer (Tall Tree or Tall Building Adjacent to House)
+// 2. Obstacle Renderer (Clean 3D Tree or Building Placed Beside House)
 // -------------------------------------------------------------
 const drawIsoObstacle = (ctx, origin, options) => {
   const { x = 0, y = 0, type = 'tree', sunTime = 12 } = options;
 
   const shadowAngle = ((sunTime - 6) / 12) * Math.PI;
-  const shadowLen = Math.abs(Math.cos(shadowAngle)) * 130;
+  const shadowLen = Math.abs(Math.cos(shadowAngle)) * 100;
   const shadowDir = sunTime < 12 ? -1 : 1;
 
   if (type === 'building') {
-    // Tall 3D Building adjacent to house (Height = 130)
-    const bw = 40, bd = 40, bh = 130;
+    // 3D Office/Apartment Building (W = 36, D = 36, H = 110)
+    const bw = 36, bd = 36, bh = 110;
     
     // Building Shadow on Ground
-    const sp = toIso(x + shadowLen * shadowDir * 0.6, y + 20, 0, origin.x, origin.y);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    const sp = toIso(x + shadowLen * shadowDir * 0.5, y + 15, 0, origin.x, origin.y);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctx.beginPath();
-    ctx.ellipse(sp.x, sp.y, 40, 20, Math.PI / 4, 0, Math.PI * 2);
+    ctx.ellipse(sp.x, sp.y, 35, 15, Math.PI / 4, 0, Math.PI * 2);
     ctx.fill();
 
-    // Building Main Structure
+    // Building Base Structure
     drawIsoBox(ctx, x - bw / 2, y - bd / 2, 0, bw, bd, bh, {
       top: '#64748b', left: '#475569', right: '#334155'
     }, origin);
 
-    // Building Windows (Visual grid of glowing windows)
-    const pWindow = toIso(x + bw / 2 + 1, y - bd / 4, bh * 0.7, origin.x, origin.y);
+    // Glowing Windows Grid
+    const pWindow = toIso(x + bw / 2 + 1, y - bd / 4, bh * 0.6, origin.x, origin.y);
     ctx.fillStyle = '#fbbf24';
-    ctx.fillRect(pWindow.x - 6, pWindow.y - 15, 5, 8);
-    ctx.fillRect(pWindow.x + 4, pWindow.y - 15, 5, 8);
-    ctx.fillRect(pWindow.x - 6, pWindow.y - 30, 5, 8);
-    ctx.fillRect(pWindow.x + 4, pWindow.y - 30, 5, 8);
+    ctx.fillRect(pWindow.x - 4, pWindow.y - 12, 4, 6);
+    ctx.fillRect(pWindow.x + 3, pWindow.y - 12, 4, 6);
+    ctx.fillRect(pWindow.x - 4, pWindow.y - 25, 4, 6);
+    ctx.fillRect(pWindow.x + 3, pWindow.y - 25, 4, 6);
   } else {
-    // Tall 3D Pine Tree right next to roof (Height = 125)
-    // Tree Shadow on Ground
-    const sp = toIso(x + shadowLen * shadowDir * 0.6, y + 20, 0, origin.x, origin.y);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    // 3D Low-Poly Pine Tree (Height 105)
+    const sp = toIso(x + shadowLen * shadowDir * 0.5, y + 15, 0, origin.x, origin.y);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctx.beginPath();
-    ctx.ellipse(sp.x, sp.y, 30, 15, Math.PI / 4, 0, Math.PI * 2);
+    ctx.ellipse(sp.x, sp.y, 25, 12, Math.PI / 4, 0, Math.PI * 2);
     ctx.fill();
 
-    // Trunk Base (3D Box Height 35)
-    const tw = 10, td = 10, th = 35;
+    // Trunk Base
+    const tw = 8, td = 8, th = 28;
     drawIsoBox(ctx, x - tw / 2, y - td / 2, 0, tw, td, th, {
       top: '#78350f', left: '#451a03', right: '#290e02'
     }, origin);
 
-    // Tall Pyramid Foliage Layers (Heights 35 -> 125)
+    // Stacked Green Foliage Pyramids
     const drawCanopyPyramid = (cz, cw, ch, colLeft, colRight) => {
       const cp0 = toIso(x - cw / 2, y - cw / 2, cz, origin.x, origin.y);
       const cp1 = toIso(x + cw / 2, y - cw / 2, cz, origin.x, origin.y);
@@ -113,22 +112,22 @@ const drawIsoObstacle = (ctx, origin, options) => {
       ctx.fill();
     };
 
-    drawCanopyPyramid(th, 50, 35, '#14532d', '#0f3923');
-    drawCanopyPyramid(th + 25, 40, 30, '#16a34a', '#15803d');
-    drawCanopyPyramid(th + 50, 30, 25, '#22c55e', '#16a34a');
-    drawCanopyPyramid(th + 70, 20, 20, '#4ade80', '#22c55e');
+    drawCanopyPyramid(th, 40, 28, '#14532d', '#0f3923');
+    drawCanopyPyramid(th + 20, 32, 24, '#16a34a', '#15803d');
+    drawCanopyPyramid(th + 40, 24, 20, '#22c55e', '#16a34a');
+    drawCanopyPyramid(th + 56, 16, 16, '#4ade80', '#22c55e');
   }
 };
 
 // -------------------------------------------------------------
-// 3. Clean Isometric House + Roof + Solar Panels + DRAMATIC SHADOW PROJECTION
+// 3. Clean Isometric House + Roof + Solar Panels + REAL ROOF SHADOW PROJECTION
 // -------------------------------------------------------------
 const drawIsometricHouse = (ctx, origin, options) => {
-  const { W = 100, D = 120, H_wall = 60, H_roof = 40, sunTime = 12, panelCount = 16, obstacleType = 'tree' } = options;
+  const { W = 100, D = 110, H_wall = 55, H_roof = 38, sunTime = 12, panelCount = 16, obstacleType = 'tree' } = options;
 
   // --- A. Draw House Base Shadow on Ground FIRST ---
   const shadowAngle = ((sunTime - 6) / 12) * Math.PI;
-  const shadowLen = Math.abs(Math.cos(shadowAngle)) * 120;
+  const shadowLen = Math.abs(Math.cos(shadowAngle)) * 110;
   const shadowDir = sunTime < 12 ? -1 : 1;
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
@@ -177,7 +176,7 @@ const drawIsometricHouse = (ctx, origin, options) => {
   ctx.lineTo(w3.x, w3.y); ctx.lineTo(w0.x, w0.y);
   ctx.closePath(); ctx.fill();
 
-  // Front-Right Wall with Gable Peak
+  // Front-Right Wall with Triangular Gable Peak
   ctx.fillStyle = '#1e293b';
   ctx.beginPath();
   ctx.moveTo(b3.x, b3.y); ctx.lineTo(b2.x, b2.y);
@@ -214,13 +213,13 @@ const drawIsometricHouse = (ctx, origin, options) => {
 
   for (let r = 0; r < panelRows; r++) {
     for (let c = 0; c < panelCols; c++) {
-      const xSpan = (W / 2 - 12) / panelCols;
-      const ySpan = (D - 20) / panelRows;
+      const xSpan = (W / 2 - 10) / panelCols;
+      const ySpan = (D - 18) / panelRows;
 
       const px0 = 4 + c * xSpan;
       const px1 = px0 + xSpan - 2;
 
-      const py0 = y0 + 10 + r * ySpan;
+      const py0 = y0 + 8 + r * ySpan;
       const py1 = py0 + ySpan - 4;
 
       const pz0 = H_wall + H_roof * (1 - px0 / (W / 2)) + 2;
@@ -261,14 +260,14 @@ const drawIsometricHouse = (ctx, origin, options) => {
     }
   }
 
-  // --- F. HIGH-CONTRAST DRAMATIC SHADOW POLYGON CAST ONTO ROOF & SOLAR PANELS ---
+  // --- F. HIGH-CONTRAST PROJECTED OBSTACLE SHADOW OVER ROOF & PANELS ---
   if (obstacleType !== 'none') {
     const isMorning = sunTime < 9.5;
     const isEvening = sunTime > 15.5;
 
     if (isMorning || isEvening) {
       ctx.save();
-      // Clip to right sun-facing roof slope
+      // Clip neatly to right sun-facing roof slope
       ctx.beginPath();
       ctx.moveTo(r0.x, r0.y);
       ctx.lineTo(w1.x, w1.y);
@@ -277,12 +276,12 @@ const drawIsometricHouse = (ctx, origin, options) => {
       ctx.closePath();
       ctx.clip();
 
-      // High-Contrast Bold Shadow Polygon
-      ctx.fillStyle = 'rgba(2, 6, 23, 0.75)'; // Heavy Dark Shadow Overlay
+      // High-Contrast Bold Shadow Polygon Overlay
+      ctx.fillStyle = 'rgba(2, 6, 23, 0.70)';
       ctx.beginPath();
 
       if (isEvening) {
-        // Evening Shadow: Sun in West (Left) -> Obstacle shadow sweeps over the roof from right to center!
+        // Evening Shadow: Sun in West -> Shadow sweeps over right panels from eaves inwards!
         const pShadow0 = toIso(W / 2, y0, H_wall, origin.x, origin.y);
         const pShadow1 = toIso(W / 4, y0, H_wall + H_roof * 0.5, origin.x, origin.y);
         const pShadow2 = toIso(W / 4, y1, H_wall + H_roof * 0.5, origin.x, origin.y);
@@ -293,7 +292,7 @@ const drawIsometricHouse = (ctx, origin, options) => {
         ctx.lineTo(pShadow2.x, pShadow2.y);
         ctx.lineTo(pShadow3.x, pShadow3.y);
       } else {
-        // Morning Shadow: Sun in East (Right) -> Obstacle shadow sweeps over upper roof from ridge downwards!
+        // Morning Shadow: Sun in East -> Shadow sweeps over upper panels from ridge downwards!
         const pShadow0 = toIso(0, y0, H_wall + H_roof, origin.x, origin.y);
         const pShadow1 = toIso(W / 4, y0, H_wall + H_roof * 0.5, origin.x, origin.y);
         const pShadow2 = toIso(W / 4, y1, H_wall + H_roof * 0.5, origin.x, origin.y);
@@ -309,17 +308,17 @@ const drawIsometricHouse = (ctx, origin, options) => {
       ctx.fill();
       ctx.restore();
 
-      // Visual Warning Text Overlay directly on Canvas
+      // Visual Warning Text Overlay on Canvas
       const textPos = toIso(W / 4, 0, H_wall + H_roof * 0.6, origin.x, origin.y);
       ctx.fillStyle = '#ef4444';
       ctx.font = 'bold 12px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('⚠️ เงาบังแผงโซลาร์ (Shading)', textPos.x, textPos.y - 10);
+      ctx.fillText('⚠️ เงาบังแผงโซลาร์ (Shaded)', textPos.x, textPos.y - 10);
     }
   }
 };
 
-// Solar Physics Calculation Helpers (Thailand Latitude ~13.75° N)
+// Solar Physics Calculation Helpers
 const calculateSunPosition = (timeHour) => {
   const normTime = (timeHour - 6) / 12; // 0 to 1
   const elevationRad = Math.sin(normTime * Math.PI) * (Math.PI / 2);
@@ -331,7 +330,7 @@ const calculateSunPosition = (timeHour) => {
 
 const Solar3DSimulator = () => {
   const navigate = useNavigate();
-  const [timeOfDay, setTimeOfDay] = useState(15.5); // 03:30 PM (Shaded Time)
+  const [timeOfDay, setTimeOfDay] = useState(12.5); // 12:30 PM Noon Default
   const [roofType, setRoofType] = useState('gable'); // 'gable' | 'hip' | 'flat'
   const [roofPitch, setRoofPitch] = useState(15); // 15° pitch
   const [roofOrientation, setRoofOrientation] = useState(180); // 180° = South
@@ -446,7 +445,15 @@ const Solar3DSimulator = () => {
       ctx.beginPath(); ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y); ctx.stroke();
     }
 
-    // 4. Sun & Rays
+    // 4. Background Obstacles (Rendered BEFORE House so no clipping into walls!)
+    if (obstacleType !== 'none') {
+      // East Obstacle neatly placed beside East ground grid (x: 105, y: -50)
+      drawIsoObstacle(ctx, origin, { x: 105, y: -50, type: obstacleType, sunTime: timeOfDay });
+      // West Obstacle neatly placed beside West ground grid (x: -105, y: -50)
+      drawIsoObstacle(ctx, origin, { x: -105, y: -50, type: obstacleType, sunTime: timeOfDay });
+    }
+
+    // 5. Sun & Rays
     const sunAngleRad = normTime * Math.PI;
     const sunX = width - (normTime * (width - 120));
     const sunY = height - 130 - Math.sin(sunAngleRad) * (height - 180);
@@ -467,20 +474,12 @@ const Solar3DSimulator = () => {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // 5. Render House Base + Roof + Panels + High-Contrast Roof Shadow
+    // 6. Render House Base + Roof + Solar Panels + Roof Shadow Polygon
     const pitchH = (roofPitch / 45) * 45;
     drawIsometricHouse(ctx, origin, {
-      W: 100, D: 120, H_wall: 60, H_roof: pitchH,
+      W: 100, D: 110, H_wall: 55, H_roof: pitchH,
       sunTime: timeOfDay, panelCount, obstacleType
     });
-
-    // 6. Render Obstacles RIGHT ADJACENT TO HOUSE (Tree or Building)
-    if (obstacleType !== 'none') {
-      // East Obstacle right beside East roof eaves (x: 65, y: -10)
-      drawIsoObstacle(ctx, origin, { x: 65, y: -10, type: obstacleType, sunTime: timeOfDay });
-      // West Obstacle right beside West wall (x: -65, y: 10)
-      drawIsoObstacle(ctx, origin, { x: -65, y: 10, type: obstacleType, sunTime: timeOfDay });
-    }
 
   }, [timeOfDay, roofType, roofPitch, panelCount, obstacleType]);
 
