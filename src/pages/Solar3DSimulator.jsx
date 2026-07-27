@@ -54,6 +54,42 @@ const drawIsoBox = (ctx, x, y, z, w, d, h, colors, origin) => {
   ctx.fill();
 };
 
+// Low-Poly 3D Isometric Pyramid (for realistic pine trees)
+const drawIsoPyramid = (ctx, x, y, z, w, d, h, colors, origin) => {
+  const p0 = toIso(x, y, z, origin.x, origin.y);
+  const p1 = toIso(x + w, y, z, origin.x, origin.y);
+  const p2 = toIso(x + w, y + d, z, origin.x, origin.y);
+  const p3 = toIso(x, y + d, z, origin.x, origin.y);
+  const pApex = toIso(x + w / 2, y + d / 2, z + h, origin.x, origin.y);
+
+  // Left Slope
+  ctx.fillStyle = colors.left;
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  ctx.lineTo(p3.x, p3.y);
+  ctx.lineTo(pApex.x, pApex.y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Right Slope
+  ctx.fillStyle = colors.right;
+  ctx.beginPath();
+  ctx.moveTo(p3.x, p3.y);
+  ctx.lineTo(p2.x, p2.y);
+  ctx.lineTo(pApex.x, pApex.y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Top/Back Slope
+  ctx.fillStyle = colors.top;
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  ctx.lineTo(p1.x, p1.y);
+  ctx.lineTo(pApex.x, pApex.y);
+  ctx.closePath();
+  ctx.fill();
+};
+
 // Solar Physics Calculation Helpers (Thailand Latitude ~13.75° N)
 const calculateSunPosition = (timeHour) => {
   const normTime = (timeHour - 6) / 12; // 0 to 1
@@ -123,7 +159,7 @@ const Solar3DSimulator = () => {
     };
   }, [timeOfDay, roofPitch, roofOrientation, panelCount, obstacleType, obstacleDistance]);
 
-  // Render Isometric 3D Engine Canvas
+  // Render Refined Isometric 3D Engine Canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -139,10 +175,10 @@ const Solar3DSimulator = () => {
     // 1. Architectural Dark Mode Sky Background Gradient
     const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
     if (timeOfDay < 7 || timeOfDay > 17) {
-      skyGrad.addColorStop(0, '#090d16');
-      skyGrad.addColorStop(1, '#1e1b4b');
+      skyGrad.addColorStop(0, '#030712');
+      skyGrad.addColorStop(1, '#0f172a');
     } else if (timeOfDay < 9 || timeOfDay > 15) {
-      skyGrad.addColorStop(0, '#0f172a');
+      skyGrad.addColorStop(0, '#0b1329');
       skyGrad.addColorStop(1, '#1e293b');
     } else {
       skyGrad.addColorStop(0, '#09152b');
@@ -152,11 +188,11 @@ const Solar3DSimulator = () => {
     ctx.fillRect(0, 0, width, height);
 
     // 2. Isometric Grid Center Origin
-    const origin = { x: width / 2, y: height / 2 + 60 };
+    const origin = { x: width / 2, y: height / 2 + 55 };
 
-    // 3. Draw Isometric Ground Plane Grid (Architectural Olive / Slate)
-    const gridSize = 300;
-    const gridStep = 30;
+    // 3. Draw Isometric Ground Plane Grid (Architectural Olive / Dark Slate)
+    const gridSize = 320;
+    const gridStep = 32;
 
     const g0 = toIso(-gridSize / 2, -gridSize / 2, 0, origin.x, origin.y);
     const g1 = toIso(gridSize / 2, -gridSize / 2, 0, origin.x, origin.y);
@@ -164,7 +200,7 @@ const Solar3DSimulator = () => {
     const g3 = toIso(-gridSize / 2, gridSize / 2, 0, origin.x, origin.y);
 
     // Ground Plane Surface
-    ctx.fillStyle = '#14281d'; // Architectural Dark Olive Slate
+    ctx.fillStyle = '#0f2318'; // Deep Olive Slate Ground
     ctx.beginPath();
     ctx.moveTo(g0.x, g0.y);
     ctx.lineTo(g1.x, g1.y);
@@ -174,7 +210,7 @@ const Solar3DSimulator = () => {
     ctx.fill();
 
     // Subtle Ground Grid Lines
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.lineWidth = 1;
     for (let x = -gridSize / 2; x <= gridSize / 2; x += gridStep) {
       const pStart = toIso(x, -gridSize / 2, 0, origin.x, origin.y);
@@ -196,7 +232,7 @@ const Solar3DSimulator = () => {
     // 4. Sun position calculation & Glowing Sun Arc
     const sunAngleRad = normTime * Math.PI;
     const sunX = width - (normTime * (width - 120));
-    const sunY = height - 140 - Math.sin(sunAngleRad) * (height - 200);
+    const sunY = height - 130 - Math.sin(sunAngleRad) * (height - 180);
 
     // Sun Rays
     ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
@@ -217,11 +253,13 @@ const Solar3DSimulator = () => {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // 5. Calculate Dynamic Sun Shadow Polygons on Ground (z = 0)
-    // Shadow offset vectors on ground based on time of day
-    const shadowLengthMultiplier = Math.max(0.3, Math.abs(Math.cos(sunAngleRad)) * 2.5 + 0.5);
-    const shadowDirX = (normTime - 0.5) * 160 * shadowLengthMultiplier;
-    const shadowDirY = Math.sin(sunAngleRad) * 40 * shadowLengthMultiplier;
+    // 5. Dynamic Sun Shadow Vectors (06:00 Sunrise -> 18:00 Sunset)
+    // Morning (06:00): Sun in East -> Shadow extends long to West (Far Left)
+    // Evening (18:00): Sun in West -> Shadow extends long to East (Far Right)
+    const shadowAngle = (normTime - 0.5) * Math.PI; // -PI/2 at 06:00, +PI/2 at 18:00
+    const shadowDist = Math.max(40, 220 * Math.abs(Math.cos(sunAngleRad)) + 30);
+    const shadowDirX = Math.sin(shadowAngle) * shadowDist;
+    const shadowDirY = (1 - Math.sin(sunAngleRad)) * 50 + 20;
 
     // House Shadow Polygon on Ground
     const hW = 100;
@@ -230,7 +268,7 @@ const Solar3DSimulator = () => {
     const hX = -hW / 2;
     const hY = -hD / 2;
 
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)'; // Dynamic Ground Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Dynamic Semi-transparent Ground Shadow
     ctx.beginPath();
     const sp0 = toIso(hX + shadowDirX, hY + shadowDirY, 0, origin.x, origin.y);
     const sp1 = toIso(hX + hW + shadowDirX, hY + shadowDirY, 0, origin.x, origin.y);
@@ -238,9 +276,7 @@ const Solar3DSimulator = () => {
     const sp3 = toIso(hX + shadowDirX, hY + hD + shadowDirY, 0, origin.x, origin.y);
 
     const bp0 = toIso(hX, hY, 0, origin.x, origin.y);
-    const bp1 = toIso(hX + hW, hY, 0, origin.x, origin.y);
     const bp2 = toIso(hX + hW, hY + hD, 0, origin.x, origin.y);
-    const bp3 = toIso(hX, hY + hD, 0, origin.x, origin.y);
 
     ctx.moveTo(bp0.x, bp0.y);
     ctx.lineTo(sp0.x, sp0.y);
@@ -251,41 +287,51 @@ const Solar3DSimulator = () => {
     ctx.closePath();
     ctx.fill();
 
-    // 6. Draw Obstacles (Trees / Buildings) & Shading
+    // 6. Refined Tree Geometry (3D Low-Poly Pine Cones)
     if (obstacleType !== 'none') {
-      const drawTreeIso = (tx, ty) => {
-        // Tree Shadow
-        const tsp0 = toIso(tx + shadowDirX * 0.7, ty + shadowDirY * 0.7, 0, origin.x, origin.y);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      const drawTreeIsoPine = (tx, ty) => {
+        // Tree Ground Shadow
+        const tsp = toIso(tx + shadowDirX * 0.7, ty + shadowDirY * 0.7, 0, origin.x, origin.y);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
         ctx.beginPath();
-        ctx.arc(tsp0.x, tsp0.y, 30, 0, Math.PI * 2);
+        ctx.ellipse(tsp.x, tsp.y, 22, 12, Math.PI / 4, 0, Math.PI * 2);
         ctx.fill();
 
-        // Trunk Box
-        drawIsoBox(ctx, tx - 5, ty - 5, 0, 10, 10, 35, {
-          top: '#78350f', left: '#451a03', right: '#311402'
+        // 3D Trunk (Square Column)
+        drawIsoBox(ctx, tx - 4, ty - 4, 0, 8, 8, 25, {
+          top: '#78350f', left: '#451a03', right: '#290e02'
         }, origin);
 
-        // Foliage Crown (Isometric Shaded Sphere / Cube)
-        drawIsoBox(ctx, tx - 25, ty - 25, 35, 50, 50, 45, {
-          top: '#16a34a', left: '#15803d', right: '#115e59'
+        // Tier 1 (Bottom Broad Cone Pyramid)
+        drawIsoPyramid(ctx, tx - 22, ty - 22, 22, 44, 44, 25, {
+          top: '#166534', left: '#14532d', right: '#0f3923'
+        }, origin);
+
+        // Tier 2 (Middle Cone Pyramid)
+        drawIsoPyramid(ctx, tx - 17, ty - 17, 42, 34, 34, 22, {
+          top: '#22c55e', left: '#16a34a', right: '#15803d'
+        }, origin);
+
+        // Tier 3 (Top Tip Pyramid)
+        drawIsoPyramid(ctx, tx - 12, ty - 12, 60, 24, 24, 20, {
+          top: '#4ade80', left: '#22c55e', right: '#16a34a'
         }, origin);
       };
 
-      // Draw East Obstacle (+120, -100) & West Obstacle (-120, 100)
-      drawTreeIso(110, -80);
-      drawTreeIso(-110, 80);
+      // Draw East Obstacle (+110, -80) & West Obstacle (-110, 80)
+      drawTreeIsoPine(110, -80);
+      drawTreeIsoPine(-110, 80);
     }
 
-    // 7. Draw Isometric House Building Walls (Architectural Grade Slate Colors)
+    // 7. Draw House Building Base Walls (Architectural Slate Colors)
     drawIsoBox(ctx, hX, hY, 0, hW, hD, hH, {
-      top: '#475569',   // Slate Top
+      top: '#475569',   // Slate Top Rim
       left: '#334155',  // Slate Left Wall
       right: '#1e293b'  // Darker Slate Right Wall
     }, origin);
 
-    // 8. Draw Roof 3D Pitch
-    const pitchH = (roofPitch / 45) * 40;
+    // 8. Refined Roof Palette (Charcoal / Dark Slate Industrial Theme)
+    const pitchH = (roofPitch / 45) * 45;
     const rZ = hH;
 
     const ridgeP1 = toIso(hX, hY + hD / 2, rZ + pitchH, origin.x, origin.y);
@@ -297,8 +343,8 @@ const Solar3DSimulator = () => {
     const cornerP3 = toIso(hX, hY + hD, rZ, origin.x, origin.y);
 
     if (roofType === 'gable') {
-      // South Roof Slope (Front) - Terracotta/Charcoal
-      ctx.fillStyle = '#9a3412';
+      // South Roof Slope (Front) - Charcoal / Industrial Dark Slate
+      ctx.fillStyle = '#1e293b';
       ctx.beginPath();
       ctx.moveTo(cornerP3.x, cornerP3.y);
       ctx.lineTo(cornerP2.x, cornerP2.y);
@@ -307,8 +353,13 @@ const Solar3DSimulator = () => {
       ctx.closePath();
       ctx.fill();
 
-      // North Roof Slope (Back)
-      ctx.fillStyle = '#7c2d12';
+      // Ridge Line Accent
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // North Roof Slope (Back) - Darker Charcoal
+      ctx.fillStyle = '#0f172a';
       ctx.beginPath();
       ctx.moveTo(cornerP0.x, cornerP0.y);
       ctx.lineTo(cornerP1.x, cornerP1.y);
@@ -318,15 +369,15 @@ const Solar3DSimulator = () => {
       ctx.fill();
     } else { // Flat / Hip
       drawIsoBox(ctx, hX, hY, rZ, hW, hD, Math.max(5, pitchH), {
-        top: '#0f172a', left: '#1e293b', right: '#334155'
+        top: '#1e293b', left: '#0f172a', right: '#020617'
       }, origin);
     }
 
-    // 9. Draw Solar Panels Grid (Isometric Metallic Blue with Specular Reflection)
+    // 9. Solar Panels Aligned Flush to Roof Pitch Slope
     const panelRows = 2;
     const panelCols = Math.min(8, Math.ceil(panelCount / 2));
     const pWidth = (hW - 20) / panelCols;
-    const pDepth = 30;
+    const pDepth = 28;
 
     const isMorningShade = timeOfDay < 9.5 && obstacleType !== 'none';
     const isEveningShade = timeOfDay > 15.5 && obstacleType !== 'none';
@@ -334,19 +385,26 @@ const Solar3DSimulator = () => {
     for (let r = 0; r < panelRows; r++) {
       for (let c = 0; c < panelCols; c++) {
         const px = hX + 10 + c * pWidth;
-        const py = hY + 15 + r * (pDepth + 5);
-        const pz = rZ + (r === 0 ? pitchH * 0.4 : pitchH * 0.1) + 2;
+        const pyTop = hY + hD / 2 + 10 + r * (pDepth + 4);
+        const pyBottom = pyTop + pDepth;
+
+        // Calculate z along the actual pitch slope line of roof
+        const slopeRatioTop = 1 - (10 + r * (pDepth + 4)) / (hD / 2);
+        const slopeRatioBottom = 1 - (10 + r * (pDepth + 4) + pDepth) / (hD / 2);
+
+        const pzTop = rZ + pitchH * Math.max(0, slopeRatioTop) + 2;
+        const pzBottom = rZ + pitchH * Math.max(0, slopeRatioBottom) + 2;
 
         const isShaded = (isMorningShade && c >= panelCols / 2) || (isEveningShade && c < panelCols / 2);
 
-        // Panel quad coordinates
-        const pc0 = toIso(px, py, pz, origin.x, origin.y);
-        const pc1 = toIso(px + pWidth - 2, py, pz, origin.x, origin.y);
-        const pc2 = toIso(px + pWidth - 2, py + pDepth - 2, pz, origin.x, origin.y);
-        const pc3 = toIso(px, py + pDepth - 2, pz, origin.x, origin.y);
+        // Solar Panel Quad aligned flush on roof slope
+        const pc0 = toIso(px, pyTop, pzTop, origin.x, origin.y);
+        const pc1 = toIso(px + pWidth - 3, pyTop, pzTop, origin.x, origin.y);
+        const pc2 = toIso(px + pWidth - 3, pyBottom, pzBottom, origin.x, origin.y);
+        const pc3 = toIso(px, pyBottom, pzBottom, origin.x, origin.y);
 
-        // Metallic Blue Fill (Dark Grey if shaded)
-        ctx.fillStyle = isShaded ? '#0f172a' : '#1e3a8a';
+        // Metallic Glossy Blue (Dark Slate if shaded)
+        ctx.fillStyle = isShaded ? '#0f172a' : '#1d4ed8';
         ctx.beginPath();
         ctx.moveTo(pc0.x, pc0.y);
         ctx.lineTo(pc1.x, pc1.y);
@@ -355,15 +413,15 @@ const Solar3DSimulator = () => {
         ctx.closePath();
         ctx.fill();
 
-        // Silver Grid Border
-        ctx.strokeStyle = isShaded ? '#334155' : '#60a5fa';
-        ctx.lineWidth = 1;
+        // Glowing Cyan Frame Border
+        ctx.strokeStyle = isShaded ? '#334155' : '#38bdf8';
+        ctx.lineWidth = 1.2;
         ctx.stroke();
 
-        // Glossy Glass Linear Reflection Overlay
+        // Specular Glass Highlight Overlay
         if (!isShaded) {
           const reflectGrad = ctx.createLinearGradient(pc0.x, pc0.y, pc2.x, pc2.y);
-          reflectGrad.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+          reflectGrad.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
           reflectGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.05)');
           reflectGrad.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
 
