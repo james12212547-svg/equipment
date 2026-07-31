@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell, LogOut, CreditCard, Sparkles } from 'lucide-react';
+import { Home, List, BookOpen, Settings as SettingsIcon, ClipboardList, Heart, Calculator, Calendar, Users, FileText, Package, BarChart2, MessageCircle, Bell, LogOut, CreditCard, Sparkles, Sun, Moon } from 'lucide-react';
 import useStore from '../store/useStore';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -7,6 +7,8 @@ const Navigation = () => {
   const favorites = useStore(state => state.favorites);
   const notifications = useStore(state => state.notifications) || [];
   const unreadCount = notifications.filter(n => !n.isRead).length;
+  const theme = useStore(state => state.theme);
+  const toggleTheme = useStore(state => state.toggleTheme);
   const { userRole, logout } = useAuth();
   
   return (
@@ -43,7 +45,6 @@ const Navigation = () => {
         <ClipboardList size={24} />
         <span>จดงาน</span>
       </NavLink>
-
 
       <NavLink to="/inventory" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <Package size={24} />
@@ -95,7 +96,17 @@ const Navigation = () => {
         <Heart size={24} color={favorites.length > 0 ? 'var(--accent-primary)' : 'var(--text-secondary)'} fill={favorites.length > 0 ? 'var(--accent-primary)' : 'none'} />
         <span>โปรด ({favorites.length})</span>
       </NavLink>
-      
+
+      {/* Quick Theme Toggle Button */}
+      <button 
+        onClick={toggleTheme} 
+        className="nav-item" 
+        title={`สลับเป็นโหมด${theme === 'dark' ? 'สว่าง' : 'มืด'}`}
+      >
+        {theme === 'dark' ? <Sun size={24} color="#fbbf24" /> : <Moon size={24} color="#3b82f6" />}
+        <span>{theme === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด'}</span>
+      </button>
+
       <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <SettingsIcon size={24} />
         <span>ตั้งค่า</span>
