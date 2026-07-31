@@ -228,32 +228,56 @@ const Settings = () => {
             {/* Theme Settings */}
             <div className="glass-panel" style={{ padding: '2rem' }}>
               <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>
-                {theme === 'dark' ? <Moon size={24} /> : <Sun size={24} />}
-                ธีมแอปพลิเคชัน
+                <Sun size={24} />
+                ธีมแอปพลิเคชัน (Theme Settings)
               </h2>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
-                  <h3 style={{ margin: '0 0 0.5rem', color: 'var(--text-secondary)' }}>โหมดมืด / สว่าง</h3>
-                  <p style={{ margin: 0, color: 'var(--text-tertiary)', fontSize: '0.9rem' }}>ปรับสีแอปให้เหมาะสมกับสภาพแวดล้อมของคุณ</p>
+                  <h3 style={{ margin: '0 0 0.25rem', color: 'var(--text-primary)', fontSize: '1.1rem' }}>โหมดการแสดงผล (Dark / Light Mode)</h3>
+                  <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>ปรับธีมของระบบให้เหมาะกับสายตาและสภาพแวดล้อมของคุณ</p>
                 </div>
-                <button 
-                  onClick={toggleTheme}
-                  style={{
-                    background: 'var(--bg-tertiary)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border-color)',
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    fontWeight: 'bold',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {theme === 'dark' ? 'เปลี่ยนเป็นสว่าง' : 'เปลี่ยนเป็นมืด'}
-                </button>
+                
+                <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-tertiary)', padding: '0.25rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                  <button 
+                    onClick={() => { if (theme !== 'dark') toggleTheme(); }}
+                    style={{
+                      background: theme === 'dark' ? 'var(--accent-primary)' : 'transparent',
+                      color: theme === 'dark' ? 'white' : 'var(--text-secondary)',
+                      border: 'none',
+                      padding: '0.6rem 1.25rem',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontWeight: 'bold',
+                      fontSize: '0.85rem',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <Moon size={16} /> โหมดมืด (Dark)
+                  </button>
+
+                  <button 
+                    onClick={() => { if (theme !== 'light') toggleTheme(); }}
+                    style={{
+                      background: theme === 'light' ? 'var(--accent-primary)' : 'transparent',
+                      color: theme === 'light' ? 'white' : 'var(--text-secondary)',
+                      border: 'none',
+                      padding: '0.6rem 1.25rem',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontWeight: 'bold',
+                      fontSize: '0.85rem',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <Sun size={16} /> โหมดสว่าง (Light)
+                  </button>
+                </div>
               </div>
             </div>
 
