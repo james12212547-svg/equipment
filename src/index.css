@@ -244,21 +244,26 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 260px;
+  min-height: 220px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   text-decoration: none;
-  color: white;
+  color: var(--text-primary);
   box-shadow: var(--card-shadow);
 }
 
-.category-card::before {
+.category-card:has(img)::before {
   content: '';
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   background: linear-gradient(to top, rgba(9, 10, 15, 0.95) 0%, rgba(9, 10, 15, 0.3) 60%, transparent 100%);
   z-index: 1;
+}
+
+.category-card:has(img) {
+  color: #ffffff !important;
 }
 
 .category-card img {
@@ -275,6 +280,10 @@ h1, h2, h3, h4, h5, h6 {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+:root[data-theme='light'] .category-card:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
 .category-card:hover img {
   transform: scale(1.05);
 }
@@ -282,6 +291,15 @@ h1, h2, h3, h4, h5, h6 {
 .category-card-content {
   position: relative;
   z-index: 2;
+}
+
+.category-card h3 {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.category-card p {
+  color: var(--text-secondary);
 }
 
 /* Grid Layout */
